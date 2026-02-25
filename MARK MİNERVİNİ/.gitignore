@@ -23,7 +23,9 @@ build/
 
 # Hassas bilgiler
 telegram_config.json
-config.py
+.env
+.env.local
+.env.*
 
 # Log dosyaları
 *.log
