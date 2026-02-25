@@ -9,7 +9,7 @@ import yfinance as yf
 import pandas as pd
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 
 
@@ -545,6 +545,124 @@ def api_add_to_portfolio():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/portfolio/history', methods=['GET'])
+def api_portfolio_history():
+    """Portföy günlük değer geçmişi — grafik için"""
+    try:
+        name = request.args.get('name', 'Varsayılan')
+        path = _portfolio_path(name)
+        if not os.path.exists(path):
+            return jsonify({'success': True, 'dates': [], 'values': [], 'costs': []})
+
+        df = pd.read_csv(path)
+        if df.empty:
+            return jsonify({'success': True, 'dates': [], 'values': [], 'costs': []})
+
+        # En eski alış tarihi → bugün
+        min_date = None
+        for _, row in df.iterrows():
+            d_str = str(row.get('Alış_Tarihi', '')).strip()
+            try:
+                d = pd.to_datetime(d_str)
+                if min_date is None or d < min_date:
+                    min_date = d
+            except Exception:
+                pass
+
+        if min_date is None:
+            min_date = datetime.now() - timedelta(days=90)
+
+        end_date = datetime.now()
+        date_range = pd.bdate_range(start=min_date, end=end_date)
+
+        if len(date_range) == 0:
+            return jsonify({'success': True, 'dates': [], 'values': [], 'costs': []})
+
+        # Her hisse için tarihi fiyatları çek
+        ticker_prices = {}
+        for _, row in df.iterrows():
+            ticker = str(row['Ticker'])
+            if 'Market' in row.index and pd.notna(row['Market']):
+                is_bist = str(row['Market']).upper().strip() == 'BIST'
+            else:
+                is_bist = str(ticker).isalpha() and len(str(ticker)) <= 6
+
+            yahoo_ticker = f"{ticker}.IS" if is_bist else ticker
+            try:
+                hist = yf.download(
+                    yahoo_ticker,
+                    start=min_date.strftime('%Y-%m-%d'),
+                    end=(end_date + timedelta(days=1)).strftime('%Y-%m-%d'),
+                    progress=False,
+                    auto_adjust=True
+                )
+                if not hist.empty:
+                    if isinstance(hist.columns, pd.MultiIndex):
+                        close = hist['Close'][yahoo_ticker] if yahoo_ticker in hist['Close'].columns else hist['Close'].iloc[:, 0]
+                    else:
+                        close = hist['Close']
+                    ticker_prices[ticker] = close
+            except Exception as e:
+                print(f"⚠️ Grafik veri hatası {ticker}: {e}", flush=True)
+
+        # Günlük portföy değeri hesapla
+        dates_out = []
+        values_out = []
+        costs_out = []
+
+        total_cost = 0
+        for _, row in df.iterrows():
+            entry_price = float(row['Maliyet'])
+            quantity = float(row['Adet']) if not pd.isna(row['Adet']) else 0
+            total_cost += entry_price * quantity
+
+        for day in date_range:
+            day_value = 0
+            for _, row in df.iterrows():
+                ticker = str(row['Ticker'])
+                quantity = float(row['Adet']) if not pd.isna(row['Adet']) else 0
+                entry_price = float(row['Maliyet'])
+
+                # Alış tarihinden önce → maliyet kullan
+                try:
+                    purchase_date = pd.to_datetime(str(row.get('Alış_Tarihi', '')).strip())
+                except Exception:
+                    purchase_date = min_date
+
+                if day < purchase_date:
+                    day_value += entry_price * quantity
+                    continue
+
+                if ticker in ticker_prices:
+                    prices = ticker_prices[ticker]
+                    # O güne en yakın önceki fiyatı bul
+                    available = prices[prices.index <= day]
+                    if len(available) > 0:
+                        price = float(available.iloc[-1])
+                    else:
+                        price = entry_price
+                else:
+                    price = entry_price
+
+                day_value += price * quantity
+
+            dates_out.append(day.strftime('%Y-%m-%d'))
+            values_out.append(round(day_value, 2))
+            costs_out.append(round(total_cost, 2))
+
+        return jsonify({
+            'success': True,
+            'dates': dates_out,
+            'values': values_out,
+            'costs': costs_out
+        })
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @app.route('/api/portfolio/<ticker>', methods=['DELETE'])
 def api_delete_from_portfolio(ticker):

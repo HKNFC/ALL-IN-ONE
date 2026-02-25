@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio - Minervini Platform</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         .portfolio-summary {
@@ -231,6 +232,26 @@
                 </form>
             </div>
             
+            <!-- Performance Chart -->
+            <div id="chart-section" style="background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);padding:1.5rem;margin-bottom:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+                    <h3 style="margin:0;font-size:1rem;font-weight:700;color:#1e293b;">📈 Portföy Performans Grafiği</h3>
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <span id="chart-return-badge" style="padding:0.3rem 0.8rem;border-radius:20px;font-weight:700;font-size:0.85rem;display:none;"></span>
+                        <button onclick="loadPerformanceChart()" style="padding:0.4rem 1rem;background:#3b82f6;color:white;border:none;border-radius:7px;font-size:0.85rem;font-weight:600;cursor:pointer;">🔄 Güncelle</button>
+                    </div>
+                </div>
+                <div id="chart-loading" style="text-align:center;padding:2rem;color:#94a3b8;display:none;">
+                    <div style="font-size:2rem;">⏳</div>
+                    <div>Fiyat geçmişi yükleniyor...</div>
+                </div>
+                <div id="chart-empty" style="text-align:center;padding:2rem;color:#94a3b8;">
+                    <div style="font-size:2.5rem;">📊</div>
+                    <div>Portföy seçin ve "Güncelle"ye tıklayın</div>
+                </div>
+                <canvas id="performanceChart" style="display:none;max-height:360px;"></canvas>
+            </div>
+
             <!-- Positions Table -->
             <div class="positions-table">
                 <table>
@@ -515,6 +536,123 @@
 
         // Artık kullanılmıyor ama referans kalmaları için boş bırakıldı
         async function loadPortfolioSummaries() { await reloadAll(); }
+
+        // ── Performans Grafiği ────────────────────────────────────
+        let perfChart = null;
+
+        async function loadPerformanceChart() {
+            const loading = document.getElementById('chart-loading');
+            const empty   = document.getElementById('chart-empty');
+            const canvas  = document.getElementById('performanceChart');
+            const badge   = document.getElementById('chart-return-badge');
+
+            loading.style.display = 'block';
+            empty.style.display   = 'none';
+            canvas.style.display  = 'none';
+            badge.style.display   = 'none';
+
+            try {
+                const res  = await fetch(`/api/portfolio/history?name=${encodeURIComponent(activePortfolio)}`);
+                const data = await res.json();
+
+                if (!data.success || !data.dates || data.dates.length === 0) {
+                    loading.style.display = 'none';
+                    empty.style.display   = 'block';
+                    empty.innerHTML = '<div style="font-size:2.5rem;">📊</div><div>Veri bulunamadı. Portföyde hisse var mı?</div>';
+                    return;
+                }
+
+                loading.style.display = 'none';
+                canvas.style.display  = 'block';
+
+                // Getiri hesapla
+                const firstVal = data.costs[0];
+                const lastVal  = data.values[data.values.length - 1];
+                const ret      = firstVal > 0 ? ((lastVal - firstVal) / firstVal * 100) : 0;
+                const isPos    = ret >= 0;
+                badge.style.display     = 'inline-block';
+                badge.textContent       = (isPos ? '+' : '') + ret.toFixed(1) + '%';
+                badge.style.background  = isPos ? '#dcfce7' : '#fee2e2';
+                badge.style.color       = isPos ? '#15803d' : '#b91c1c';
+
+                // Currency
+                const bistCount = positions.filter(p => p.market === 'BIST').length;
+                const usCount   = positions.filter(p => p.market !== 'BIST').length;
+                const currency  = (bistCount > 0 && bistCount >= usCount) ? '₺' : '$';
+
+                // Chart.js
+                if (perfChart) { perfChart.destroy(); perfChart = null; }
+
+                perfChart = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [
+                            {
+                                label: 'Portföy Değeri',
+                                data: data.values,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59,130,246,0.08)',
+                                borderWidth: 2.5,
+                                pointRadius: 0,
+                                pointHoverRadius: 5,
+                                fill: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Maliyet',
+                                data: data.costs,
+                                borderColor: '#9ca3af',
+                                borderWidth: 1.5,
+                                borderDash: [6, 4],
+                                pointRadius: 0,
+                                pointHoverRadius: 0,
+                                fill: false,
+                                tension: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'top', labels: { font: { size: 12 } } },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => {
+                                        const v = ctx.raw;
+                                        return ` ${ctx.dataset.label}: ${currency}${Math.round(v).toLocaleString('tr-TR')}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    maxTicksLimit: 8,
+                                    maxRotation: 0,
+                                    font: { size: 11 }
+                                },
+                                grid: { display: false }
+                            },
+                            y: {
+                                ticks: {
+                                    font: { size: 11 },
+                                    callback: v => currency + Math.round(v).toLocaleString('tr-TR')
+                                },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            }
+                        }
+                    }
+                });
+
+            } catch(e) {
+                loading.style.display = 'none';
+                empty.style.display   = 'block';
+                empty.innerHTML = `<div style="font-size:2.5rem;">❌</div><div>Grafik yüklenemedi: ${e.message}</div>`;
+            }
+        }
     </script>
 </body>
 </html>
