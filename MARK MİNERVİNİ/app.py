@@ -410,6 +410,26 @@ def api_create_portfolio():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/portfolios/rename', methods=['POST'])
+def api_rename_portfolio():
+    """Portföy yeniden adlandır"""
+    try:
+        old_name = request.args.get('old', '').strip()
+        new_name = request.args.get('new', '').strip()
+        if not old_name or not new_name:
+            return jsonify({'success': False, 'error': 'Eski ve yeni ad gerekli'}), 400
+        old_path = _portfolio_path(old_name)
+        new_path = _portfolio_path(new_name)
+        if not os.path.exists(old_path):
+            return jsonify({'success': False, 'error': 'Portföy bulunamadı'}), 404
+        if os.path.exists(new_path):
+            return jsonify({'success': False, 'error': 'Bu isimde portföy zaten var'}), 400
+        os.rename(old_path, new_path)
+        return jsonify({'success': True, 'name': new_name})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/portfolios/delete', methods=['DELETE'])
 def api_delete_portfolio():
     """Portföy sil"""

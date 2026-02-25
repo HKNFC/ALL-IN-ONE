@@ -152,6 +152,7 @@
                     <option value="">Yükleniyor...</option>
                 </select>
                 <button onclick="promptCreatePortfolio()" style="padding:0.6rem 1.2rem;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">➕ Yeni</button>
+                <button onclick="promptRenamePortfolio()" style="padding:0.6rem 1.2rem;background:#f59e0b;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">✏️ Yeniden Adlandır</button>
                 <button onclick="confirmDeletePortfolio()" style="padding:0.6rem 1.2rem;background:#ef4444;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">🗑️ Sil</button>
             </div>
 
@@ -423,6 +424,20 @@
             const data = await res.json();
             if (data.success) { delete summaryCache[activePortfolio]; activePortfolio = 'Varsayılan'; loadPortfolioList(); }
             else alert('❌ ' + data.error);
+        }
+
+        async function promptRenamePortfolio() {
+            const newName = prompt(`"${activePortfolio}" portföyünün yeni adını girin:`, activePortfolio);
+            if (!newName || newName.trim() === '' || newName.trim() === activePortfolio) return;
+            const res  = await fetch(`/api/portfolios/rename?old=${encodeURIComponent(activePortfolio)}&new=${encodeURIComponent(newName.trim())}`, {method:'POST'});
+            const data = await res.json();
+            if (data.success) {
+                delete summaryCache[activePortfolio];
+                activePortfolio = newName.trim();
+                await loadPortfolioList();
+            } else {
+                alert('❌ ' + data.error);
+            }
         }
 
         // ── Detay: yükle ──────────────────────────────────────────
