@@ -1,0 +1,18 @@
+[2026-02-25 00:03:36] =================================================================
+[2026-02-25 00:03:36] AYLIK REBALANCING BASLIYOR — 2026-02-25
+[2026-02-25 00:03:36] =================================================================
+[2026-02-25 00:03:36] Portfoy bos — ilk kurulum modu, baslangic listesi olusturuluyor...
+[2026-02-25 00:03:36] BIST100 referans getirisi aliniyor...
+[2026-02-25 00:03:36] BIST100 yillik getiri: %46.75
+[2026-02-25 00:03:36] 
+--- ALFA TARAMASI BASLIYOR ---
+[2026-02-25 00:05:14]   [ALFA] Baslangic portfoyu: ['ATATP', 'AKBNK', 'ISCTR', 'ANSGR', 'VAKBN']
+[2026-02-25 00:05:14] 
+--- BETA TARAMASI BASLIYOR ---
+[2026-02-25 00:06:44]   [BETA] Baslangic portfoyu: ['AKFGY', 'ATATP', 'ASELS', 'GUBRF', 'TOASO']
+[2026-02-25 00:06:44] 
+--- DELTA TARAMASI BASLIYOR ---
+[2026-02-25 00:08:17]   [DELTA] Baslangic portfoyu: ['ASELS', 'EKGYO', 'EREGL', 'TCELL', 'TSKB']
+[2026-02-25 00:08:17] 
+Portfoy kaydedildi: /Users/hakanficicilar/Documents/Aİ/101 YATIRIM/portfoy_durumu.json
+[2026-02-25 00:08:17] REBALANCING TAMAMLANDI.

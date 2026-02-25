@@ -1,0 +1,6 @@
+Ticker,Maliyet,Adet,Alış_Tarihi,Stop_Seviyesi,Backstop_Aktif,Market
+AAPL,270.01,37,2026-02-24,251.11,False,US
+ACGL,96.71,103,2026-02-24,89.94,False,US
+ADI,316.86,32,2026-02-24,294.68,False,US
+AFL,111.95,89,2026-02-24,104.11,False,US
+AIZ,240.39,42,2026-02-24,223.56,False,US

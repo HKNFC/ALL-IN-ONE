@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Scanner - Minervini Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .scanner-controls {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .control-item label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        .control-item select,
+        .control-item input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .control-item select:focus,
+        .control-item input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .scan-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .scan-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+        .scan-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+            display: none;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        .filter-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .export-btn {
+            padding: 0.5rem 1rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>📈 Minervini Platform</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/scanner" class="active">Scanner</a></li>
+                <li><a href="/backtest">Backtest</a></li>
+                <li><a href="/portfolio">Portfolio</a></li>
+                <li><a href="/signals">Signals</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Scanner Section -->
+    <section class="features" style="padding-top: 2rem;">
+        <div class="container">
+            <h1 class="section-title">🔍 Advanced Stock Scanner</h1>
+            
+            <!-- Scanner Controls -->
+            <div class="scanner-controls">
+                <h3>Scan Configuration</h3>
+                
+                <div class="control-group">
+                    <div class="control-item">
+                        <label>Market</label>
+                        <select id="market-select" onchange="updateScanTypeOptions()">
+                            <option value="BOTH">🌍 Both (BIST + US)</option>
+                            <option value="US">🇺🇸 US Markets</option>
+                            <option value="BIST">🇹🇷 BIST</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>Scan Type <span id="scan-type-note" style="display:none;font-size:0.72rem;color:#f59e0b;font-weight:600;">(Tarih girildi → Full Scan zorunlu)</span></label>
+                        <select id="scan-type" onchange="updateScanTypeOptions()">
+                            <option value="quick">⚡ Quick Scan (8-10 stocks)</option>
+                            <option value="full">🎯 Full Scan (All stocks)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- BIST Endeks Seçeneği (yalnızca BIST seçilince göster) -->
+                    <div class="control-item" id="bist-index-group" style="display:none;">
+                        <label>BIST Endeksi</label>
+                        <select id="bist-index">
+                            <option value="BISTTUM">🇹🇷 BIST Tüm (Tüm Hisseler)</option>
+                            <option value="BIST100">📊 BIST 100</option>
+                            <option value="BISTXUTUM">🏢 BIST XUTUM (Ana Pazar)</option>
+                            <option value="BISTXTUMY">⭐ BIST XTUMY (Yıldız Pazar)</option>
+                            <option value="BISTMANUEL">✏️ Manuel Liste</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Manuel ticker girişi -->
+                    <div class="control-item" id="bist-manual-group" style="display:none;">
+                        <label>Manuel Hisse Listesi</label>
+                        <input type="text" id="bist-manual-input" placeholder="THYAO, GARAN, SASA (virgülle ayırın)" style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #d1d5db;">
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>Min RS Score</label>
+                        <input type="number" id="min-rs" value="70" min="0" max="100" placeholder="70">
+                    </div>
+
+                    <div class="control-item">
+                        <label>Tarama Tarihi <span style="font-size:0.75rem;color:#6b7280;">(boş = bugün)</span></label>
+                        <input type="date" id="scan-date" max=""
+                               style="padding:0.5rem; border-radius:6px; border:1px solid #d1d5db; width:100%;"
+                               onchange="onScanDateChange()">
+                    </div>
+                </div>
+                
+                <button class="scan-button" id="start-scan" onclick="startScan()">
+                    🚀 Start Scanning
+                </button>
+                
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                
+                <div id="scan-status" style="text-align: center; margin-top: 1rem; font-weight: 600;"></div>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="results-section" style="display: none;">
+                <div class="results-header">
+                    <div>
+                        <h2>Scan Results (<span id="result-count">0</span> stocks found)</h2>
+                        <p style="color: #6b7280; margin-top: 0.5rem;">Scan completed at <span id="scan-time">-</span></p>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all" onclick="filterResults('all')">All</button>
+                        <button class="filter-btn" data-filter="TOPPICKS" onclick="filterResults('TOPPICKS')" style="background:#7c3aed;color:#fff;border-color:#7c3aed;">⭐ Top Picks</button>
+                        <button class="filter-btn" data-filter="BREAKOUT" onclick="filterResults('BREAKOUT')">Breakout</button>
+                        <button class="filter-btn" data-filter="PIVOT_NEAR" onclick="filterResults('PIVOT_NEAR')">Pivot Near</button>
+                        <button class="filter-btn" data-filter="SETUP" onclick="filterResults('SETUP')">Setup</button>
+                        <button class="export-btn" onclick="exportResults()">📥 Export CSV</button>
+                    </div>
+                </div>
+                
+                <div class="results-grid" id="results-container"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Mark Minervini Trading Platform © 2026</p>
+            <p>Based on SEPA Methodology • Not Investment Advice</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        let scanResults = [];
+        let currentFilter = 'all';
+
+        const STORAGE_KEY = 'minervini_scan_results';
+        const STORAGE_META_KEY = 'minervini_scan_meta';
+        const CACHE_VERSION = 'v3-rs-fixed';
+
+        // Sayfa yüklenirken eski cache'i zorla temizle
+        (function clearOldCache() {
+            const stored = localStorage.getItem('scan_cache_version');
+            if (stored !== CACHE_VERSION) {
+                localStorage.clear();
+                localStorage.setItem('scan_cache_version', CACHE_VERSION);
+            }
+        })();
+
+        function saveResultsToStorage(results, meta) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+                localStorage.setItem(STORAGE_META_KEY, JSON.stringify(meta));
+                localStorage.setItem('scan_cache_version', CACHE_VERSION);
+            } catch(e) {}
+        }
+
+        function loadResultsFromStorage() {
+            try {
+                // Versiyon kontrolü — eski cache ise sil
+                const storedVersion = localStorage.getItem('scan_cache_version');
+                if (storedVersion !== CACHE_VERSION) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(STORAGE_META_KEY);
+                    localStorage.setItem('scan_cache_version', CACHE_VERSION);
+                    return { results: null, meta: null };
+                }
+                const raw = localStorage.getItem(STORAGE_KEY);
+                const meta = localStorage.getItem(STORAGE_META_KEY);
+                return {
+                    results: raw ? JSON.parse(raw) : null,
+                    meta: meta ? JSON.parse(meta) : null
+                };
+            } catch(e) { return { results: null, meta: null }; }
+        }
+
+        // ── Sayfa yüklendiğinde önceki sonuçları geri yükle ──
+        (function restoreOnLoad() {
+            const { results, meta } = loadResultsFromStorage();
+            if (results && results.length > 0) {
+                scanResults = results;
+
+                // Meta bilgilerini input'lara geri yaz
+                if (meta) {
+                    if (meta.market) {
+                        const ms = document.getElementById('market-select');
+                        if (ms) ms.value = meta.market;
+                    }
+                    if (meta.scan_date) {
+                        const sd = document.getElementById('scan-date');
+                        if (sd) { sd.value = meta.scan_date; onScanDateChange(); }
+                    }
+                    if (meta.bist_index) {
+                        const bi = document.getElementById('bist-index');
+                        if (bi) bi.value = meta.bist_index;
+                    }
+                }
+                updateScanTypeOptions();
+
+                // Sonuçları göster + banner
+                displayResults(results);
+                const status = document.getElementById('scan-status');
+                if (status) {
+                    const dateLabel = meta && meta.scan_date ? ` (${meta.scan_date})` : '';
+                    const count = results.length;
+                    status.innerHTML = `✅ Önceki tarama sonuçları yüklendi${dateLabel} — <strong>${count} hisse</strong>
+                        <button onclick="clearStoredResults()" style="margin-left:1rem;padding:2px 10px;
+                        border-radius:6px;border:1px solid #d1d5db;cursor:pointer;font-size:0.8rem;">
+                        🗑️ Temizle</button>`;
+                    status.style.display = 'block';
+                }
+                const scanTimeEl = document.getElementById('scan-time');
+                if (scanTimeEl && meta && meta.scan_date) scanTimeEl.textContent = meta.scan_date;
+            }
+        })();
+
+        function clearStoredResults() {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(STORAGE_META_KEY);
+            scanResults = [];
+            const section = document.getElementById('results-section');
+            if (section) section.style.display = 'none';
+            const status = document.getElementById('scan-status');
+            if (status) status.style.display = 'none';
+        }
+
+        // Tarih inputuna max=bugün ayarla
+        (function() {
+            const d = new Date();
+            const today = d.toISOString().split('T')[0];
+            const el = document.getElementById('scan-date');
+            if (el) el.max = today;
+        })();
+
+        function onScanDateChange() {
+            const scanDate = document.getElementById('scan-date').value;
+            const scanTypeEl = document.getElementById('scan-type');
+            const scanTypeNote = document.getElementById('scan-type-note');
+            if (scanDate) {
+                // Tarih girildiğinde Quick Scan'i devre dışı bırak, Full Scan'e zorla
+                scanTypeEl.value = 'full';
+                scanTypeEl.disabled = true;
+                if (scanTypeNote) scanTypeNote.style.display = 'inline';
+                updateScanTypeOptions();
+            } else {
+                scanTypeEl.disabled = false;
+                if (scanTypeNote) scanTypeNote.style.display = 'none';
+            }
+        }
+
+        function updateScanTypeOptions() {
+            const market = document.getElementById('market-select').value;
+            const scanType = document.getElementById('scan-type').value;
+            const bistGroup = document.getElementById('bist-index-group');
+            const manualGroup = document.getElementById('bist-manual-group');
+            const bistIndex = document.getElementById('bist-index');
+
+            if (market === 'BIST' && scanType === 'full') {
+                bistGroup.style.display = 'block';
+                manualGroup.style.display = bistIndex && bistIndex.value === 'BISTMANUEL' ? 'block' : 'none';
+            } else {
+                bistGroup.style.display = 'none';
+                manualGroup.style.display = 'none';
+            }
+        }
+
+        document.getElementById('bist-index') && document.getElementById('bist-index').addEventListener('change', function() {
+            const manualGroup = document.getElementById('bist-manual-group');
+            manualGroup.style.display = this.value === 'BISTMANUEL' ? 'block' : 'none';
+        });
+
+        async function startScan() {
+            const market = document.getElementById('market-select').value;
+            const scanType = document.getElementById('scan-type').value;
+            const minRS = document.getElementById('min-rs').value;
+            const bistIndex = document.getElementById('bist-index') ? document.getElementById('bist-index').value : 'BISTTUM';
+            const manualInput = document.getElementById('bist-manual-input') ? document.getElementById('bist-manual-input').value : '';
+            const scanDate = document.getElementById('scan-date').value || null;
+            
+            const button = document.getElementById('start-scan');
+            const progressBar = document.getElementById('progress-bar');
+            const progressFill = document.getElementById('progress-fill');
+            const status = document.getElementById('scan-status');
+            const resultsSection = document.getElementById('results-section');
+            
+            // Disable button
+            button.disabled = true;
+            button.textContent = '⏳ Taranıyor...';
+            
+            // Show progress
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+            status.textContent = 'Tarama başlatılıyor...';
+            
+            // Hide previous results
+            resultsSection.style.display = 'none';
+            
+            // Gerçek ilerleme polling
+            let pollInterval = null;
+            function startPolling() {
+                pollInterval = setInterval(async () => {
+                    try {
+                        const pr = await fetch('/api/scan/progress');
+                        const pd = await pr.json();
+                        if (pd.pct > 0) {
+                            progressFill.style.width = pd.pct + '%';
+                            status.textContent = pd.msg || `Tarıyor... %${pd.pct}`;
+                        }
+                    } catch(e) {}
+                }, 800);
+            }
+            startPolling();
+
+            try {
+                
+                // Make API call
+                // tarih girilmişse her zaman full scan kullan
+                const endpoint = (scanDate || scanType === 'full') ? '/api/scan/full' : '/api/scan/quick';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ market: market, scan_type: bistIndex, manual_list: manualInput, scan_date: scanDate })
+                });
+                
+                const data = await response.json();
+                
+                clearInterval(pollInterval);
+                progressFill.style.width = '100%';
+                
+                if (data.success) {
+                    const dateLabel = scanDate ? ` — ${scanDate} tarihli tarama` : '';
+                    status.textContent = `✅ Tarama tamamlandı${dateLabel}! ${data.count} hisse bulundu.`;
+                    scanResults = data.results;
+                    // localStorage'a kaydet
+                    saveResultsToStorage(data.results, {
+                        market: document.getElementById('market-select').value,
+                        scan_date: scanDate || null,
+                        bist_index: document.getElementById('bist-index') ? document.getElementById('bist-index').value : 'BISTTUM',
+                        timestamp: new Date().toISOString()
+                    });
+                    displayResults(scanResults);
+                    // Sonuç başlığına tarihi yaz
+                    const scanTimeEl = document.getElementById('scan-time');
+                    if (scanTimeEl) scanTimeEl.textContent = scanDate ? scanDate : new Date().toLocaleString('tr-TR');
+                    
+                    setTimeout(() => {
+                        progressBar.style.display = 'none';
+                        status.textContent = '';
+                    }, 3000);
+                } else {
+                    throw new Error(data.error);
+                }
+                
+            } catch (error) {
+                clearInterval(pollInterval);
+                status.textContent = '❌ Error: ' + error.message;
+                progressBar.style.display = 'none';
+            } finally {
+                button.disabled = false;
+                button.textContent = '🚀 Taramayı Başlat';
+            }
+        }
+        
+        function getRsValue(stock) {
+            // RS: US için bağıl fazla getiri (%), BIST için XU100 ayrışması (%)
+            return parseFloat(stock.RS || stock['RS_Divergence_%'] || stock.RS_Divergence_pct || stock.rs_rank || 0);
+        }
+
+        // Backtest ile aynı mantık: RS'e göre sırala (cap yok, ham değer)
+        function getTopPicks(results) {
+            return results
+                .filter(s => ['BREAKOUT','PIVOT_NEAR','SETUP'].includes(s.Status || s.status))
+                .sort((a, b) => getRsValue(b) - getRsValue(a));
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('results-container');
+            const resultsSection = document.getElementById('results-section');
+            const resultCount = document.getElementById('result-count');
+
+            resultsSection.style.display = 'block';
+            resultCount.textContent = results.length;
+
+            if (results.length === 0) {
+                container.innerHTML = '<div class="no-results">No stocks found matching criteria. Try adjusting your filters.</div>';
+                return;
+            }
+
+            // Top picks listesini önceden hesapla (rank için)
+            const topPicks = getTopPicks(results);
+            const topPickTickers = topPicks.slice(0, 10).map(s => s.Ticker || s.ticker);
+            const topPickRank = {};
+            topPicks.forEach((s, i) => { topPickRank[s.Ticker || s.ticker] = i + 1; });
+
+            let html = '';
+
+            results.forEach(stock => {
+                const market = stock.Market || stock.market;
+                const ticker = stock.Ticker || stock.ticker;
+                const status = stock.Status || stock.status;
+                const currency = market === 'BIST' ? '₺' : '$';
+                const price = stock.current_price_tl || stock.current_price || stock.Price || 0;
+                const pivot = stock.Pivot || stock.pivot_price || 0;
+                const distance = stock.Distance_to_Pivot_pct || stock.distance_to_pivot_pct || stock['Distance_to_Pivot_%'] || 0;
+                const stopLoss = stock.Stop_Level || stock.stop_loss || 0;
+                const rs = getRsValue(stock);
+                const volumeSpike = stock.Volume_Spike_Ratio || 0;
+
+                const flag = market === 'BIST' ? '🇹🇷' : '🇺🇸';
+                const rank = topPickRank[ticker];
+                const isTopPick = !!rank;
+
+                // Hacim teyidi
+                const hasVolumeConfirmation = volumeSpike >= 1.5;
+                const volumeIcon = hasVolumeConfirmation ? '📊✅' : '📊⚠️';
+                const volumeText = hasVolumeConfirmation
+                    ? `${volumeSpike.toFixed(2)}x (Teyit var!)`
+                    : `${volumeSpike.toFixed(2)}x (Düşük hacim)`;
+                const volumeColor = hasVolumeConfirmation ? '#10b981' : '#f59e0b';
+
+                // BREAKOUT uyarısı
+                let breakoutWarning = '';
+                if (status === 'BREAKOUT') {
+                    if (hasVolumeConfirmation) {
+                        breakoutWarning = `
+                            <div style="background:#d1fae5;border-left:4px solid #10b981;padding:0.75rem;margin-top:0.5rem;border-radius:4px;">
+                                <strong style="color:#059669;">✅ Alım Yapılabilir!</strong><br>
+                                <small style="color:#047857;">Hacim teyidi var (${volumeSpike.toFixed(2)}x artış)</small>
+                            </div>`;
+                    } else {
+                        breakoutWarning = `
+                            <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:0.75rem;margin-top:0.5rem;border-radius:4px;">
+                                <strong style="color:#d97706;">⚠️ Dikkat!</strong><br>
+                                <small style="color:#b45309;">Hacim teyidi zayıf (${volumeSpike.toFixed(2)}x). Bekle veya dikkatli ol!</small>
+                            </div>`;
+                    }
+                }
+
+                // Top Pick rozeti ve açıklaması
+                const topPickBadge = isTopPick
+                    ? `<span style="background:#7c3aed;color:#fff;font-size:0.7rem;padding:2px 8px;border-radius:12px;margin-left:6px;">⭐ #${rank} Top Pick</span>`
+                    : '';
+                const topPickNote = isTopPick && status === 'SETUP'
+                    ? `<div style="background:#ede9fe;border-left:4px solid #7c3aed;padding:0.6rem;margin-top:0.5rem;border-radius:4px;">
+                           <strong style="color:#6d28d9;">📋 Backtest Adayı</strong><br>
+                           <small style="color:#5b21b6;">RS skoru yüksek (${rs.toFixed(1)}). Pivot kırılımı bekleniyor — VCP tamamlanıyor.</small>
+                       </div>`
+                    : '';
+
+                // data-toppick + data-rsrank attribute for filtering/sorting
+                const topPickAttr = isTopPick ? ` data-toppick="true" data-rsrank="${rank}"` : ' data-rsrank="9999"';
+
+                html += `
+                    <div class="result-card" data-status="${status}"${topPickAttr}>
+                        <div class="result-header">
+                            <h3>${flag} ${ticker}${topPickBadge}</h3>
+                            <span class="badge badge-${status}">${status}</span>
+                        </div>
+                        <div class="result-body">
+                            <div class="result-row"><span>Market:</span><strong>${market}</strong></div>
+                            <div class="result-row"><span>Price:</span><strong>${currency}${parseFloat(price).toFixed(2)}</strong></div>
+                            <div class="result-row"><span>Pivot:</span><span>${currency}${parseFloat(pivot).toFixed(2)}</span></div>
+                            <div class="result-row"><span>Distance:</span><span>${parseFloat(distance).toFixed(2)}%</span></div>
+                            <div class="result-row"><span>RS Score:</span><span>${parseFloat(rs).toFixed(2)}</span></div>
+                            <div class="result-row"><span>Stop-Loss:</span><span>${currency}${parseFloat(stopLoss).toFixed(2)}</span></div>
+                            <div class="result-row">
+                                <span>${volumeIcon} Hacim:</span>
+                                <span style="color:${volumeColor};font-weight:600;">${volumeText}</span>
+                            </div>
+                        </div>
+                        ${breakoutWarning}
+                        ${topPickNote}
+                        <div style="margin-top:1rem;display:flex;gap:0.5rem;">
+                            <button class="btn btn-primary" style="flex:1;font-size:0.9rem;padding:0.5rem;" onclick="addToPortfolio('${ticker}', ${price}, '${market}')">
+                                💼 Add to Portfolio
+                            </button>
+                            <button class="btn btn-secondary" style="flex:1;font-size:0.9rem;padding:0.5rem;" onclick="viewDetails('${ticker}', '${market}')">
+                                📊 Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+        
+        function filterResults(status) {
+            currentFilter = status;
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === status) btn.classList.add('active');
+            });
+
+            const container = document.getElementById('results-container');
+            const cards = Array.from(container.querySelectorAll('.result-card'));
+
+            if (status === 'TOPPICKS') {
+                // RS sırasına göre sırala (data-rsrank küçükten büyüğe)
+                cards.sort((a, b) => parseInt(a.dataset.rsrank || 9999) - parseInt(b.dataset.rsrank || 9999));
+                cards.forEach(card => {
+                    container.appendChild(card); // sıralı şekilde yeniden ekle
+                    card.style.display = card.dataset.toppick === 'true' ? 'block' : 'none';
+                });
+            } else {
+                cards.forEach(card => {
+                    if (status === 'all') {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = card.dataset.status === status ? 'block' : 'none';
+                    }
+                });
+            }
+        }
+        
+        function exportResults() {
+            if (scanResults.length === 0) {
+                alert('No results to export!');
+                return;
+            }
+            
+            // Convert to CSV
+            const headers = Object.keys(scanResults[0]).join(',');
+            const rows = scanResults.map(row => 
+                Object.values(row).map(val => 
+                    typeof val === 'string' && val.includes(',') ? `"${val}"` : val
+                ).join(',')
+            );
+            
+            const csv = [headers, ...rows].join('\n');
+            
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `minervini_scan_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        function addToPortfolio(ticker, price, market) {
+            // Portföyleri yükle, sonra modal aç
+            fetch('/api/portfolios')
+                .then(r => r.json())
+                .then(data => {
+                    const portfolios = data.portfolios || [];
+                    const options = portfolios.map(p => `<option value="${p}">${p}</option>`).join('');
+                    
+                    const modal = document.createElement('div');
+                    modal.id = 'portfolioModal';
+                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+                    modal.innerHTML = `
+                        <div style="background:white;border-radius:12px;padding:2rem;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                            <h3 style="margin:0 0 1.5rem;font-size:1.2rem;">📂 Portföye Ekle — <strong>${ticker}</strong> <span style="font-size:.85rem;color:#64748b;">(${market === 'BIST' ? '🇹🇷 BIST' : '🇺🇸 US'})</span></h3>
+                            <input type="hidden" id="pm-market" value="${market || 'US'}">
+                            <div style="margin-bottom:1rem;">
+                                <label style="display:block;font-weight:600;margin-bottom:0.4rem;">Portföy Seç</label>
+                                <select id="pm-portfolio-select" style="width:100%;padding:0.7rem;border:2px solid #e5e7eb;border-radius:8px;font-size:1rem;">
+                                    ${options}
+                                    <option value="__new__">➕ Yeni Portföy Oluştur...</option>
+                                </select>
+                            </div>
+                            <div id="pm-new-name-row" style="margin-bottom:1rem;display:none;">
+                                <label style="display:block;font-weight:600;margin-bottom:0.4rem;">Yeni Portföy Adı</label>
+                                <input id="pm-new-name" type="text" placeholder="Portföy adı" style="width:100%;padding:0.7rem;border:2px solid #e5e7eb;border-radius:8px;font-size:1rem;box-sizing:border-box;">
+                            </div>
+                            <div style="margin-bottom:1rem;">
+                                <label style="display:block;font-weight:600;margin-bottom:0.4rem;">Adet</label>
+                                <input id="pm-qty" type="number" value="10" min="1" style="width:100%;padding:0.7rem;border:2px solid #e5e7eb;border-radius:8px;font-size:1rem;box-sizing:border-box;">
+                            </div>
+                            <div style="margin-bottom:1.5rem;">
+                                <label style="display:block;font-weight:600;margin-bottom:0.4rem;">Giriş Fiyatı</label>
+                                <input id="pm-price" type="number" step="0.01" value="${parseFloat(price).toFixed(2)}" style="width:100%;padding:0.7rem;border:2px solid #e5e7eb;border-radius:8px;font-size:1rem;box-sizing:border-box;">
+                            </div>
+                            <div style="display:flex;gap:0.75rem;">
+                                <button onclick="confirmAddToPortfolio('${ticker}')" style="flex:1;padding:0.75rem;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:white;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;">✅ Ekle</button>
+                                <button onclick="document.getElementById('portfolioModal').remove()" style="flex:1;padding:0.75rem;background:#e5e7eb;color:#374151;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;">İptal</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+
+                    // "Yeni portföy" seçilince isim alanını göster
+                    document.getElementById('pm-portfolio-select').addEventListener('change', function() {
+                        document.getElementById('pm-new-name-row').style.display = this.value === '__new__' ? 'block' : 'none';
+                    });
+                });
+        }
+
+        async function confirmAddToPortfolio(ticker) {
+            const select = document.getElementById('pm-portfolio-select');
+            let portfolioName = select.value;
+            const price = parseFloat(document.getElementById('pm-price').value);
+            const qty = parseInt(document.getElementById('pm-qty').value);
+            const stopLoss = parseFloat((price * 0.93).toFixed(2));
+
+            if (portfolioName === '__new__') {
+                const newName = document.getElementById('pm-new-name').value.trim();
+                if (!newName) { alert('Portföy adı giriniz'); return; }
+                const cr = await fetch('/api/portfolios', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: newName})});
+                const cd = await cr.json();
+                if (!cd.success) { alert('❌ ' + cd.error); return; }
+                portfolioName = newName;
+            }
+
+            const res = await fetch('/api/portfolio', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ticker, entry_price: price, quantity: qty, stop_loss: stopLoss, portfolio_name: portfolioName, market: document.getElementById('pm-market').value})
+            });
+            const data = await res.json();
+            document.getElementById('portfolioModal').remove();
+            if (data.success) {
+                alert(`✅ ${ticker} "${portfolioName}" portföyüne eklendi!`);
+            } else {
+                alert('❌ Hata: ' + data.error);
+            }
+        }
+        
+        function viewDetails(ticker, market) {
+            window.open(`/stock/${ticker}?market=${market}`, '_blank');
+        }
+    </script>
+</body>
+</html>
