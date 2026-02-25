@@ -583,8 +583,36 @@
                 // Chart.js
                 if (perfChart) { perfChart.destroy(); perfChart = null; }
 
+                // Alış tarihi dikey çizgisi için plugin
+                const purchaseDate = data.purchase_date;
+                const purchaseIdx  = purchaseDate ? data.dates.indexOf(purchaseDate) : -1;
+
+                const verticalLinePlugin = {
+                    id: 'purchaseLine',
+                    afterDraw(chart) {
+                        if (purchaseIdx < 0) return;
+                        const ctx2 = chart.ctx;
+                        const x    = chart.scales.x.getPixelForValue(purchaseIdx);
+                        const yTop = chart.scales.y.top;
+                        const yBot = chart.scales.y.bottom;
+                        ctx2.save();
+                        ctx2.beginPath();
+                        ctx2.moveTo(x, yTop);
+                        ctx2.lineTo(x, yBot);
+                        ctx2.strokeStyle = '#f59e0b';
+                        ctx2.lineWidth   = 2;
+                        ctx2.setLineDash([5, 4]);
+                        ctx2.stroke();
+                        ctx2.fillStyle = '#f59e0b';
+                        ctx2.font      = 'bold 11px Inter, sans-serif';
+                        ctx2.fillText('Alış Tarihi', x + 5, yTop + 14);
+                        ctx2.restore();
+                    }
+                };
+
                 perfChart = new Chart(canvas, {
                     type: 'line',
+                    plugins: [verticalLinePlugin],
                     data: {
                         labels: data.dates,
                         datasets: [

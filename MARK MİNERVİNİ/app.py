@@ -559,22 +559,26 @@ def api_portfolio_history():
         if df.empty:
             return jsonify({'success': True, 'dates': [], 'values': [], 'costs': []})
 
-        # En eski alış tarihi → bugün
-        min_date = None
+        # En eski alış tarihi
+        purchase_dates = {}
+        earliest_purchase = None
         for _, row in df.iterrows():
             d_str = str(row.get('Alış_Tarihi', '')).strip()
             try:
                 d = pd.to_datetime(d_str)
-                if min_date is None or d < min_date:
-                    min_date = d
+                purchase_dates[str(row['Ticker'])] = d
+                if earliest_purchase is None or d < earliest_purchase:
+                    earliest_purchase = d
             except Exception:
                 pass
 
-        if min_date is None:
-            min_date = datetime.now() - timedelta(days=90)
+        if earliest_purchase is None:
+            earliest_purchase = datetime.now() - timedelta(days=90)
 
+        # Grafik başlangıcı: alış tarihinden 3 ay önce (daha fazla bağlam için)
+        chart_start = earliest_purchase - timedelta(days=90)
         end_date = datetime.now()
-        date_range = pd.bdate_range(start=min_date, end=end_date)
+        date_range = pd.bdate_range(start=chart_start, end=end_date)
 
         if len(date_range) == 0:
             return jsonify({'success': True, 'dates': [], 'values': [], 'costs': []})
@@ -592,7 +596,7 @@ def api_portfolio_history():
             try:
                 hist = yf.download(
                     yahoo_ticker,
-                    start=min_date.strftime('%Y-%m-%d'),
+                    start=chart_start.strftime('%Y-%m-%d'),
                     end=(end_date + timedelta(days=1)).strftime('%Y-%m-%d'),
                     progress=False,
                     auto_adjust=True
@@ -628,7 +632,7 @@ def api_portfolio_history():
                 try:
                     purchase_date = pd.to_datetime(str(row.get('Alış_Tarihi', '')).strip())
                 except Exception:
-                    purchase_date = min_date
+                    purchase_date = earliest_purchase
 
                 if day < purchase_date:
                     day_value += entry_price * quantity
@@ -655,7 +659,8 @@ def api_portfolio_history():
             'success': True,
             'dates': dates_out,
             'values': values_out,
-            'costs': costs_out
+            'costs': costs_out,
+            'purchase_date': earliest_purchase.strftime('%Y-%m-%d') if earliest_purchase else None
         })
 
     except Exception as e:
