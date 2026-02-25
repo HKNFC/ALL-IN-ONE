@@ -324,7 +324,19 @@ if os.path.exists(_legacy):
         shutil.copy(_legacy, _dest)
 
 def _portfolio_path(name):
-    safe = "".join(c for c in name if c.isalnum() or c in (' ', '_', '-', 'ğüşıöçĞÜŞİÖÇ')).strip()
+    """Portföy adından dosya yolunu döndür.
+    Önce portföyler klasöründe tam eşleşme ara,
+    bulamazsa safe-name filtresi uygula."""
+    # 1) Tam eşleşme (büyük/küçük harf duyarsız)
+    name_stripped = name.strip()
+    try:
+        for fname in os.listdir(PORTFOLIOS_DIR):
+            if fname.endswith('.csv') and fname[:-4] == name_stripped:
+                return os.path.join(PORTFOLIOS_DIR, fname)
+    except Exception:
+        pass
+    # 2) Fallback: safe filtre
+    safe = "".join(c for c in name_stripped if c.isalnum() or c in (' ', '_', '-', 'ğüşıöçĞÜŞİÖÇ')).strip()
     return os.path.join(PORTFOLIOS_DIR, f"{safe}.csv")
 
 @app.route('/api/portfolios/summary', methods=['GET'])
