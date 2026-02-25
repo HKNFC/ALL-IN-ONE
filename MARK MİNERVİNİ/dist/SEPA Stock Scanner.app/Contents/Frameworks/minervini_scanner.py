@@ -1,1 +1,0 @@
-../Resources/minervini_scanner.py

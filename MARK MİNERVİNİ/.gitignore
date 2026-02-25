@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Veri cache (büyük dosyalar, otomatik yenilenir)
+data_cache/
+
+# PyInstaller çıktıları
+*.spec.bak
+dist/
+build/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Hassas bilgiler
+telegram_config.json
+config.py
+
+# Log dosyaları
+*.log
+server.log
+server.pid
+
+# Geçici dosyalar
+*.tmp
+*.bak
