@@ -419,7 +419,7 @@
 
         async function confirmDeletePortfolio() {
             if (!confirm(`"${activePortfolio}" portföyünü silmek istediğinize emin misiniz?`)) return;
-            const res  = await fetch(`/api/portfolios/${encodeURIComponent(activePortfolio)}`, {method:'DELETE'});
+            const res  = await fetch(`/api/portfolios/delete?name=${encodeURIComponent(activePortfolio)}`, {method:'DELETE'});
             const data = await res.json();
             if (data.success) { delete summaryCache[activePortfolio]; activePortfolio = 'Varsayılan'; loadPortfolioList(); }
             else alert('❌ ' + data.error);

@@ -410,10 +410,13 @@ def api_create_portfolio():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/portfolios/<name>', methods=['DELETE'])
-def api_delete_portfolio(name):
+@app.route('/api/portfolios/delete', methods=['DELETE'])
+def api_delete_portfolio():
     """Portföy sil"""
     try:
+        name = request.args.get('name', '').strip()
+        if not name:
+            return jsonify({'success': False, 'error': 'Portföy adı gerekli'}), 400
         path = _portfolio_path(name)
         if os.path.exists(path):
             os.remove(path)
