@@ -297,7 +297,9 @@ class MinerviniBacktest:
             return
 
         fetch_start = self.start_date - timedelta(days=420)
-        fetch_end   = self.end_date + timedelta(days=3)
+        # fetch_end her zaman bugün + 3 gün — scanner ile aynı cache key'i üretir
+        fetch_end   = datetime.now().date() + timedelta(days=3)
+        fetch_end   = pd.Timestamp(fetch_end)
 
         benchmark    = ['^GSPC', 'XU100.IS', 'SPY']
         all_tickers  = list(dict.fromkeys(tickers + benchmark))

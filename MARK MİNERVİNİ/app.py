@@ -187,7 +187,9 @@ def api_full_scan():
         # ── GEÇMİŞ TARİH: backtest motorunu kullan (batch download, aynı mantık) ──
         if scan_date:
             _set_progress(2, 'Tarama başlatılıyor...')
-            bt = MinerviniBacktest(scan_date, scan_date)
+            # end_date olarak bugünü kullan — böylece disk cache backtest ile örtüşür
+            today_str = datetime.now().strftime('%Y-%m-%d')
+            bt = MinerviniBacktest(scan_date, today_str)
             scan_dt = pd.Timestamp(scan_date)
 
             # BIST için scan_type'a uygun ticker listesi belirle
