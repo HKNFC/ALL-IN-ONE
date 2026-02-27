@@ -257,12 +257,29 @@
 
             <!-- Saved Backtests Panel -->
             <div class="config-panel" id="saved-panel">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.5rem;">
                     <h2 style="margin:0;">💾 Kaydedilen Backtestler</h2>
                     <button onclick="loadSavedList()" style="padding:.45rem 1rem;background:#f1f5f9;border:1px solid #e5e7eb;border-radius:7px;font-size:.88rem;cursor:pointer;font-weight:600;">🔄 Yenile</button>
                 </div>
-                <div id="saved-list">
-                    <p style="color:var(--muted);font-size:.9rem;">Yükleniyor...</p>
+
+                <!-- BIST -->
+                <div style="margin-bottom:1.5rem;">
+                    <h3 style="margin:0 0 .75rem;font-size:.95rem;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:.4rem;">
+                        🇹🇷 BIST Backtestleri
+                    </h3>
+                    <div id="saved-list-bist">
+                        <p style="color:var(--muted);font-size:.9rem;">Yükleniyor...</p>
+                    </div>
+                </div>
+
+                <!-- USA -->
+                <div>
+                    <h3 style="margin:0 0 .75rem;font-size:.95rem;font-weight:700;color:#2563eb;display:flex;align-items:center;gap:.4rem;">
+                        🇺🇸 USA Backtestleri
+                    </h3>
+                    <div id="saved-list-us">
+                        <p style="color:var(--muted);font-size:.9rem;">Yükleniyor...</p>
+                    </div>
                 </div>
             </div>
 
@@ -415,57 +432,61 @@
     // ---------------------------------------------------------------
     // Saved Backtests
     // ---------------------------------------------------------------
+    function _buildTable(list) {
+        if (list.length === 0) {
+            return '<p style="color:var(--muted);font-size:.9rem;margin:0;">Henüz backtest yok.</p>';
+        }
+        const rows = list.map(bt => {
+            const s   = bt.summary || {};
+            const ret = s.total_return_pct ?? s.total_return ?? null;
+            const retStr = ret !== null
+                ? `<span class="${ret >= 0 ? 'ret-pos' : 'ret-neg'}">${ret >= 0 ? '+' : ''}${Number(ret).toFixed(1)}%</span>`
+                : '—';
+            const wr  = s.win_rate != null ? Number(s.win_rate).toFixed(0) + '%' : '—';
+            const dd  = s.max_drawdown != null ? Number(s.max_drawdown).toFixed(1) + '%' : '—';
+            const isActive = bt.id === activeBacktestId;
+            return `
+                <tr id="row-${bt.id}" class="${isActive ? 'active-row' : ''}">
+                    <td><strong>${bt.name}</strong></td>
+                    <td style="color:var(--muted);font-size:.82rem;">${bt.created_at}</td>
+                    <td>${retStr}</td>
+                    <td>${wr}</td>
+                    <td>${dd}</td>
+                    <td style="white-space:nowrap;display:flex;gap:.4rem;">
+                        <button class="btn-open" onclick="openSaved('${bt.id}')">📂 Aç</button>
+                        <button class="btn-del-bt" onclick="deleteSaved('${bt.id}')">🗑️</button>
+                    </td>
+                </tr>`;
+        }).join('');
+        return `
+            <div style="overflow-x:auto;">
+                <table class="saved-table">
+                    <thead><tr>
+                        <th>İsim</th><th>Tarih</th><th>Getiri</th>
+                        <th>Win Rate</th><th>Max DD</th><th>İşlem</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    }
+
     async function loadSavedList() {
-        const container = document.getElementById('saved-list');
+        const bistContainer = document.getElementById('saved-list-bist');
+        const usContainer   = document.getElementById('saved-list-us');
         try {
             const res  = await fetch('/api/backtests');
             const data = await res.json();
             const list = data.backtests || [];
 
-            if (list.length === 0) {
-                container.innerHTML = '<p style="color:var(--muted);font-size:.9rem;margin:0;">Henüz kaydedilmiş backtest yok. Aşağıdan yeni bir backtest çalıştırın.</p>';
-                return;
-            }
+            const bistList = list.filter(bt => (bt.params?.market || '').toUpperCase() === 'BIST');
+            const usList   = list.filter(bt => (bt.params?.market || '').toUpperCase() !== 'BIST');
 
-            const rows = list.map(bt => {
-                const s   = bt.summary || {};
-                const ret = s.total_return_pct ?? s.total_return ?? null;
-                const retStr = ret !== null
-                    ? `<span class="${ret >= 0 ? 'ret-pos' : 'ret-neg'}">${ret >= 0 ? '+' : ''}${Number(ret).toFixed(1)}%</span>`
-                    : '—';
-                const wr  = s.win_rate != null ? Number(s.win_rate).toFixed(0) + '%' : '—';
-                const dd  = s.max_drawdown != null ? Number(s.max_drawdown).toFixed(1) + '%' : '—';
-                const isActive = bt.id === activeBacktestId;
-                return `
-                    <tr id="row-${bt.id}" class="${isActive ? 'active-row' : ''}">
-                        <td><strong>${bt.name}</strong></td>
-                        <td style="color:var(--muted);font-size:.82rem;">${bt.created_at}</td>
-                        <td>${retStr}</td>
-                        <td>${wr}</td>
-                        <td>${dd}</td>
-                        <td style="white-space:nowrap;display:flex;gap:.4rem;">
-                            <button class="btn-open" onclick="openSaved('${bt.id}')">📂 Aç</button>
-                            <button class="btn-del-bt" onclick="deleteSaved('${bt.id}')">🗑️</button>
-                        </td>
-                    </tr>`;
-            }).join('');
-
-            container.innerHTML = `
-                <div style="overflow-x:auto;">
-                    <table class="saved-table">
-                        <thead><tr>
-                            <th>İsim</th>
-                            <th>Tarih</th>
-                            <th>Getiri</th>
-                            <th>Win Rate</th>
-                            <th>Max DD</th>
-                            <th>İşlem</th>
-                        </tr></thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>`;
+            bistContainer.innerHTML = _buildTable(bistList);
+            usContainer.innerHTML   = _buildTable(usList);
         } catch(e) {
-            container.innerHTML = `<p style="color:var(--red);">❌ Liste yüklenemedi: ${e.message}</p>`;
+            const msg = `<p style="color:var(--red);">❌ Liste yüklenemedi: ${e.message}</p>`;
+            bistContainer.innerHTML = msg;
+            usContainer.innerHTML   = msg;
         }
     }
 
