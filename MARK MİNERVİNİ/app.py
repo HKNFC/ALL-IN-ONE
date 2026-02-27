@@ -12,6 +12,12 @@ import os
 from datetime import datetime, timedelta
 import sys
 
+try:
+    from price_validator import validate_scan_results
+    _VALIDATOR_AVAILABLE = True
+except ImportError:
+    _VALIDATOR_AVAILABLE = False
+
 
 def resource_path(relative):
     """PyInstaller paketlenmiş uygulamada doğru dosya yolunu döndürür."""
@@ -234,6 +240,10 @@ def api_full_scan():
                 result = scanner.scan_us_stock(ticker, sp500)
                 if result:
                     us_results.append(result)
+            # Cross-validation (Breakout + Pivot Near hisseler için)
+            if _VALIDATOR_AVAILABLE and us_results:
+                print("🔍 Cross-validation başlıyor (US)...", flush=True)
+                us_results = validate_scan_results(us_results, is_bist=False)
             return jsonify(_sanitize({
                 'success': True, 'count': len(us_results), 'results': us_results,
                 'market': 'US', 'scan_date': 'today', 'timestamp': datetime.now().isoformat()
@@ -249,6 +259,10 @@ def api_full_scan():
                 result = scanner.scan_bist_stock(ticker, xu100)
                 if result:
                     bist_results.append(result)
+            # Cross-validation (Breakout + Pivot Near hisseler için)
+            if _VALIDATOR_AVAILABLE and bist_results:
+                print("🔍 Cross-validation başlıyor (BIST)...", flush=True)
+                bist_results = validate_scan_results(bist_results, is_bist=True)
             return jsonify(_sanitize({
                 'success': True, 'count': len(bist_results), 'results': bist_results,
                 'market': 'BIST', 'scan_date': 'today', 'timestamp': datetime.now().isoformat()
@@ -256,6 +270,10 @@ def api_full_scan():
 
         else:  # BOTH
             results = scanner.run_universal_scan()
+            if _VALIDATOR_AVAILABLE and results:
+                print("🔍 Cross-validation başlıyor (BOTH)...", flush=True)
+                is_bist = any(r.get('Market') == 'BIST' for r in results[:5])
+                results = validate_scan_results(results, is_bist=False)
             return jsonify(_sanitize({
                 'success': True, 'count': len(results), 'results': results,
                 'market': 'BOTH', 'scan_date': 'today', 'timestamp': datetime.now().isoformat()

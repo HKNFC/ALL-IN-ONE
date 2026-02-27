@@ -553,6 +553,20 @@
                        </div>`
                     : '';
 
+                // data_warning (cross-validation)
+                const dataWarning = stock.data_warning || null;
+                const dataValid   = stock.data_valid;
+                let dataWarningHtml = '';
+                if (dataWarning) {
+                    const bg    = dataValid === false ? '#fee2e2' : '#fef3c7';
+                    const border = dataValid === false ? '#ef4444' : '#f59e0b';
+                    const color  = dataValid === false ? '#b91c1c' : '#92400e';
+                    dataWarningHtml = `
+                        <div style="background:${bg};border-left:4px solid ${border};padding:0.6rem;margin-top:0.5rem;border-radius:4px;">
+                            <small style="color:${color};">${dataWarning}</small>
+                        </div>`;
+                }
+
                 // data-toppick + data-rsrank attribute for filtering/sorting
                 const topPickAttr = isTopPick ? ` data-toppick="true" data-rsrank="${rank}"` : ' data-rsrank="9999"';
 
@@ -576,6 +590,7 @@
                         </div>
                         ${breakoutWarning}
                         ${topPickNote}
+                        ${dataWarningHtml}
                         <div style="margin-top:1rem;display:flex;gap:0.5rem;">
                             <button class="btn btn-primary" style="flex:1;font-size:0.9rem;padding:0.5rem;" onclick="addToPortfolio('${ticker}', ${price}, '${market}')">
                                 💼 Add to Portfolio
