@@ -125,14 +125,44 @@ class MarketDataCache:
             self._save_disk(ticker, start, end, df)
 
     def get_or_fetch_disk(self, ticker, start, end):
-        """Bellekte yoksa disk cache'e bak, orda da yoksa None döndür."""
+        """Bellekte yoksa disk cache'e bak, orda da yoksa None döndür.
+        Cache'deki son fiyat anlık fiyatın 5 katından fazlaysa stale kabul et."""
         if ticker in self._data:
             return self._data[ticker]
         disk_df = self._load_disk(ticker, start, end)
         if disk_df is not None:
+            if self._is_stale(ticker, disk_df):
+                print(f"  ⚠️  {ticker} cache stale (yanlış fiyat), yeniden indirilecek.", flush=True)
+                self._delete_disk(ticker, start, end)
+                return None
             self._data[ticker] = disk_df
             return disk_df
         return None
+
+    def _is_stale(self, ticker, cached_df):
+        """Cache'deki son fiyat gerçek fiyatın 3x-10x fazlaysa stale."""
+        try:
+            cached_last = float(cached_df['Close'].dropna().iloc[-1])
+            import yfinance as yf
+            info = yf.Ticker(ticker).fast_info
+            live = getattr(info, 'last_price', None) or getattr(info, 'previous_close', None)
+            if not live or live <= 0:
+                return False
+            ratio = cached_last / live
+            # 5 kattan fazla sapma → stale
+            return ratio > 5 or ratio < 0.2
+        except Exception:
+            return False
+
+    def _delete_disk(self, ticker, start, end):
+        """Bozuk cache dosyasını sil."""
+        try:
+            path = self._disk_path(ticker, start, end)
+            if os.path.exists(path):
+                os.remove(path)
+                print(f"  🗑️  Stale cache silindi: {os.path.basename(path)}", flush=True)
+        except Exception:
+            pass
 
     def get_or_empty(self, ticker, start=None, end=None, cutoff=None):
         return self.get_slice(ticker, cutoff or end)
