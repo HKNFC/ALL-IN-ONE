@@ -16,6 +16,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import warnings
 import logging
@@ -54,6 +55,9 @@ class MarketDataCache:
     DISK_CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_cache')
     CACHE_TTL_DAYS = 1   # 1 günden eski disk cache taze veri çeker
 
+    # Proses-level RAM cache — disk'e bile gitmeden aynı oturumda hızlı döner
+    _RAM_CACHE: dict = {}
+
     def __init__(self):
         self._data = {}          # {ticker: DataFrame}
         self._bad  = set()       # veri gelmeyen tickerlar
@@ -85,6 +89,9 @@ class MarketDataCache:
         try:
             with open(self._disk_path(ticker, start, end), 'wb') as f:
                 pickle.dump(df, f)
+            # RAM cache'e de yaz
+            ram_key = self._disk_key(ticker, start, end)
+            MarketDataCache._RAM_CACHE[ram_key] = df
         except Exception:
             pass
 
@@ -125,10 +132,17 @@ class MarketDataCache:
             self._save_disk(ticker, start, end, df)
 
     def get_or_fetch_disk(self, ticker, start, end):
-        """Bellekte yoksa disk cache'e bak, orda da yoksa None döndür.
-        Cache'deki son fiyat anlık fiyatın 5 katından fazlaysa stale kabul et."""
+        """Önce instance cache, sonra RAM cache, sonra disk cache."""
         if ticker in self._data:
             return self._data[ticker]
+
+        # Proses-level RAM cache — disk I/O olmadan hızlı döner
+        ram_key = self._disk_key(ticker, start, end)
+        if ram_key in MarketDataCache._RAM_CACHE:
+            df = MarketDataCache._RAM_CACHE[ram_key]
+            self._data[ticker] = df
+            return df
+
         disk_df = self._load_disk(ticker, start, end)
         if disk_df is not None:
             if self._is_stale(ticker, disk_df):
@@ -136,6 +150,7 @@ class MarketDataCache:
                 self._delete_disk(ticker, start, end)
                 return None
             self._data[ticker] = disk_df
+            MarketDataCache._RAM_CACHE[ram_key] = disk_df  # RAM'e de kaydet
             return disk_df
         return None
 
@@ -387,25 +402,30 @@ class MinerviniBacktest:
         results = []
         passed = failed = 0
 
-        for ticker in test_tickers:
+        def _score_ticker(ticker):
             stock_data = self._cache.get_slice(ticker, cutoff)
             if len(stock_data) < 200:
-                failed += 1
-                continue
+                return None
             try:
                 is_bist = ticker.endswith('.IS')
-                result = (
+                return (
                     self.scanner.scan_bist_stock(ticker, xu100, stock_data)
                     if is_bist
                     else self.scanner.scan_us_stock(ticker, sp500, stock_data)
                 )
-                if result:
-                    results.append(result)
+            except Exception:
+                return None
+
+        workers = min(8, max(1, len(test_tickers)))
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(_score_ticker, t): t for t in test_tickers}
+            for fut in as_completed(futures):
+                res = fut.result()
+                if res:
+                    results.append(res)
                     passed += 1
                 else:
                     failed += 1
-            except Exception:
-                failed += 1
 
         print(f"  ✅ {passed} hisse kriterleri geçti, {failed} geçemedi", flush=True)
         return results
