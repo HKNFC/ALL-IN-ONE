@@ -444,18 +444,22 @@
             return '<p style="color:var(--muted);font-size:.9rem;margin:0;">Henüz backtest yok.</p>';
         }
         const rows = list.map(bt => {
-            const s   = bt.summary || {};
-            const ret = s.total_return_pct ?? s.total_return ?? null;
-            const retStr = ret !== null
+            const s        = bt.summary || {};
+            const p        = bt.params  || {};
+            const ret      = s.total_return_pct ?? s.total_return ?? null;
+            const retStr   = ret !== null
                 ? `<span class="${ret >= 0 ? 'ret-pos' : 'ret-neg'}">${ret >= 0 ? '+' : ''}${Number(ret).toFixed(1)}%</span>`
                 : '—';
-            const wr  = s.win_rate != null ? Number(s.win_rate).toFixed(0) + '%' : '—';
-            const dd  = s.max_drawdown != null ? Number(s.max_drawdown).toFixed(1) + '%' : '—';
+            const wr       = s.win_rate    != null ? Number(s.win_rate).toFixed(0)    + '%' : '—';
+            const dd       = s.max_drawdown != null ? Number(s.max_drawdown).toFixed(1) + '%' : '—';
+            const startDt  = p.start_date  || '—';
+            const endDt    = p.end_date    || '—';
             const isActive = bt.id === activeBacktestId;
             return `
                 <tr id="row-${bt.id}" class="${isActive ? 'active-row' : ''}">
                     <td><strong>${bt.name}</strong></td>
-                    <td style="color:var(--muted);font-size:.82rem;">${bt.created_at}</td>
+                    <td style="font-size:.82rem;">${startDt}</td>
+                    <td style="font-size:.82rem;">${endDt}</td>
                     <td>${retStr}</td>
                     <td>${wr}</td>
                     <td>${dd}</td>
@@ -469,7 +473,7 @@
             <div style="overflow-x:auto;">
                 <table class="saved-table">
                     <thead><tr>
-                        <th>İsim</th><th>Tarih</th><th>Getiri</th>
+                        <th>İsim</th><th>Başlangıç</th><th>Bitiş</th><th>Getiri</th>
                         <th>Win Rate</th><th>Max DD</th><th>İşlem</th>
                     </tr></thead>
                     <tbody>${rows}</tbody>
@@ -485,8 +489,12 @@
             const data = await res.json();
             const list = data.backtests || [];
 
-            const bistList = list.filter(bt => (bt.params?.market || '').toUpperCase() === 'BIST');
-            const usList   = list.filter(bt => (bt.params?.market || '').toUpperCase() !== 'BIST');
+            const bistList = list
+                .filter(bt => (bt.params?.market || '').toUpperCase() === 'BIST')
+                .sort((a, b) => new Date(b.params?.start_date || 0) - new Date(a.params?.start_date || 0));
+            const usList = list
+                .filter(bt => (bt.params?.market || '').toUpperCase() !== 'BIST')
+                .sort((a, b) => new Date(b.params?.start_date || 0) - new Date(a.params?.start_date || 0));
 
             bistContainer.innerHTML = _buildTable(bistList);
             usContainer.innerHTML   = _buildTable(usList);
