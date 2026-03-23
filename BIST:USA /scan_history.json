@@ -1,0 +1,206 @@
+[
+  {
+    "id": "20260318143145634231",
+    "date": "18.03.2026 14:31",
+    "market": "BIST",
+    "index": "BIST 100",
+    "params": {
+      "mfi_min": 50,
+      "mfi_max": 80,
+      "vol_mult": 1.3,
+      "div_lookback": 15,
+      "use_divergence": false
+    },
+    "total_hits": 5,
+    "top5": [
+      {
+        "symbol": "KUYAS.IS",
+        "rs": 74.1,
+        "mfi": 57.5,
+        "rsi": 66.3,
+        "vol": 1.97
+      },
+      {
+        "symbol": "INDES.IS",
+        "rs": 73.8,
+        "mfi": 67.8,
+        "rsi": 64.7,
+        "vol": 1.44
+      },
+      {
+        "symbol": "AKGRT.IS",
+        "rs": 70.5,
+        "mfi": 60.8,
+        "rsi": 59.0,
+        "vol": 1.44
+      },
+      {
+        "symbol": "TURSG.IS",
+        "rs": 64.0,
+        "mfi": 72.9,
+        "rsi": 69.6,
+        "vol": 1.32
+      },
+      {
+        "symbol": "YEOTK.IS",
+        "rs": 62.3,
+        "mfi": 78.0,
+        "rsi": 70.9,
+        "vol": 1.55
+      }
+    ]
+  },
+  {
+    "id": "20260318143129056976",
+    "date": "18.03.2026 14:31",
+    "market": "BIST",
+    "index": "BIST TÜM",
+    "params": {
+      "mfi_min": 50,
+      "mfi_max": 80,
+      "vol_mult": 1.3,
+      "div_lookback": 15,
+      "use_divergence": false
+    },
+    "total_hits": 12,
+    "top5": [
+      {
+        "symbol": "PAGYO.IS",
+        "rs": 80.4,
+        "mfi": 68.0,
+        "rsi": 64.3,
+        "vol": 1.97
+      },
+      {
+        "symbol": "KUYAS.IS",
+        "rs": 74.1,
+        "mfi": 57.5,
+        "rsi": 66.3,
+        "vol": 1.97
+      },
+      {
+        "symbol": "KRDMA.IS",
+        "rs": 74.0,
+        "mfi": 76.3,
+        "rsi": 63.3,
+        "vol": 2.29
+      },
+      {
+        "symbol": "INDES.IS",
+        "rs": 73.8,
+        "mfi": 67.8,
+        "rsi": 64.7,
+        "vol": 1.44
+      },
+      {
+        "symbol": "EGPRO.IS",
+        "rs": 71.3,
+        "mfi": 65.7,
+        "rsi": 69.7,
+        "vol": 1.52
+      }
+    ]
+  },
+  {
+    "id": "20260318142947094663",
+    "date": "18.03.2026 14:29",
+    "market": "BIST",
+    "index": "BIST TÜM",
+    "params": {
+      "mfi_min": 50,
+      "mfi_max": 80,
+      "vol_mult": 1.0,
+      "div_lookback": 15,
+      "use_divergence": false
+    },
+    "total_hits": 22,
+    "top5": [
+      {
+        "symbol": "PAGYO.IS",
+        "rs": 80.4,
+        "mfi": 68.0,
+        "rsi": 64.3,
+        "vol": 1.97
+      },
+      {
+        "symbol": "KUYAS.IS",
+        "rs": 74.1,
+        "mfi": 57.5,
+        "rsi": 66.3,
+        "vol": 1.97
+      },
+      {
+        "symbol": "KRDMA.IS",
+        "rs": 74.0,
+        "mfi": 76.3,
+        "rsi": 63.3,
+        "vol": 2.29
+      },
+      {
+        "symbol": "INDES.IS",
+        "rs": 73.8,
+        "mfi": 67.8,
+        "rsi": 64.7,
+        "vol": 1.44
+      },
+      {
+        "symbol": "EGPRO.IS",
+        "rs": 71.3,
+        "mfi": 65.7,
+        "rsi": 69.7,
+        "vol": 1.52
+      }
+    ]
+  },
+  {
+    "id": "20260318142753457512",
+    "date": "18.03.2026 14:27",
+    "market": "BIST",
+    "index": "BIST TÜM",
+    "params": {
+      "mfi_min": 50,
+      "mfi_max": 80,
+      "vol_mult": 1.0,
+      "div_lookback": 15,
+      "use_divergence": false
+    },
+    "total_hits": 22,
+    "top5": [
+      {
+        "symbol": "PAGYO.IS",
+        "rs": 80.4,
+        "mfi": 68.0,
+        "rsi": 64.3,
+        "vol": 1.97
+      },
+      {
+        "symbol": "KUYAS.IS",
+        "rs": 74.1,
+        "mfi": 57.5,
+        "rsi": 66.3,
+        "vol": 1.97
+      },
+      {
+        "symbol": "KRDMA.IS",
+        "rs": 74.0,
+        "mfi": 76.3,
+        "rsi": 63.3,
+        "vol": 2.29
+      },
+      {
+        "symbol": "INDES.IS",
+        "rs": 73.8,
+        "mfi": 67.8,
+        "rsi": 64.7,
+        "vol": 1.44
+      },
+      {
+        "symbol": "EGPRO.IS",
+        "rs": 71.3,
+        "mfi": 65.7,
+        "rsi": 69.7,
+        "vol": 1.52
+      }
+    ]
+  }
+]

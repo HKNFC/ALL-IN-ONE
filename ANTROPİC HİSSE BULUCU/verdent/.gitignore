@@ -1,0 +1,23 @@
+# Environment files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Dependencies
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/.next/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Prisma
+**/prisma/migrations/
+
+# Coverage
+**/coverage/

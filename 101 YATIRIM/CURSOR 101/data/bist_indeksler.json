@@ -1,0 +1,29 @@
+{
+  "_aciklama": "Borsa İstanbul resmi endeks bileşenleri. Ocak, Nisan, Temmuz, Ekim'de güncellenir. Kaynak: BIST/KAP - 2025 dönemi.",
+  "BIST_30": [
+    "AEFES", "AKBNK", "ALARK", "ARCLK", "ASELS", "ASTOR", "BIMAS", "BRSAN", "CCOLA", "CIMSA",
+    "DOAS", "DOHOL", "EKGYO", "ENJSA", "ENKAI", "EREGL", "FROTO", "GARAN", "GUBRF", "HALKB",
+    "HEKTS", "ISCTR", "KCHOL", "KONTR", "KRDMD", "MAVI", "MGROS", "MIATK", "OYAKC", "PETKM"
+  ],
+  "BIST_50": [
+    "AEFES", "AKBNK", "ALARK", "ARCLK", "ASELS", "ASTOR", "BIMAS", "BRSAN", "CCOLA", "CIMSA",
+    "DOAS", "DOHOL", "EKGYO", "ENJSA", "ENKAI", "EREGL", "FROTO", "GARAN", "GUBRF", "HALKB",
+    "HEKTS", "ISCTR", "KCHOL", "KONTR", "KRDMD", "MAVI", "MGROS", "MIATK", "OYAKC", "PETKM",
+    "PGSUS", "SAHOL", "SASA", "SISE", "SOKM", "TAVHL", "TCELL", "THYAO", "TKFEN", "TOASO",
+    "TSKB", "TTKOM", "TUPRS", "ULKER", "VAKBN", "VESTL", "YKBNK", "ZOREN",
+    "AKSEN", "OTKAR"
+  ],
+  "BIST_100": [
+    "AGHOL", "AGROT", "AHGAZ", "AKBNK", "AKSA", "AKSEN", "ALARK", "ALFAS", "ALTNY", "ANSGR",
+    "AEFES", "ANHYT", "ARCLK", "ARDYZ", "ASELS", "ASTOR", "AVPGY", "BTCIM", "BSOKE", "BERA",
+    "BIMAS", "BRSAN", "BRYAT", "CCOLA", "CWENE", "CANTE", "CLEBI", "CIMSA", "DOHOL", "DOAS",
+    "EFORC", "EGEEN", "ECILC", "EKGYO", "ENJSA", "ENERY", "ENKAI", "EREGL", "EUPWR", "FROTO",
+    "GSRAY", "GESAN", "GOLTS", "GRTHO", "GUBRF", "SAHOL", "HEKTS", "IEYHO", "ISMEN", "KRDMD",
+    "KARSN", "KTLEV", "KCAER", "KCHOL", "KONTR", "KONYA", "KOZAL", "KOZAA", "LMKDC", "MAGEN",
+    "MAVI", "MIATK", "MGROS", "MPARK", "OBAMS", "ODAS", "OTKAR", "OYAKC", "PASEU", "PGSUS",
+    "PETKM", "RALYH", "REEDR", "RYGYO", "SASA", "SELEC", "SMRTG", "SKBNK", "SOKM", "TABGD",
+    "TAVHL", "TKFEN", "TOASO", "TCELL", "TUPRS", "THYAO", "GARAN", "HALKB", "ISCTR", "TSKB",
+    "TURSG", "SISE", "VAKBN", "TTKOM", "TTRAK", "ULKER", "VESTL", "YKBNK", "YEOTK", "ZOREN"
+  ],
+  "BIST_100_DISI": []
+}

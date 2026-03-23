@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Stock {
+  id          String       @id @default(cuid())
+  symbol      String       @unique
+  name        String
+  market      String
+  sector      String?
+  marketCap   Float?
+  createdAt   DateTime     @default(now())
+
+  prices      StockPrice[]
+  scanResults ScanResult[]
+}
+
+model StockPrice {
+  id            String   @id @default(cuid())
+  stockId       String
+  date          DateTime
+  open          Float
+  high          Float
+  low           Float
+  close         Float
+  volume        Float
+  rsi14         Float?
+  macd          Float?
+  macdSignal    Float?
+  ema20         Float?
+  ema50         Float?
+  ema200        Float?
+  sma50         Float?
+  sma200        Float?
+  atr14         Float?
+  obv           Float?
+  vwap          Float?
+  bbUpper       Float?
+  bbLower       Float?
+  bbMiddle      Float?
+  adx14         Float?
+  stochK        Float?
+  stochD        Float?
+  pe            Float?
+  pb            Float?
+  roe           Float?
+  debtEquity    Float?
+  revenueGrowth Float?
+  earningsGrowth Float?
+  freeCashFlow  Float?
+
+  stock Stock @relation(fields: [stockId], references: [id], onDelete: Cascade)
+
+  @@unique([stockId, date])
+  @@index([stockId])
+  @@index([date])
+}
+
+model MarketCondition {
+  id            String   @id @default(cuid())
+  date          DateTime @unique
+  market        String
+  condition     String
+  vixLevel      Float?
+  breadthIndex  Float?
+  sp500Trend    String?
+  bistTrend     String?
+  confidence    Float
+  indicators    Json
+
+  @@index([market])
+  @@index([date])
+}
+
+model Criteria {
+  id             String       @id @default(cuid())
+  name           String
+  displayName    String
+  market         String
+  description    String
+  rules          Json
+  scoringWeights Json
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+
+  scanResults ScanResult[]
+}
+
+model ScanResult {
+  id          String   @id @default(cuid())
+  scanDate    DateTime
+  criteriaId  String
+  stockId     String
+  score       Float
+  rank        Int
+  signals     Json
+  entryPrice  Float
+  targetPrice Float?
+  stopLoss    Float?
+
+  criteria Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+  stock    Stock    @relation(fields: [stockId], references: [id], onDelete: Cascade)
+
+  @@unique([scanDate, criteriaId, stockId])
+  @@index([scanDate])
+  @@index([criteriaId])
+  @@index([stockId])
+}
+
+model Backtest {
+  id               String   @id @default(cuid())
+  name             String
+  criteriaType     String
+  criteriaId       String?
+  startDate        DateTime
+  endDate          DateTime
+  rebalancePeriod  String
+  market           String
+  initialCapital   Float    @default(100000)
+  status           String   @default("RUNNING")
+  totalReturn      Float?
+  annualizedReturn Float?
+  maxDrawdown      Float?
+  sharpeRatio      Float?
+  winRate          Float?
+  totalTrades      Int?
+  createdAt        DateTime @default(now())
+  isDeleted        Boolean  @default(false)
+
+  portfolioSnapshots BacktestSnapshot[]
+  trades             BacktestTrade[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([market])
+}
+
+model BacktestSnapshot {
+  id              String   @id @default(cuid())
+  backtestId      String
+  date            DateTime
+  portfolioValue  Float
+  holdings        Json
+  criteriaUsed    String
+  marketCondition String
+
+  backtest Backtest @relation(fields: [backtestId], references: [id], onDelete: Cascade)
+
+  @@index([backtestId])
+  @@index([date])
+}
+
+model BacktestTrade {
+  id         String   @id @default(cuid())
+  backtestId String
+  symbol     String
+  action     String
+  date       DateTime
+  price      Float
+  shares     Float
+  value      Float
+  reason     String
+
+  backtest Backtest @relation(fields: [backtestId], references: [id], onDelete: Cascade)
+
+  @@index([backtestId])
+  @@index([symbol])
+  @@index([date])
+}

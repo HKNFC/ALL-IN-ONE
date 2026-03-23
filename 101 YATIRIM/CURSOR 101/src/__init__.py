@@ -1,0 +1,1 @@
+"""BIST Hisse Tarama modülü"""
