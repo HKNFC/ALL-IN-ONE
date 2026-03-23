@@ -5,17 +5,16 @@ __pycache__/
 *.pyd
 .Python
 *.egg-info/
-dist/
-build/
-.eggs/
 
 # Veri cache (büyük dosyalar, otomatik yenilenir)
 data_cache/
+.cache/
+*.pkl
 
-# PyInstaller çıktıları
-*.spec.bak
+# PyInstaller
 dist/
 build/
+*.spec.bak
 
 # macOS
 .DS_Store
@@ -27,11 +26,28 @@ telegram_config.json
 .env.local
 .env.*
 
-# Log dosyaları
+# Log / geçici dosyalar
 *.log
 server.log
 server.pid
-
-# Geçici dosyalar
 *.tmp
 *.bak
+
+# Diğer projeler (bu repo sadece MARK MİNERVİNİ klasörüne ait)
+../101 YATIRIM/
+../ANTROPİC HİSSE BULUCU/
+../BIST:USA /
+../EKONOMİK HABER AKISI/
+../PATLAMA/
+../VERDENT.docx
+../MARK MİNERVİNİ  programının son haline dönebilmek için terminale aşağıdaki komutu yaz.docx
+../Backtest kalitesini bozmadan süresini kısaltmak için.docx
+../GİTHUB TOKEN.docx
+
+# venv / node_modules
+venv/
+.venv/
+node_modules/
+
+# Gömülü git repoları
+PATLAMA/
