@@ -51,3 +51,9 @@ node_modules/
 
 # Gömülü git repoları
 PATLAMA/
+
+# SQLite DB (Railway Volume'da tutulur, repoya eklenmez)
+sepa.db
+
+# macOS app bundle (local, repoya eklenmez)
+SEPA Starter.app/

@@ -11,6 +11,7 @@ import json
 import os
 from datetime import datetime, timedelta
 import sys
+import storage
 
 try:
     from price_validator import validate_scan_results
@@ -344,10 +345,6 @@ if os.path.exists(_legacy):
         shutil.copy(_legacy, _dest)
 
 def _portfolio_path(name):
-    """Portföy adından dosya yolunu döndür.
-    Önce portföyler klasöründe tam eşleşme ara,
-    bulamazsa safe-name filtresi uygula."""
-    # 1) Tam eşleşme (büyük/küçük harf duyarsız)
     name_stripped = name.strip()
     try:
         for fname in os.listdir(PORTFOLIOS_DIR):
@@ -355,7 +352,6 @@ def _portfolio_path(name):
                 return os.path.join(PORTFOLIOS_DIR, fname)
     except Exception:
         pass
-    # 2) Fallback: safe filtre
     safe = "".join(c for c in name_stripped if c.isalnum() or c in (' ', '_', '-', 'ğüşıöçĞÜŞİÖÇ')).strip()
     return os.path.join(PORTFOLIOS_DIR, f"{safe}.csv")
 
@@ -364,53 +360,42 @@ def api_portfolios_summary():
     """Tüm portföylerin özet istatistiklerini döndür"""
     try:
         summaries = []
-        files = sorted(f[:-4] for f in os.listdir(PORTFOLIOS_DIR) if f.endswith('.csv'))
-        for name in files:
-            path = _portfolio_path(name)
-            try:
-                df = pd.read_csv(path)
-                if df.empty:
-                    summaries.append({'name': name, 'total_value': 0, 'total_cost': 0,
-                                      'total_profit': 0, 'total_pct': 0, 'win_rate': 0, 'count': 0})
-                    continue
-
-                total_cost = total_value = 0.0
-                winners = 0
-                count = len(df)
-
-                for _, row in df.iterrows():
-                    entry  = float(row['Maliyet'])
-                    qty    = float(row['Adet']) if not pd.isna(row['Adet']) else 0
-                    cost   = entry * qty
-                    total_cost += cost
-                    try:
-                        ticker     = str(row['Ticker'])
-                        yf_ticker  = ticker + '.IS' if (str(row.get('Market','US')) == 'BIST') else ticker
-                        hist       = yf.Ticker(yf_ticker).history(period='1d')
-                        cur_price  = float(hist['Close'].iloc[-1]) if len(hist) > 0 else entry
-                    except Exception:
-                        cur_price = entry
-                    cur_val = cur_price * qty
-                    total_value += cur_val
-                    if cur_val > cost:
-                        winners += 1
-
-                profit   = total_value - total_cost
-                pct      = (profit / total_cost * 100) if total_cost > 0 else 0
-                win_rate = (winners / count * 100) if count > 0 else 0
-
-                summaries.append({
-                    'name': name, 'count': count,
-                    'total_value': round(total_value, 2),
-                    'total_cost':  round(total_cost,  2),
-                    'total_profit': round(profit, 2),
-                    'total_pct':   round(pct, 2),
-                    'win_rate':    round(win_rate, 1),
-                })
-            except Exception:
+        names = storage.list_portfolios()
+        for name in names:
+            rows = storage.get_portfolio(name)
+            if not rows:
                 summaries.append({'name': name, 'total_value': 0, 'total_cost': 0,
                                   'total_profit': 0, 'total_pct': 0, 'win_rate': 0, 'count': 0})
-
+                continue
+            total_cost = total_value = 0.0
+            winners = 0
+            count = len(rows)
+            for row in rows:
+                entry = float(row['maliyet'])
+                qty   = float(row['adet']) if row['adet'] else 0
+                cost  = entry * qty
+                total_cost += cost
+                try:
+                    yf_ticker = row['ticker'] + '.IS' if row['market'] == 'BIST' else row['ticker']
+                    hist = yf.Ticker(yf_ticker).history(period='1d')
+                    cur_price = float(hist['Close'].iloc[-1]) if len(hist) > 0 else entry
+                except Exception:
+                    cur_price = entry
+                cur_val = cur_price * qty
+                total_value += cur_val
+                if cur_val > cost:
+                    winners += 1
+            profit   = total_value - total_cost
+            pct      = (profit / total_cost * 100) if total_cost > 0 else 0
+            win_rate = (winners / count * 100) if count > 0 else 0
+            summaries.append({
+                'name': name, 'count': count,
+                'total_value':  round(total_value, 2),
+                'total_cost':   round(total_cost,  2),
+                'total_profit': round(profit, 2),
+                'total_pct':    round(pct, 2),
+                'win_rate':     round(win_rate, 1),
+            })
         return jsonify({'success': True, 'summaries': summaries})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -420,8 +405,7 @@ def api_portfolios_summary():
 def api_list_portfolios():
     """Tüm portföyleri listele"""
     try:
-        files = [f[:-4] for f in os.listdir(PORTFOLIOS_DIR) if f.endswith('.csv')]
-        return jsonify({'success': True, 'portfolios': sorted(files)})
+        return jsonify({'success': True, 'portfolios': storage.list_portfolios()})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -433,11 +417,9 @@ def api_create_portfolio():
         name = data.get('name', '').strip()
         if not name:
             return jsonify({'success': False, 'error': 'Portföy adı boş olamaz'}), 400
-        path = _portfolio_path(name)
-        if os.path.exists(path):
+        if storage.portfolio_exists(name):
             return jsonify({'success': False, 'error': 'Bu isimde portföy zaten var'}), 400
-        df = pd.DataFrame(columns=['Ticker','Maliyet','Adet','Alış_Tarihi','Stop_Seviyesi','Backstop_Aktif'])
-        df.to_csv(path, index=False)
+        storage.create_portfolio(name)
         return jsonify({'success': True, 'name': name})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -450,13 +432,11 @@ def api_rename_portfolio():
         new_name = request.args.get('new', '').strip()
         if not old_name or not new_name:
             return jsonify({'success': False, 'error': 'Eski ve yeni ad gerekli'}), 400
-        old_path = _portfolio_path(old_name)
-        new_path = _portfolio_path(new_name)
-        if not os.path.exists(old_path):
+        if not storage.portfolio_exists(old_name):
             return jsonify({'success': False, 'error': 'Portföy bulunamadı'}), 404
-        if os.path.exists(new_path):
+        if storage.portfolio_exists(new_name):
             return jsonify({'success': False, 'error': 'Bu isimde portföy zaten var'}), 400
-        os.rename(old_path, new_path)
+        storage.rename_portfolio(old_name, new_name)
         return jsonify({'success': True, 'name': new_name})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -469,9 +449,7 @@ def api_delete_portfolio():
         name = request.args.get('name', '').strip()
         if not name:
             return jsonify({'success': False, 'error': 'Portföy adı gerekli'}), 400
-        path = _portfolio_path(name)
-        if os.path.exists(path):
-            os.remove(path)
+        storage.delete_portfolio(name)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -481,39 +459,24 @@ def api_get_portfolio():
     """Portföy getir"""
     try:
         name = request.args.get('name', 'Varsayılan')
-        path = _portfolio_path(name)
-        if not os.path.exists(path):
+        rows = storage.get_portfolio(name)
+        if not rows:
             return jsonify({'success': True, 'positions': [], 'summary': {'total_value': 0, 'total_profit': 0, 'total_positions': 0, 'win_rate': 0}})
 
-        df = pd.read_csv(path)
-
-        # Güncel fiyatları çek
         positions = []
         total_value = 0
         total_cost = 0
 
-        for _, row in df.iterrows():
-            ticker = row['Ticker']
-            entry_price = row['Maliyet']
-            quantity = row['Adet']
-            stop_loss = row['Stop_Seviyesi']
+        for row in rows:
+            ticker      = row['ticker']
+            entry_price = float(row['maliyet'])
+            quantity    = float(row['adet']) if row['adet'] else 0
+            stop_loss   = float(row['stop_seviyesi']) if row['stop_seviyesi'] else entry_price * 0.93
+            market      = row['market']
 
-            # NaN kontrolü
-            if pd.isna(quantity):
-                quantity = 0
-
-            # Güncel fiyat çek
             try:
-                # Market sütunu varsa kullan, yoksa heuristic
-                if 'Market' in row.index and pd.notna(row['Market']) and str(row['Market']).strip():
-                    is_bist = str(row['Market']).upper().strip() == 'BIST'
-                else:
-                    is_bist = str(ticker).isalpha() and len(str(ticker)) <= 6 and not any(c in str(ticker) for c in ['.', '-'])
-
-                yahoo_ticker = f"{ticker}.IS" if is_bist else str(ticker)
-                stock = yf.Ticker(yahoo_ticker)
-
-                # fast_info ile önce dene (hızlı, güvenilir)
+                yf_ticker = f"{ticker}.IS" if market == 'BIST' else ticker
+                stock = yf.Ticker(yf_ticker)
                 current_price = None
                 try:
                     fi = stock.fast_info
@@ -522,39 +485,35 @@ def api_get_portfolio():
                         current_price = float(p)
                 except Exception:
                     pass
-
-                # fast_info başarısız → history dene
                 if not current_price:
                     hist = stock.history(period='5d')
                     if len(hist) > 0:
                         current_price = float(hist['Close'].iloc[-1])
-
                 if not current_price:
-                    current_price = float(entry_price)
-
+                    current_price = entry_price
             except Exception as e:
                 print(f"⚠️ Fiyat çekme hatası {ticker}: {e}", flush=True)
-                current_price = float(entry_price)
+                current_price = entry_price
 
-            cost_basis = entry_price * quantity
+            cost_basis    = entry_price * quantity
             current_value = current_price * quantity
-            total_cost += cost_basis
-            total_value += current_value
+            total_cost   += cost_basis
+            total_value  += current_value
 
             positions.append({
-                'ticker': ticker,
-                'market': str(row['Market']) if 'Market' in row.index and pd.notna(row['Market']) else ('BIST' if str(ticker).isalpha() and len(str(ticker)) <= 6 else 'US'),
-                'entry_price': float(entry_price),
-                'current_price': float(current_price),
-                'quantity': float(quantity),
-                'stop_loss': float(stop_loss),
-                'cost_basis': float(cost_basis),
-                'current_value': float(current_value),
-                'purchase_date': row.get('Alış_Tarihi', 'N/A')
+                'ticker':        ticker,
+                'market':        market,
+                'entry_price':   entry_price,
+                'current_price': current_price,
+                'quantity':      quantity,
+                'stop_loss':     stop_loss,
+                'cost_basis':    cost_basis,
+                'current_value': current_value,
+                'purchase_date': row.get('alis_tarihi', 'N/A')
             })
 
         total_profit = total_value - total_cost
-        winning = sum(1 for p in positions if p['current_value'] > p['cost_basis'])
+        winning  = sum(1 for p in positions if p['current_value'] > p['cost_basis'])
         win_rate = (winning / len(positions) * 100) if positions else 0
 
         summary = {
@@ -564,7 +523,6 @@ def api_get_portfolio():
             'total_positions': len(positions),
             'win_rate':        win_rate
         }
-
         return jsonify({'success': True, 'positions': positions, 'summary': summary})
 
     except Exception as e:
@@ -575,29 +533,15 @@ def api_add_to_portfolio():
     """Portföye ekle"""
     try:
         data = request.get_json()
-        name = data.get('portfolio_name', 'Varsayılan').strip() or 'Varsayılan'
-        path = _portfolio_path(name)
-
-        if os.path.exists(path):
-            df = pd.read_csv(path)
-        else:
-            df = pd.DataFrame(columns=['Ticker', 'Maliyet', 'Adet', 'Alış_Tarihi', 'Stop_Seviyesi', 'Backstop_Aktif'])
-
-        new_row = {
-            'Ticker': data['ticker'],
-            'Market': data.get('market', 'US'),
-            'Maliyet': data['entry_price'],
-            'Adet': data['quantity'],
-            'Alış_Tarihi': datetime.now().strftime('%Y-%m-%d'),
-            'Stop_Seviyesi': data['stop_loss'],
-            'Backstop_Aktif': False
-        }
-
-        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-        df.to_csv(path, index=False)
-
-        return jsonify({'success': True, 'message': f'{data["ticker"]} portföye eklendi ({name})'})
-
+        name  = data.get('portfolio_name', 'Varsayılan').strip() or 'Varsayılan'
+        ticker     = str(data['ticker']).upper().strip()
+        market     = data.get('market', 'US')
+        entry      = float(data['entry_price'])
+        quantity   = float(data['quantity'])
+        stop_loss  = float(data['stop_loss'])
+        buy_date   = data.get('buy_date', datetime.now().strftime('%Y-%m-%d'))
+        storage.add_position(name, ticker, market, entry, quantity, buy_date, stop_loss)
+        return jsonify({'success': True, 'message': f'{ticker} portföye eklendi ({name})'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -606,22 +550,17 @@ def api_portfolio_history():
     """Portföy günlük değer geçmişi — grafik için"""
     try:
         name = request.args.get('name', 'Varsayılan')
-        path = _portfolio_path(name)
-        if not os.path.exists(path):
+        rows = storage.get_portfolio(name)
+        if not rows:
             return jsonify({'success': True, 'dates': [], 'values': [], 'costs': []})
 
-        df = pd.read_csv(path)
-        if df.empty:
-            return jsonify({'success': True, 'dates': [], 'values': [], 'costs': []})
-
-        # En eski alış tarihi
         purchase_dates = {}
         earliest_purchase = None
-        for _, row in df.iterrows():
-            d_str = str(row.get('Alış_Tarihi', '')).strip()
+        for row in rows:
+            d_str = str(row.get('alis_tarihi', '')).strip()
             try:
                 d = pd.to_datetime(d_str)
-                purchase_dates[str(row['Ticker'])] = d
+                purchase_dates[row['ticker']] = d
                 if earliest_purchase is None or d < earliest_purchase:
                     earliest_purchase = d
             except Exception:
@@ -630,97 +569,60 @@ def api_portfolio_history():
         if earliest_purchase is None:
             earliest_purchase = datetime.now() - timedelta(days=90)
 
-        # Grafik başlangıcı: alış tarihinden 3 ay önce (daha fazla bağlam için)
         chart_start = earliest_purchase - timedelta(days=90)
-        end_date = datetime.now()
-        date_range = pd.bdate_range(start=chart_start, end=end_date)
+        end_date    = datetime.now()
+        date_range  = pd.bdate_range(start=chart_start, end=end_date)
 
         if len(date_range) == 0:
             return jsonify({'success': True, 'dates': [], 'values': [], 'costs': []})
 
-        # Her hisse için tarihi fiyatları çek
         ticker_prices = {}
-        for _, row in df.iterrows():
-            ticker = str(row['Ticker'])
-            if 'Market' in row.index and pd.notna(row['Market']):
-                is_bist = str(row['Market']).upper().strip() == 'BIST'
-            else:
-                is_bist = str(ticker).isalpha() and len(str(ticker)) <= 6
-
-            yahoo_ticker = f"{ticker}.IS" if is_bist else ticker
+        for row in rows:
+            ticker    = row['ticker']
+            yf_ticker = f"{ticker}.IS" if row['market'] == 'BIST' else ticker
             try:
-                hist = yf.download(
-                    yahoo_ticker,
-                    start=chart_start.strftime('%Y-%m-%d'),
-                    end=(end_date + timedelta(days=1)).strftime('%Y-%m-%d'),
-                    progress=False,
-                    auto_adjust=True
-                )
+                hist = yf.download(yf_ticker, start=chart_start.strftime('%Y-%m-%d'),
+                                   end=(end_date + timedelta(days=1)).strftime('%Y-%m-%d'),
+                                   progress=False, auto_adjust=True)
                 if not hist.empty:
-                    if isinstance(hist.columns, pd.MultiIndex):
-                        close = hist['Close'][yahoo_ticker] if yahoo_ticker in hist['Close'].columns else hist['Close'].iloc[:, 0]
-                    else:
-                        close = hist['Close']
+                    close = hist['Close'][yf_ticker] if isinstance(hist.columns, pd.MultiIndex) and yf_ticker in hist['Close'].columns else hist['Close']
                     ticker_prices[ticker] = close
             except Exception as e:
                 print(f"⚠️ Grafik veri hatası {ticker}: {e}", flush=True)
 
-        # Günlük portföy değeri hesapla
+        total_cost = sum(float(r['maliyet']) * float(r['adet'] or 0) for r in rows)
+
         dates_out = []
         values_out = []
-        costs_out = []
-
-        total_cost = 0
-        for _, row in df.iterrows():
-            entry_price = float(row['Maliyet'])
-            quantity = float(row['Adet']) if not pd.isna(row['Adet']) else 0
-            total_cost += entry_price * quantity
-
+        costs_out  = []
         for day in date_range:
             day_value = 0
-            for _, row in df.iterrows():
-                ticker = str(row['Ticker'])
-                quantity = float(row['Adet']) if not pd.isna(row['Adet']) else 0
-                entry_price = float(row['Maliyet'])
-
-                # Alış tarihinden önce → maliyet kullan
+            for row in rows:
+                ticker      = row['ticker']
+                quantity    = float(row['adet'] or 0)
+                entry_price = float(row['maliyet'])
                 try:
-                    purchase_date = pd.to_datetime(str(row.get('Alış_Tarihi', '')).strip())
+                    purchase_date = pd.to_datetime(str(row.get('alis_tarihi', '')).strip())
                 except Exception:
                     purchase_date = earliest_purchase
-
                 if day < purchase_date:
                     day_value += entry_price * quantity
                     continue
-
                 if ticker in ticker_prices:
-                    prices = ticker_prices[ticker]
-                    # O güne en yakın önceki fiyatı bul
-                    available = prices[prices.index <= day]
-                    if len(available) > 0:
-                        price = float(available.iloc[-1])
-                    else:
-                        price = entry_price
+                    avail = ticker_prices[ticker]
+                    avail = avail[avail.index <= day]
+                    price = float(avail.iloc[-1]) if len(avail) > 0 else entry_price
                 else:
                     price = entry_price
-
                 day_value += price * quantity
-
             dates_out.append(day.strftime('%Y-%m-%d'))
             values_out.append(round(day_value, 2))
             costs_out.append(round(total_cost, 2))
 
-        return jsonify({
-            'success': True,
-            'dates': dates_out,
-            'values': values_out,
-            'costs': costs_out,
-            'purchase_date': earliest_purchase.strftime('%Y-%m-%d') if earliest_purchase else None
-        })
-
+        return jsonify({'success': True, 'dates': dates_out, 'values': values_out, 'costs': costs_out,
+                        'purchase_date': earliest_purchase.strftime('%Y-%m-%d') if earliest_purchase else None})
     except Exception as e:
-        import traceback
-        print(traceback.format_exc())
+        import traceback; print(traceback.format_exc())
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
@@ -729,16 +631,8 @@ def api_delete_from_portfolio(ticker):
     """Portföyden sil"""
     try:
         name = request.args.get('name', 'Varsayılan')
-        path = _portfolio_path(name)
-        if not os.path.exists(path):
-            return jsonify({'success': False, 'error': 'Portföy bulunamadı'}), 404
-
-        df = pd.read_csv(path)
-        df = df[df['Ticker'] != ticker.upper()]
-        df.to_csv(path, index=False)
-
+        storage.delete_position(name, ticker)
         return jsonify({'success': True, 'message': f'{ticker} portföyden silindi'})
-
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -746,25 +640,10 @@ def api_delete_from_portfolio(ticker):
 def api_signals_history():
     """Sinyal geçmişi"""
     try:
-        if os.path.exists('sepa_signal_history.json'):
-            with open('sepa_signal_history.json', 'r') as f:
-                signals = json.load(f)
-            
-            return jsonify({
-                'success': True,
-                'signals': signals
-            })
-        else:
-            return jsonify({
-                'success': True,
-                'signals': []
-            })
-            
+        signals = storage.list_signals()
+        return jsonify({'success': True, 'signals': signals})
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/market-status', methods=['GET'])
 def api_market_status():
@@ -990,30 +869,11 @@ def api_data_source_status():
 
 import uuid
 
-BACKTESTS_DIR = os.path.join(os.path.dirname(__file__), 'backtests')
-os.makedirs(BACKTESTS_DIR, exist_ok=True)
-
 @app.route('/api/backtests', methods=['GET'])
 def api_list_backtests():
     """Kaydedilmiş backtestleri listele"""
     try:
-        items = []
-        for fname in sorted(os.listdir(BACKTESTS_DIR), reverse=True):
-            if not fname.endswith('.json'):
-                continue
-            fpath = os.path.join(BACKTESTS_DIR, fname)
-            try:
-                with open(fpath, 'r', encoding='utf-8') as f:
-                    meta = json.load(f)
-                items.append({
-                    'id':         meta['id'],
-                    'name':       meta['name'],
-                    'created_at': meta['created_at'],
-                    'params':     meta['params'],
-                    'summary':    meta.get('report', {}).get('summary', {})
-                })
-            except Exception:
-                continue
+        items = storage.list_backtests()
         return jsonify({'success': True, 'backtests': items})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1022,11 +882,9 @@ def api_list_backtests():
 def api_get_backtest(bt_id):
     """Kaydedilmiş backtest'i yükle"""
     try:
-        fpath = os.path.join(BACKTESTS_DIR, f"{bt_id}.json")
-        if not os.path.exists(fpath):
+        data = storage.get_backtest(bt_id)
+        if not data:
             return jsonify({'success': False, 'error': 'Backtest bulunamadı'}), 404
-        with open(fpath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
         return jsonify({'success': True, 'data': data})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1035,9 +893,7 @@ def api_get_backtest(bt_id):
 def api_delete_backtest(bt_id):
     """Kaydedilmiş backtest'i sil"""
     try:
-        fpath = os.path.join(BACKTESTS_DIR, f"{bt_id}.json")
-        if os.path.exists(fpath):
-            os.remove(fpath)
+        storage.delete_backtest(bt_id)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1046,7 +902,7 @@ def api_delete_backtest(bt_id):
 def api_run_backtest():
     """Backtest çalıştır ve otomatik kaydet"""
     try:
-        data = request.get_json()
+        data            = request.get_json()
         start_date      = data.get('start_date')
         end_date        = data.get('end_date')
         initial_capital = data.get('initial_capital', 100000)
@@ -1054,27 +910,12 @@ def api_run_backtest():
         method          = data.get('method', 'rs')
         frequency       = data.get('frequency', 'monthly')
 
-        # ── Duplicate kontrolü: aynı parametreli backtest var mı? ──────────
-        params_key = f"{market}_{method}_{frequency}_{start_date}_{end_date}_{initial_capital}"
-        existing_id = None
-        for fname in os.listdir(BACKTESTS_DIR):
-            if not fname.endswith('.json'):
-                continue
-            try:
-                with open(os.path.join(BACKTESTS_DIR, fname), encoding='utf-8') as f:
-                    rec = json.load(f)
-                p = rec.get('params', {})
-                k = f"{p.get('market')}_{p.get('method')}_{p.get('frequency')}_{p.get('start_date')}_{p.get('end_date')}_{p.get('initial_capital', 100000)}"
-                if k == params_key:
-                    existing_id = rec['id']
-                    break
-            except Exception:
-                continue
+        # ── Duplicate kontrolü ──────────────────────────────────────────────
+        params_key  = f"{market}_{method}_{frequency}_{start_date}_{end_date}_{initial_capital}"
+        existing_id = storage.find_duplicate_backtest(params_key)
 
         if existing_id:
-            # Aynı parametreli backtest zaten var — mevcut sonucu döndür
-            with open(os.path.join(BACKTESTS_DIR, f"{existing_id}.json"), encoding='utf-8') as f:
-                existing = json.load(f)
+            existing = storage.get_backtest(existing_id)
             return jsonify({
                 'success':    True,
                 'report':     existing['report'],
@@ -1084,27 +925,19 @@ def api_run_backtest():
                 'message':    'Bu parametrelerle daha önce kaydedilmiş backtest bulundu. Mevcut sonuç döndürüldü.'
             })
 
-        # ── Yeni backtest çalıştır ──────────────────────────────────────────
+        # ── Yeni backtest çalıştır ───────────────────────────────────────────
         backtest = MinerviniBacktest(start_date, end_date, initial_capital)
         report   = backtest.run_backtest(market, method=method, frequency=frequency)
         report   = _sanitize(report)
 
-        bt_id   = str(uuid.uuid4())[:8]
+        bt_id         = str(uuid.uuid4())[:8]
         freq_labels   = {'monthly': 'Aylık', 'biweekly': '15 Günlük', 'weekly': 'Haftalık'}
         method_labels = {'rs': 'RS', 'minervini': 'Minervini'}
         name = f"{market} • {method_labels.get(method, method)} • {freq_labels.get(frequency, frequency)} • {start_date} → {end_date}"
-        record = {
-            'id':         bt_id,
-            'name':       name,
-            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M'),
-            'params':     {'start_date': start_date, 'end_date': end_date,
-                           'market': market, 'method': method,
-                           'frequency': frequency, 'initial_capital': initial_capital},
-            'report':     report
-        }
-        fpath = os.path.join(BACKTESTS_DIR, f"{bt_id}.json")
-        with open(fpath, 'w', encoding='utf-8') as f:
-            json.dump(record, f, ensure_ascii=False)
+        params = {'start_date': start_date, 'end_date': end_date,
+                  'market': market, 'method': method,
+                  'frequency': frequency, 'initial_capital': initial_capital}
+        storage.save_backtest(bt_id, name, params, report)
 
         return jsonify({'success': True, 'report': report, 'saved_id': bt_id, 'saved_name': name, 'duplicate': False})
 
@@ -1135,20 +968,22 @@ def _clean_data_cache(max_age_days=30):
 
 
 if __name__ == '__main__':
+    storage.init_db()
     _clean_data_cache(max_age_days=30)
-    # Klasörleri oluştur
     os.makedirs('templates', exist_ok=True)
     os.makedirs('static/css', exist_ok=True)
     os.makedirs('static/js', exist_ok=True)
-    
+
     print("=" * 80)
     print("🚀 MARK MINERVINI TRADING PLATFORM")
     print("=" * 80)
-    print("\n✅ Server başlatılıyor...")
-    print(f"📡 URL: http://localhost:5555")
-    print(f"📊 Dashboard: http://localhost:5555")
-    print(f"🔍 Scanner: http://localhost:5555/scanner")
-    print(f"💼 Portfolio: http://localhost:5555/portfolio")
+    port = int(os.environ.get('PORT', 5555))
+    host = '0.0.0.0' if os.environ.get('PORT') else '127.0.0.1'
+    print(f"\n✅ Server başlatılıyor...")
+    print(f"📡 URL: http://localhost:{port}")
+    print(f"📊 Dashboard: http://localhost:{port}")
+    print(f"🔍 Scanner: http://localhost:{port}/scanner")
+    print(f"💼 Portfolio: http://localhost:{port}/portfolio")
     print("\n⚠️  Durdurmak için Ctrl+C\n")
-    
-    app.run(debug=False, host='127.0.0.1', port=5555, use_reloader=False)
+
+    app.run(debug=False, host=host, port=port, use_reloader=False)
