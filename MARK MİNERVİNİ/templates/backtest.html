@@ -621,32 +621,72 @@
             });
             const data = await res.json();
 
-            clearInterval(progInt);
-            document.getElementById('prog-fill').style.width = '100%';
-            document.getElementById('prog-label').textContent = '✅ Tamamlandı!';
-
             if (!data.success) throw new Error(data.error || 'Bilinmeyen hata');
 
-            // Duplicate uyarısı
-            if (data.duplicate) {
-                document.getElementById('prog-label').textContent =
-                    '⚠️ Bu parametrelerle kayıtlı backtest bulundu — mevcut sonuç gösteriliyor';
+            // Duplicate veya çok hızlı biten backtest — direkt sonuç
+            if (data.status === 'done') {
+                clearInterval(progInt);
+                document.getElementById('prog-fill').style.width = '100%';
+                document.getElementById('prog-label').textContent = data.duplicate
+                    ? '⚠️ Bu parametrelerle kayıtlı backtest bulundu — mevcut sonuç gösteriliyor'
+                    : '✅ Tamamlandı!';
+                setTimeout(() => {
+                    document.getElementById('progress-panel').style.display = 'none';
+                    activeBacktestId = data.saved_id || null;
+                    render(data.report, capital);
+                    loadSavedList();
+                }, data.duplicate ? 1500 : 700);
+                return;
             }
 
-            setTimeout(() => {
-                document.getElementById('progress-panel').style.display = 'none';
-                activeBacktestId = data.saved_id || null;
-                render(data.report, capital);
-                loadSavedList();
-            }, data.duplicate ? 1500 : 700);
+            // Arka planda çalışıyor — polling başlat
+            const taskId = data.task_id;
+            const pollInterval = setInterval(async () => {
+                try {
+                    const sr = await fetch(`/api/backtest/status/${taskId}`);
+                    const sd = await sr.json();
+
+                    if (sd.status === 'running') return; // devam ediyor
+
+                    clearInterval(pollInterval);
+                    clearInterval(progInt);
+
+                    if (!sd.success || sd.status === 'error') {
+                        document.getElementById('progress-panel').style.display = 'none';
+                        alert('❌ Hata: ' + (sd.error || 'Bilinmeyen hata'));
+                        btn.disabled = false;
+                        btn.textContent = '🚀 Backtest Başlat';
+                        return;
+                    }
+
+                    document.getElementById('prog-fill').style.width = '100%';
+                    document.getElementById('prog-label').textContent = '✅ Tamamlandı!';
+                    setTimeout(() => {
+                        document.getElementById('progress-panel').style.display = 'none';
+                        activeBacktestId = sd.saved_id || null;
+                        render(sd.report, capital);
+                        loadSavedList();
+                        btn.disabled = false;
+                        btn.textContent = '🚀 Backtest Başlat';
+                    }, 700);
+                } catch (pollErr) {
+                    // geçici ağ hatası — polling devam etsin
+                }
+            }, 3000); // her 3 saniyede bir sorgula
+            return; // finally bloğu btn'yi erken serbest bırakmasın
 
         } catch(e) {
             clearInterval(progInt);
             document.getElementById('progress-panel').style.display = 'none';
             alert('❌ Hata: ' + e.message);
         } finally {
-            btn.disabled = false;
-            btn.textContent = '🚀 Backtest Başlat';
+            // polling durumunda btn finally'den değil pollInterval'dan serbest bırakılır
+            // sadece hata/duplicate durumlarında buraya düşer
+            if (!document.getElementById('progress-panel').style.display ||
+                document.getElementById('progress-panel').style.display === 'none') {
+                btn.disabled = false;
+                btn.textContent = '🚀 Backtest Başlat';
+            }
         }
     }
 

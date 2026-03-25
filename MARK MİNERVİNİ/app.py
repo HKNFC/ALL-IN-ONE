@@ -871,6 +871,103 @@ def api_data_source_status():
         })
 
 import uuid
+import threading
+
+# Aktif backtest görevleri: task_id → {status, result, error}
+_backtest_tasks = {}
+_backtest_lock  = threading.Lock()
+
+
+def _run_backtest_task(task_id, start_date, end_date, initial_capital, market, method, frequency):
+    """Arka planda backtest çalıştır, sonucu _backtest_tasks'a yaz."""
+    try:
+        backtest = MinerviniBacktest(start_date, end_date, initial_capital)
+        report   = backtest.run_backtest(market, method=method, frequency=frequency)
+        report   = _sanitize(report)
+
+        bt_id         = str(uuid.uuid4())[:8]
+        freq_labels   = {'monthly': 'Aylık', 'biweekly': '15 Günlük', 'weekly': 'Haftalık'}
+        method_labels = {'rs': 'RS', 'minervini': 'Minervini'}
+        name = (f"{market} • {method_labels.get(method, method)} • "
+                f"{freq_labels.get(frequency, frequency)} • {start_date} → {end_date}")
+        params = {'start_date': start_date, 'end_date': end_date,
+                  'market': market, 'method': method,
+                  'frequency': frequency, 'initial_capital': initial_capital}
+        storage.save_backtest(bt_id, name, params, report)
+
+        with _backtest_lock:
+            _backtest_tasks[task_id] = {
+                'status': 'done', 'report': report,
+                'saved_id': bt_id, 'saved_name': name, 'duplicate': False
+            }
+    except Exception as e:
+        with _backtest_lock:
+            _backtest_tasks[task_id] = {'status': 'error', 'error': str(e)}
+
+
+@app.route('/api/backtest', methods=['POST'])
+def api_run_backtest():
+    """Backtest başlat — hemen task_id döndür, sonuç polling ile alınır."""
+    try:
+        data            = request.get_json()
+        start_date      = data.get('start_date')
+        end_date        = data.get('end_date')
+        initial_capital = data.get('initial_capital', 100000)
+        market          = data.get('market', 'US')
+        method          = data.get('method', 'rs')
+        frequency       = data.get('frequency', 'monthly')
+
+        # ── Duplicate kontrolü ──────────────────────────────────────────────
+        params_key  = f"{market}_{method}_{frequency}_{start_date}_{end_date}_{initial_capital}"
+        existing_id = storage.find_duplicate_backtest(params_key)
+        if existing_id:
+            existing = storage.get_backtest(existing_id)
+            return jsonify({
+                'success': True, 'status': 'done',
+                'report':     existing['report'],
+                'saved_id':   existing_id,
+                'saved_name': existing['name'],
+                'duplicate':  True,
+                'message':    'Bu parametrelerle daha önce kaydedilmiş backtest bulundu.'
+            })
+
+        # ── Yeni backtest: arka planda başlat ───────────────────────────────
+        task_id = str(uuid.uuid4())[:12]
+        with _backtest_lock:
+            _backtest_tasks[task_id] = {'status': 'running'}
+
+        t = threading.Thread(
+            target=_run_backtest_task,
+            args=(task_id, start_date, end_date, initial_capital, market, method, frequency),
+            daemon=True
+        )
+        t.start()
+
+        return jsonify({'success': True, 'status': 'running', 'task_id': task_id})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/backtest/status/<task_id>', methods=['GET'])
+def api_backtest_status(task_id):
+    """Backtest görev durumunu sorgula."""
+    with _backtest_lock:
+        task = _backtest_tasks.get(task_id)
+    if not task:
+        return jsonify({'success': False, 'error': 'Görev bulunamadı'}), 404
+    if task['status'] == 'running':
+        return jsonify({'success': True, 'status': 'running'})
+    if task['status'] == 'error':
+        return jsonify({'success': False, 'status': 'error', 'error': task['error']})
+    # done
+    result = dict(task)
+    result['success'] = True
+    # Tamamlanan görevi bellekten temizle
+    with _backtest_lock:
+        _backtest_tasks.pop(task_id, None)
+    return jsonify(result)
+
 
 @app.route('/api/backtests', methods=['GET'])
 def api_list_backtests():
@@ -901,51 +998,6 @@ def api_delete_backtest(bt_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/backtest', methods=['POST'])
-def api_run_backtest():
-    """Backtest çalıştır ve otomatik kaydet"""
-    try:
-        data            = request.get_json()
-        start_date      = data.get('start_date')
-        end_date        = data.get('end_date')
-        initial_capital = data.get('initial_capital', 100000)
-        market          = data.get('market', 'US')
-        method          = data.get('method', 'rs')
-        frequency       = data.get('frequency', 'monthly')
-
-        # ── Duplicate kontrolü ──────────────────────────────────────────────
-        params_key  = f"{market}_{method}_{frequency}_{start_date}_{end_date}_{initial_capital}"
-        existing_id = storage.find_duplicate_backtest(params_key)
-
-        if existing_id:
-            existing = storage.get_backtest(existing_id)
-            return jsonify({
-                'success':    True,
-                'report':     existing['report'],
-                'saved_id':   existing_id,
-                'saved_name': existing['name'],
-                'duplicate':  True,
-                'message':    'Bu parametrelerle daha önce kaydedilmiş backtest bulundu. Mevcut sonuç döndürüldü.'
-            })
-
-        # ── Yeni backtest çalıştır ───────────────────────────────────────────
-        backtest = MinerviniBacktest(start_date, end_date, initial_capital)
-        report   = backtest.run_backtest(market, method=method, frequency=frequency)
-        report   = _sanitize(report)
-
-        bt_id         = str(uuid.uuid4())[:8]
-        freq_labels   = {'monthly': 'Aylık', 'biweekly': '15 Günlük', 'weekly': 'Haftalık'}
-        method_labels = {'rs': 'RS', 'minervini': 'Minervini'}
-        name = f"{market} • {method_labels.get(method, method)} • {freq_labels.get(frequency, frequency)} • {start_date} → {end_date}"
-        params = {'start_date': start_date, 'end_date': end_date,
-                  'market': market, 'method': method,
-                  'frequency': frequency, 'initial_capital': initial_capital}
-        storage.save_backtest(bt_id, name, params, report)
-
-        return jsonify({'success': True, 'report': report, 'saved_id': bt_id, 'saved_name': name, 'duplicate': False})
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
 
 def _clean_data_cache(max_age_days=30):
     """data_cache/ klasöründe 30 günden eski .pkl dosyalarını temizler."""
