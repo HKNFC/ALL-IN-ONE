@@ -648,127 +648,109 @@ def api_signals_history():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+_market_status_cache = {'data': None, 'ts': 0}
+
 @app.route('/api/market-status', methods=['GET'])
 def api_market_status():
     """BIST ve ABD piyasasının yatırım durumunu hesapla"""
+    import time as _time
+
+    force = request.args.get('force', '0') == '1'
+    if not force and _market_status_cache['data'] and (_time.time() - _market_status_cache['ts']) < 900:
+        return jsonify(_market_status_cache['data'])
+
+    def _fetch(symbol, period='14mo'):
+        try:
+            t = yf.Ticker(symbol)
+            df = t.history(period=period, auto_adjust=True)
+            if df is not None and len(df) >= 200:
+                return df['Close'].squeeze()
+        except Exception:
+            pass
+        try:
+            df = yf.download(symbol, period=period, auto_adjust=True, progress=False, timeout=30)
+            if df is not None and not df.empty and len(df) >= 200:
+                return df['Close'].squeeze()
+        except Exception:
+            pass
+        return None
+
     def analyze(symbol, label):
         try:
-            df = yf.download(symbol, period='14mo', auto_adjust=True, progress=False)
-            if df.empty or len(df) < 200:
-                return None
-            close = df['Close'].squeeze()
+            close = _fetch(symbol)
+            if close is None:
+                return {'symbol': symbol, 'label': label, 'error': 'Veri indirilemedi'}
             price        = float(close.iloc[-1])
             sma50        = float(close.rolling(50).mean().iloc[-1])
             sma200       = float(close.rolling(200).mean().iloc[-1])
             sma200_30ago = float(close.rolling(200).mean().iloc[-31]) if len(close) >= 231 else sma200
             high52       = float(close.tail(252).max())
             low52        = float(close.tail(252).min())
-
-            score = 0
-            criteria = []
-
-            ok = price > sma50
-            score += 1 if ok else 0
+            score = 0; criteria = []
+            ok = price > sma50;  score += 1 if ok else 0
             criteria.append({'label': 'Fiyat > 50G SMA', 'ok': ok, 'detail': f'{price:.1f} vs {sma50:.1f}'})
-
-            ok = price > sma200
-            score += 1 if ok else 0
+            ok = price > sma200; score += 1 if ok else 0
             criteria.append({'label': 'Fiyat > 200G SMA', 'ok': ok, 'detail': f'{price:.1f} vs {sma200:.1f}'})
-
-            ok = sma50 > sma200
-            score += 1 if ok else 0
+            ok = sma50 > sma200; score += 1 if ok else 0
             criteria.append({'label': '50G SMA > 200G SMA', 'ok': ok, 'detail': f'{sma50:.1f} vs {sma200:.1f}'})
-
-            ok = sma200 > sma200_30ago
-            score += 1 if ok else 0
+            ok = sma200 > sma200_30ago; score += 1 if ok else 0
             slope_pct = ((sma200 - sma200_30ago) / sma200_30ago * 100) if sma200_30ago else 0
             criteria.append({'label': '200G SMA yükselen trend', 'ok': ok, 'detail': f'{slope_pct:+.2f}% (30 gün)'})
-
             dist_from_high = ((price - high52) / high52) * 100
-            ok = dist_from_high >= -15
-            score += 1 if ok else 0
+            ok = dist_from_high >= -15; score += 1 if ok else 0
             criteria.append({'label': '52H zirveden ≤%15 uzakta', 'ok': ok, 'detail': f'{dist_from_high:.1f}% (zirve: {high52:.1f})'})
-
-            if score == 5:
-                status = 'GÜÇLÜ BOĞA'; color = 'green'; action = 'SİSTEM AKTİF — Tam pozisyon al'
-            elif score == 4:
-                status = 'BOĞA'; color = 'green'; action = 'SİSTEM AKTİF — Normal pozisyon al'
-            elif score == 3:
-                status = 'KARMA'; color = 'yellow'; action = 'DİKKATLİ — Yarım pozisyon düşün'
-            elif score == 2:
-                status = 'ZAYIF'; color = 'yellow'; action = 'TEMKİNLİ — Mevcut pozisyonları koru'
-            else:
-                status = 'AY PİYASASI'; color = 'red'; action = 'NAKİTTE KAL — Yeni alım yapma'
-
-            # Volatilite hesapla (20 günlük gerçekleşmiş vol, yıllıklaştırılmış)
+            if score == 5:   status, color, action = 'GÜÇLÜ BOĞA', 'green',  'SİSTEM AKTİF — Tam pozisyon al'
+            elif score == 4: status, color, action = 'BOĞA',       'green',  'SİSTEM AKTİF — Normal pozisyon al'
+            elif score == 3: status, color, action = 'KARMA',       'yellow', 'DİKKATLİ — Yarım pozisyon düşün'
+            elif score == 2: status, color, action = 'ZAYIF',       'yellow', 'TEMKİNLİ — Mevcut pozisyonları koru'
+            else:            status, color, action = 'AY PİYASASI', 'red',    'NAKİTTE KAL — Yeni alım yapma'
             returns = close.pct_change().dropna()
-            vol20 = float(returns.tail(20).std() * (252 ** 0.5) * 100)
-
-            result = {
-                'symbol': symbol, 'label': label,
-                'price': price, 'sma50': sma50, 'sma200': sma200,
-                'high52': high52, 'low52': low52,
-                'score': score, 'max_score': 5,
-                'status': status, 'color': color, 'action': action,
-                'criteria': criteria,
-                'vol20': round(vol20, 1),
-            }
-
-            # Birleşik karar
-            vol_high = vol20 > 25
-            trend_ok = score >= 4
-
+            vol20    = float(returns.tail(20).std() * (252 ** 0.5) * 100)
+            vol_high = vol20 > 25; trend_ok = score >= 4
             if trend_ok and not vol_high:
                 combined = {'icon': '🟢', 'text': 'Tam gaz yatırım yap', 'sub': 'Trend güçlü, volatilite normal — sistemi tam kapasite çalıştır.', 'color': '#15803d', 'bg': '#dcfce7'}
             elif trend_ok and vol_high:
                 combined = {'icon': '🟡', 'text': 'Yatırım yap — pozisyon büyüklüğünü %50 azalt', 'sub': 'Trend güçlü ama piyasa sert sallanıyor. Her hisseye normal sermayenin yarısını koy.', 'color': '#92400e', 'bg': '#fef9c3'}
             else:
                 combined = {'icon': '🔴', 'text': 'Nakitte kal — yeni alım yapma', 'sub': 'Trend bozuk. Mevcut döngü kapanana kadar bekle.', 'color': '#b91c1c', 'bg': '#fee2e2'}
-
-            result['combined_decision'] = combined
+            result = {'symbol': symbol, 'label': label, 'price': price, 'sma50': sma50, 'sma200': sma200,
+                      'high52': high52, 'low52': low52, 'score': score, 'max_score': 5,
+                      'status': status, 'color': color, 'action': action, 'criteria': criteria,
+                      'vol20': round(vol20, 1), 'combined_decision': combined}
             if symbol == '^GSPC':
                 try:
-                    vdf   = yf.download('^VIX', period='3mo', auto_adjust=True, progress=False)
-                    vc    = vdf['Close'].squeeze()
-                    vix   = float(vc.iloc[-1])
-                    v5    = float(vc.tail(5).mean())
-                    v20   = float(vc.tail(20).mean())
-                    trend = 'YÜKSELIYOR' if vix > v5 else 'DÜŞÜYOR'
-                    if vix < 15:
-                        vlevel = 'DÜŞÜK'; vcomment = 'Piyasa sakin'
-                    elif vix < 20:
-                        vlevel = 'NORMAL'; vcomment = 'Normal volatilite'
-                    elif vix < 28:
-                        vlevel = 'YÜKSEK'; vcomment = 'Dikkat — pozisyon küçült'
-                    elif vix < 40:
-                        vlevel = 'ALARM'; vcomment = 'Yüksek korku'
-                    else:
-                        vlevel = 'PANIK'; vcomment = 'Panik satışı'
-                    result['vix'] = {'value': round(vix,2), 'vix_5d': round(v5,2),
-                                     'vix_20d': round(v20,2), 'trend': trend,
-                                     'level': vlevel, 'comment': vcomment}
-                    # ABD için VIX'i de birleşik karara yansıt
-                    vix_ok = vix < 28
-                    if trend_ok and not vol_high and vix_ok:
-                        result['combined_decision'] = {'icon': '🟢', 'text': 'Tam gaz yatırım yap', 'sub': 'Trend güçlü, volatilite normal, VIX sakin — sistemi tam kapasite çalıştır.', 'color': '#15803d', 'bg': '#dcfce7'}
-                    elif trend_ok and (vol_high or not vix_ok):
-                        reasons = []
-                        if vol_high: reasons.append('yüksek volatilite')
-                        if not vix_ok: reasons.append(f'VIX {vix:.0f}')
-                        result['combined_decision'] = {'icon': '🟡', 'text': 'Yatırım yap — pozisyon büyüklüğünü %50 azalt', 'sub': f'Trend güçlü ama dikkat: {", ".join(reasons)}. Her hisseye normal sermayenin yarısını koy.', 'color': '#92400e', 'bg': '#fef9c3'}
-                    else:
-                        result['combined_decision'] = {'icon': '🔴', 'text': 'Nakitte kal — yeni alım yapma', 'sub': 'Trend bozuk. Mevcut döngü kapanana kadar bekle.', 'color': '#b91c1c', 'bg': '#fee2e2'}
+                    vc = _fetch('^VIX', period='3mo')
+                    if vc is not None:
+                        vix = float(vc.iloc[-1]); v5 = float(vc.tail(5).mean()); v20 = float(vc.tail(20).mean())
+                        trend = 'YÜKSELIYOR' if vix > v5 else 'DÜŞÜYOR'
+                        if vix < 15:   vlevel, vcomment = 'DÜŞÜK',  'Piyasa sakin'
+                        elif vix < 20: vlevel, vcomment = 'NORMAL', 'Normal volatilite'
+                        elif vix < 28: vlevel, vcomment = 'YÜKSEK', 'Dikkat — pozisyon küçült'
+                        elif vix < 40: vlevel, vcomment = 'ALARM',  'Yüksek korku'
+                        else:          vlevel, vcomment = 'PANİK',  'Panik satışı'
+                        result['vix'] = {'value': round(vix,2), 'vix_5d': round(v5,2), 'vix_20d': round(v20,2), 'trend': trend, 'level': vlevel, 'comment': vcomment}
+                        vix_ok = vix < 28
+                        if trend_ok and not vol_high and vix_ok:
+                            result['combined_decision'] = {'icon': '🟢', 'text': 'Tam gaz yatırım yap', 'sub': 'Trend güçlü, volatilite normal, VIX sakin.', 'color': '#15803d', 'bg': '#dcfce7'}
+                        elif trend_ok and (vol_high or not vix_ok):
+                            reasons = (['yüksek volatilite'] if vol_high else []) + ([f'VIX {vix:.0f}'] if not vix_ok else [])
+                            reason_str = ', '.join(reasons)
+                            result['combined_decision'] = {'icon': '🟡', 'text': 'Yatırım yap — pozisyon büyüklüğünü %50 azalt', 'sub': f'Trend güçlü ama dikkat: {reason_str}.', 'color': '#92400e', 'bg': '#fef9c3'}
+                        else:
+                            result['combined_decision'] = {'icon': '🔴', 'text': 'Nakitte kal — yeni alım yapma', 'sub': 'Trend bozuk.', 'color': '#b91c1c', 'bg': '#fee2e2'}
                 except Exception:
                     result['vix'] = None
-
             return result
         except Exception as e:
             return {'symbol': symbol, 'label': label, 'error': str(e)}
 
     bist = analyze('XU100.IS', 'BIST (XU100)')
     us   = analyze('^GSPC', 'ABD (S&P 500)')
+    payload = {'success': True, 'bist': bist, 'us': us}
+    _market_status_cache['data'] = payload
+    _market_status_cache['ts']   = _time.time()
+    return jsonify(payload)
 
-    return jsonify({'success': True, 'bist': bist, 'us': us})
 
 
 @app.route('/api/stats', methods=['GET'])
