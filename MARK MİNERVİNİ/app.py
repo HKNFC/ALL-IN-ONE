@@ -13,6 +13,9 @@ from datetime import datetime, timedelta
 import sys
 import storage
 
+# Uygulama başlarken DB tablolarını oluştur (gunicorn dahil her ortamda çalışır)
+storage.init_db()
+
 try:
     from price_validator import validate_scan_results
     _VALIDATOR_AVAILABLE = True
