@@ -659,14 +659,34 @@ def api_market_status():
     if not force and _market_status_cache['data'] and (_time.time() - _market_status_cache['ts']) < 900:
         return jsonify(_market_status_cache['data'])
 
+    # Twelvedata sembol eşlemeleri (yfinance sembolü → Twelvedata sembolü)
+    _TD_SYMBOLS = {
+        'XU100.IS': 'XU100:BIST',
+        '^GSPC':    'SPX',
+        '^VIX':     'VIX',
+    }
+
     def _fetch(symbol, period='14mo'):
+        """1) Twelvedata  2) yf.Ticker.history  3) yf.download"""
+        # -- Twelvedata --
         try:
-            t = yf.Ticker(symbol)
+            import twelvedata_client as td
+            td_sym = _TD_SYMBOLS.get(symbol, symbol)
+            outputsize = 400 if period in ('14mo', '1y', '2y') else 100
+            df_td = td.get_time_series(td_sym, interval='1day', outputsize=outputsize)
+            if df_td is not None and len(df_td) >= 200:
+                return df_td['close'].astype(float).squeeze()
+        except Exception:
+            pass
+        # -- yf.Ticker.history --
+        try:
+            t  = yf.Ticker(symbol)
             df = t.history(period=period, auto_adjust=True)
             if df is not None and len(df) >= 200:
                 return df['Close'].squeeze()
         except Exception:
             pass
+        # -- yf.download --
         try:
             df = yf.download(symbol, period=period, auto_adjust=True, progress=False, timeout=30)
             if df is not None and not df.empty and len(df) >= 200:
