@@ -684,7 +684,8 @@ def api_save_top_picks():
         scan_date = data.get('scan_date', datetime.now().strftime('%Y-%m-%d'))
         market    = data.get('market', 'BIST')
         picks     = data.get('picks', [])
-        storage.save_top_picks(scan_date, market, picks)
+        engine    = data.get('engine', 'classic')
+        storage.save_top_picks(scan_date, market, picks, engine)
         return jsonify({'success': True, 'saved': len(picks)})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -703,7 +704,8 @@ def api_delete_top_picks_session():
         data      = request.get_json()
         scan_date = data.get('scan_date', '')
         market    = data.get('market', '')
-        storage.delete_top_picks_session(scan_date, market)
+        engine    = data.get('engine', 'classic')
+        storage.delete_top_picks_session(scan_date, market, engine)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

@@ -59,7 +59,8 @@ def init_db():
                 price     REAL,
                 rank      INTEGER,
                 saved_at  TEXT NOT NULL,
-                UNIQUE(scan_date, market, ticker)
+                engine    TEXT DEFAULT 'classic',
+                UNIQUE(scan_date, market, ticker, engine)
             );
         """)
 
@@ -216,19 +217,19 @@ def list_signals(limit=200):
 
 # ── Top Picks ─────────────────────────────────────────────────────────────────
 
-def save_top_picks(scan_date, market, picks):
-    """En iyi 5 hisseyi kaydet. Aynı scan_date+market+ticker varsa güncelle."""
+def save_top_picks(scan_date, market, picks, engine='classic'):
+    """En iyi 5 hisseyi kaydet. Aynı scan_date+market+ticker+engine varsa güncelle."""
     now = datetime.now().strftime('%Y-%m-%d %H:%M')
     with _conn() as c:
         for p in picks:
             c.execute("""
-                INSERT INTO top_picks (scan_date, market, ticker, status, rs, price, rank, saved_at)
-                VALUES (?,?,?,?,?,?,?,?)
-                ON CONFLICT(scan_date, market, ticker)
+                INSERT INTO top_picks (scan_date, market, ticker, status, rs, price, rank, saved_at, engine)
+                VALUES (?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(scan_date, market, ticker, engine)
                 DO UPDATE SET status=excluded.status, rs=excluded.rs,
                               price=excluded.price, rank=excluded.rank, saved_at=excluded.saved_at
             """, (scan_date, market, p.get('ticker',''), p.get('status'),
-                  p.get('rs'), p.get('price'), p.get('rank'), now))
+                  p.get('rs'), p.get('price'), p.get('rank'), now, engine))
 
 
 def list_top_picks():
@@ -244,7 +245,7 @@ def delete_top_pick(pick_id):
         c.execute("DELETE FROM top_picks WHERE id=?", (pick_id,))
 
 
-def delete_top_picks_session(scan_date, market):
+def delete_top_picks_session(scan_date, market, engine='classic'):
     """Belirli bir tarama oturumuna ait tüm hisseleri sil."""
     with _conn() as c:
-        c.execute("DELETE FROM top_picks WHERE scan_date=? AND market=?", (scan_date, market))
+        c.execute("DELETE FROM top_picks WHERE scan_date=? AND market=? AND engine=?", (scan_date, market, engine))
