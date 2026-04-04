@@ -1,54 +1,62 @@
-#!/bin/zsh
-# SEPA Stock Scanner — Kalıcı Servis Kurulum Scripti
-# Bir kez çalıştır, sonra uygulama her zaman arka planda hazır olur.
+#!/bin/bash
+# SEPA Stock Scanner - Kalıcı servis kurulum scripti
+# Türkçe karakter içeren yolu bypass eder
 
-PLIST_DIR="$HOME/Library/LaunchAgents"
-PLIST_FILE="$PLIST_DIR/com.sepa.stockscanner.plist"
-APP_DIR="/Users/hakanficicilar/Documents/Aİ/MARK MİNERVİNİ"
+SEPA_DIR="/Users/hakanficicilar/Documents/A\u0130/MARK M\u0130NERV\u0130N\u0130"
+WRAPPER="$HOME/sepa_run.sh"
+PLIST="$HOME/Library/LaunchAgents/com.sepa.scanner.plist"
+LOG="/tmp/sepa.log"
 
-mkdir -p "$PLIST_DIR"
+# 1. Wrapper script oluştur (ASCII yolda)
+cat > "$WRAPPER" << 'EOF'
+#!/bin/bash
+cd "/Users/hakanficicilar/Documents/Aİ/MARK MİNERVİNİ"
+/usr/bin/python3 app.py >> /tmp/sepa.log 2>&1
+EOF
+chmod +x "$WRAPPER"
 
-cat > "$PLIST_FILE" << 'EOF'
+# 2. Mevcut servisi durdur
+launchctl unload "$PLIST" 2>/dev/null
+sleep 1
+
+# 3. plist yaz
+cat > "$PLIST" << PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.sepa.stockscanner</string>
+    <string>com.sepa.scanner</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/zsh</string>
-        <string>/Users/hakanficicilar/Documents/Aİ/MARK MİNERVİNİ/start_server.sh</string>
+        <string>/bin/bash</string>
+        <string>$(echo $WRAPPER)</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/tmp/sepa_server.log</string>
+    <string>$LOG</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/sepa_server_error.log</string>
-    <key>WorkingDirectory</key>
-    <string>/Users/hakanficicilar/Documents/Aİ/MARK MİNERVİNİ</string>
+    <string>$LOG</string>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
 </dict>
 </plist>
-EOF
+PLIST
 
-# Eski servisi durdur (varsa)
-launchctl unload "$PLIST_FILE" 2>/dev/null
+# 4. Servisi başlat
+launchctl load "$PLIST"
+sleep 3
 
-# Portu temizle
-lsof -ti:5555 | xargs kill -9 2>/dev/null
-sleep 1
-
-# Yeni servisi yükle ve başlat
-launchctl load "$PLIST_FILE"
-
-echo ""
-echo "✅ SEPA Stock Scanner servisi kuruldu!"
-echo "   http://localhost:5555 adresinde çalışıyor"
-echo ""
-echo "Servis yönetimi:"
-echo "  Durdur : launchctl unload ~/Library/LaunchAgents/com.sepa.stockscanner.plist"
-echo "  Başlat : launchctl load ~/Library/LaunchAgents/com.sepa.stockscanner.plist"
-echo "  Log    : tail -f /tmp/sepa_server.log"
+# 5. Kontrol
+if lsof -ti:5555 > /dev/null 2>&1; then
+    echo "✅ SEPA Scanner çalışıyor: http://localhost:5555"
+    echo "   Log: tail -f $LOG"
+    echo "   Durdur: launchctl unload $PLIST"
+else
+    echo "⚠️  Servis başlatıldı ama port henüz dinlenmiyor"
+    echo "   10 saniye bekleyip tekrar deneyin"
+    echo "   Log: cat $LOG"
+fi
