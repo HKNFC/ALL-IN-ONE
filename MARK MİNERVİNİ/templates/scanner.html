@@ -193,6 +193,27 @@
                                onchange="onScanDateChange()">
                     </div>
                 </div>
+
+                <!-- ⚙️ Tarama Motoru Seçici -->
+                <div style="margin-bottom:1rem;padding:14px 16px;background:#0f172a;border:1px solid #334155;border-radius:10px;">
+                    <div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:10px;">⚙️ Tarama Motoru</div>
+                    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#f1f5f9;font-size:14px;">
+                            <input type="radio" name="scan-engine" value="classic" checked onchange="onEngineChange()" style="accent-color:#3b82f6;">
+                            <span><strong>Klasik Sistem</strong> <span style="color:#64748b;font-size:12px;">(Mevcut)</span></span>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#f1f5f9;font-size:14px;">
+                            <input type="radio" name="scan-engine" value="calibrated" onchange="onEngineChange()" style="accent-color:#8b5cf6;">
+                            <span><strong>Pazar Bazlı Kalibrasyon</strong> <span style="color:#64748b;font-size:12px;">(Yeni — BIST/USA dinamik ağırlık)</span></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 🔧 Debug Paneli (sadece Kalibrasyon seçiliyken) -->
+                <div id="calibration-debug" style="display:none;margin-bottom:1rem;padding:14px 16px;background:#1a0f2e;border:1px solid #6d28d9;border-radius:10px;font-size:13px;">
+                    <div style="font-weight:700;color:#a78bfa;margin-bottom:10px;">🔧 Aktif Market Profile</div>
+                    <div id="debug-content" style="display:grid;grid-template-columns:auto 1fr;gap:4px 16px;color:#e2e8f0;line-height:1.8;"></div>
+                </div>
                 
                 <button class="scan-button" id="start-scan" onclick="startScan()">
                     🚀 Start Scanning
@@ -440,10 +461,11 @@
                 // Make API call
                 // tarih girilmişse her zaman full scan kullan
                 const endpoint = (scanDate || scanType === 'full') ? '/api/scan/full' : '/api/scan/quick';
+                const engineVal = document.querySelector('input[name="scan-engine"]:checked')?.value || 'classic';
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ market: market, scan_type: bistIndex, manual_list: manualInput, scan_date: scanDate })
+                    body: JSON.stringify({ market: market, scan_type: bistIndex, manual_list: manualInput, scan_date: scanDate, engine: engineVal })
                 });
                 
                 const data = await response.json();
@@ -862,8 +884,46 @@
             loadSavedTopPicks();
         }
 
+        // ── Motor seçici: debug paneli ─────────────────────────────────────────
+        const CALIBRATION_PROFILES = {
+            BIST:    { name:'BIST Profile', benchmark:'XU100.IS', weights:{rs:'%35',trend:'%25','D/E':'%20',roic:'%10',vcp:'%10'}, roic:'<10→20p / 10-20→50p / 20-35→80p / 35+→100p' },
+            BISTTUM: { name:'BIST Profile', benchmark:'XU100.IS', weights:{rs:'%35',trend:'%25','D/E':'%20',roic:'%10',vcp:'%10'}, roic:'<10→20p / 10-20→50p / 20-35→80p / 35+→100p' },
+            BIST100: { name:'BIST Profile', benchmark:'XU100.IS', weights:{rs:'%35',trend:'%25','D/E':'%20',roic:'%10',vcp:'%10'}, roic:'<10→20p / 10-20→50p / 20-35→80p / 35+→100p' },
+            US:      { name:'USA Profile',  benchmark:'SPY',       weights:{rs:'%30',trend:'%20',PEG:'%30',roic:'%10',vcp:'%10'},   roic:'<8→20p / 8-12→50p / 12-20→80p / 20+→100p' },
+        };
+
+        function onEngineChange() {
+            const engine = document.querySelector('input[name="scan-engine"]:checked')?.value || 'classic';
+            const debugEl = document.getElementById('calibration-debug');
+            if (!debugEl) return;
+            if (engine !== 'calibrated') {
+                debugEl.style.display = 'none';
+                return;
+            }
+            debugEl.style.display = 'block';
+
+            const market = document.getElementById('market-select')?.value || 'BIST';
+            const key = ['BIST','BISTTUM','BIST100'].includes(market) ? (market === 'US' ? 'US' : 'BIST') : 'US';
+            const prof = CALIBRATION_PROFILES[market] || CALIBRATION_PROFILES[key];
+
+            const weightStr = Object.entries(prof.weights).map(([k,v]) => `<span style="background:#2d1b69;padding:2px 6px;border-radius:4px;margin-right:4px">${k} ${v}</span>`).join('');
+            document.getElementById('debug-content').innerHTML = `
+                <span style="color:#94a3b8">Piyasa</span>       <span>${market}</span>
+                <span style="color:#94a3b8">Profil</span>        <span style="color:#a78bfa">${prof.name}</span>
+                <span style="color:#94a3b8">Benchmark</span>     <span style="color:#34d399;font-weight:700">${prof.benchmark}</span>
+                <span style="color:#94a3b8">Ağırlıklar</span>    <span>${weightStr}</span>
+                <span style="color:#94a3b8">ROIC Aralıkları</span> <span style="color:#fbbf24">${prof.roic}</span>
+            `;
+        }
+
+        // Piyasa değişince debug panelini de güncelle
+        document.getElementById('market-select')?.addEventListener('change', onEngineChange);
+
         // Sayfa yüklenince mevcut Top Picks göster
-        document.addEventListener('DOMContentLoaded', loadSavedTopPicks);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedTopPicks();
+            onEngineChange();  // debug paneli başlangıç durumu
+        });
     </script>
 </body>
 </html>

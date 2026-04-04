@@ -326,6 +326,21 @@
                     </div>
                 </div>
                 <button class="run-btn" id="run-btn" onclick="startBacktest()">🚀 Backtest Başlat</button>
+
+                <!-- ⚙️ Tarama Motoru Seçici -->
+                <div style="margin-top:16px;padding:14px 16px;background:#0f172a;border:1px solid #334155;border-radius:10px;">
+                    <div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:10px;">⚙️ Tarama Motoru</div>
+                    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text);font-size:14px;">
+                            <input type="radio" name="bt-engine" value="classic" checked style="accent-color:#3b82f6;">
+                            <span><strong>Klasik Sistem</strong> <span style="color:#64748b;font-size:12px;">(Mevcut)</span></span>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text);font-size:14px;">
+                            <input type="radio" name="bt-engine" value="calibrated" style="accent-color:#8b5cf6;">
+                            <span><strong>Pazar Bazlı Kalibrasyon</strong> <span style="color:#64748b;font-size:12px;">(Yeni — BIST/USA dinamik ağırlık)</span></span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <!-- Progress -->
@@ -587,6 +602,7 @@
         const method    = document.getElementById('selection-method').value;
         const frequency = document.getElementById('rebalance-frequency').value;
         const capital   = parseFloat(document.getElementById('initial-capital').value);
+        const engine    = document.querySelector('input[name="bt-engine"]:checked')?.value || 'classic';
 
         if (!startDate || !endDate) { alert('Başlangıç ve bitiş tarihini seçin!'); return; }
         if (new Date(startDate) >= new Date(endDate)) { alert('Başlangıç tarihi bitiş tarihinden önce olmalı!'); return; }
@@ -617,7 +633,7 @@
             const res  = await fetch('/api/backtest', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ start_date: startDate, end_date: endDate, market, initial_capital: capital, method, frequency })
+                body: JSON.stringify({ start_date: startDate, end_date: endDate, market, initial_capital: capital, method, frequency, engine })
             });
             const data = await res.json();
 

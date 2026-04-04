@@ -30,6 +30,7 @@ logging.getLogger('yfinance').setLevel(logging.CRITICAL)
 logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
 from universal_scanner import UniversalStockScanner
+import market_calibration_scanner as mcs
 
 
 def _to_float(val):
@@ -585,21 +586,29 @@ class MinerviniBacktest:
     # Ana backtest döngüsü
     # ──────────────────────────────────────────────────────────────────
 
-    def run_backtest(self, market='BOTH', method='rs', frequency='monthly'):
+    def run_backtest(self, market='BOTH', method='rs', frequency='monthly', engine='classic'):
         self._market = market
         self._method = method
         self._frequency = frequency
+        self._engine = engine
 
         currency = '₺' if market == 'BIST' else '$'
         method_label = 'RS Yöntemi' if method == 'rs' else 'Minervini Yöntemi'
+        engine_label = ' [Kalibrasyon]' if engine == 'calibrated' else ' [Klasik]'
         freq_labels = {'weekly': 'Haftalık', 'biweekly': '15 Günlük', 'monthly': 'Aylık'}
         freq_label = freq_labels.get(frequency, 'Aylık')
 
         print("\n" + "=" * 70)
-        print(f"🚀 MİNERVİNİ BACKTEST [{method_label}] [{freq_label}]")
+        print(f"🚀 MİNERVİNİ BACKTEST [{method_label}] [{freq_label}]{engine_label}")
         print(f"📅 {self.start_date.date()} → {self.end_date.date()}")
         print(f"💰 Sermaye: {currency}{self.initial_capital:,.0f}  |  Market: {market}")
         print("=" * 70)
+
+        if engine == 'calibrated':
+            profile = mcs.get_profile(market)
+            print(f"🔧 Market Profile: {profile['name']} | Benchmark: {profile['benchmark']}")
+            print(f"   Ağırlıklar: {profile['weights']}")
+            print(f"   ROIC: {profile['roic_label']}")
 
         rebalance_dates = self.get_rebalance_dates(frequency)
         print(f"📆 {len(rebalance_dates)} {freq_label.lower()} rebalancing planlandı")
@@ -619,7 +628,15 @@ class MinerviniBacktest:
         for i, date in enumerate(rebalance_dates, 1):
             print(f"\n── Periyot {i}/{len(rebalance_dates)}: {date.strftime('%d %B %Y')} ──", flush=True)
 
-            scan_results = self.scan_market_at_date(date, market)
+            if engine == 'calibrated':
+                scan_results = mcs.scan_with_calibration(
+                    all_tickers, market,
+                    cutoff=pd.Timestamp(date),
+                    cache=self._cache
+                )
+            else:
+                scan_results = self.scan_market_at_date(date, market)
+
             if method == 'minervini':
                 top_stocks = self.select_top_stocks_minervini(scan_results, top_n=5)
             else:

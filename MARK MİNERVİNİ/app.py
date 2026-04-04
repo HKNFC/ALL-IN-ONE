@@ -34,6 +34,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sepa_scanner import SEPAScanner
 from universal_scanner import UniversalStockScanner
 from backtest_engine import MinerviniBacktest
+import market_calibration_scanner as mcs
 
 app = Flask(__name__)
 CORS(app)
@@ -191,18 +192,17 @@ def api_full_scan():
         market    = data.get('market', 'BOTH')
         scan_date = data.get('scan_date', None)   # "YYYY-MM-DD" veya None
         scan_type = data.get('scan_type', 'BISTTUM')
+        engine    = data.get('engine', 'classic')  # 'classic' | 'calibrated'
         manual_list_raw = data.get('manual_list', '')
         manual_list = [t.strip() for t in manual_list_raw.split(',') if t.strip()] if manual_list_raw else []
 
         # ── GEÇMİŞ TARİH: backtest motorunu kullan (batch download, aynı mantık) ──
         if scan_date:
             _set_progress(2, 'Tarama başlatılıyor...')
-            # end_date olarak bugünü kullan — böylece disk cache backtest ile örtüşür
             today_str = datetime.now().strftime('%Y-%m-%d')
             bt = MinerviniBacktest(scan_date, today_str)
             scan_dt = pd.Timestamp(scan_date)
 
-            # BIST için scan_type'a uygun ticker listesi belirle
             if market in ['BIST', 'BOTH']:
                 scanner_tmp = bt.scanner
                 bist_list = scanner_tmp.get_tickers_by_scan_type(scan_type, manual_list)
@@ -219,8 +219,20 @@ def api_full_scan():
             total = len(tickers_override)
             _set_progress(5, f'Veriler indiriliyor ({total} hisse)...')
 
-            # Gerçek zamanlı ilerleme için scan_market_at_date'i aşamalı çalıştır
-            results = _scan_with_progress(bt, scan_dt, market, tickers_override)
+            if engine == 'calibrated':
+                # Kalibrasyon motoru — önce veriyi prefetch et, sonra scan
+                bt._global_prefetch(tickers_override, market)
+                done_count = [0]
+                def _prog(done, tot):
+                    done_count[0] = done
+                    pct = 5 + int(done / tot * 90) if tot > 0 else 95
+                    _set_progress(pct, f'Kalibrasyon taraması {done}/{tot}...')
+                results = mcs.scan_with_calibration(
+                    tickers_override, market, cutoff=scan_dt,
+                    cache=bt._cache, progress_cb=_prog
+                )
+            else:
+                results = _scan_with_progress(bt, scan_dt, market, tickers_override)
 
             _set_progress(100, f'Tamamlandı — {len(results)} hisse bulundu')
             return jsonify(_sanitize({
@@ -229,6 +241,25 @@ def api_full_scan():
                 'results': results,
                 'market': market,
                 'scan_date': scan_date,
+                'engine': engine,
+                'timestamp': datetime.now().isoformat()
+            }))
+
+        # ── BUGÜN: canlı tarama ──
+        scanner = UniversalStockScanner()
+
+        if engine == 'calibrated':
+            if market == 'US':
+                tickers_live = scanner.us_tickers
+            elif market == 'BIST':
+                tickers_live = scanner.get_tickers_by_scan_type(scan_type, manual_list)
+            else:
+                tickers_live = scanner.us_tickers + scanner.get_tickers_by_scan_type(scan_type, manual_list)
+
+            results = mcs.scan_with_calibration(tickers_live, market)
+            return jsonify(_sanitize({
+                'success': True, 'count': len(results), 'results': results,
+                'market': market, 'scan_date': 'today', 'engine': engine,
                 'timestamp': datetime.now().isoformat()
             }))
 
@@ -920,21 +951,23 @@ _backtest_tasks = {}
 _backtest_lock  = threading.Lock()
 
 
-def _run_backtest_task(task_id, start_date, end_date, initial_capital, market, method, frequency):
+def _run_backtest_task(task_id, start_date, end_date, initial_capital, market, method, frequency, engine='classic'):
     """Arka planda backtest çalıştır, sonucu _backtest_tasks'a yaz."""
     try:
         backtest = MinerviniBacktest(start_date, end_date, initial_capital)
-        report   = backtest.run_backtest(market, method=method, frequency=frequency)
+        report   = backtest.run_backtest(market, method=method, frequency=frequency, engine=engine)
         report   = _sanitize(report)
 
         bt_id         = str(uuid.uuid4())[:8]
         freq_labels   = {'monthly': 'Aylık', 'biweekly': '15 Günlük', 'weekly': 'Haftalık'}
         method_labels = {'rs': 'RS', 'minervini': 'Minervini'}
+        engine_label = ' • Kalibrasyon' if engine == 'calibrated' else ''
         name = (f"{market} • {method_labels.get(method, method)} • "
-                f"{freq_labels.get(frequency, frequency)} • {start_date} → {end_date}")
+                f"{freq_labels.get(frequency, frequency)}{engine_label} • {start_date} → {end_date}")
         params = {'start_date': start_date, 'end_date': end_date,
                   'market': market, 'method': method,
-                  'frequency': frequency, 'initial_capital': initial_capital}
+                  'frequency': frequency, 'initial_capital': initial_capital,
+                  'engine': engine}
         storage.save_backtest(bt_id, name, params, report)
 
         with _backtest_lock:
@@ -958,9 +991,10 @@ def api_run_backtest():
         market          = data.get('market', 'US')
         method          = data.get('method', 'rs')
         frequency       = data.get('frequency', 'monthly')
+        engine          = data.get('engine', 'classic')
 
         # ── Duplicate kontrolü ──────────────────────────────────────────────
-        params_key  = f"{market}_{method}_{frequency}_{start_date}_{end_date}_{initial_capital}"
+        params_key  = f"{market}_{method}_{frequency}_{start_date}_{end_date}_{initial_capital}_{engine}"
         existing_id = storage.find_duplicate_backtest(params_key)
         if existing_id:
             existing = storage.get_backtest(existing_id)
@@ -980,7 +1014,7 @@ def api_run_backtest():
 
         t = threading.Thread(
             target=_run_backtest_task,
-            args=(task_id, start_date, end_date, initial_capital, market, method, frequency),
+            args=(task_id, start_date, end_date, initial_capital, market, method, frequency, engine),
             daemon=True
         )
         t.start()
