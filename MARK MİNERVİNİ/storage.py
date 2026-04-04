@@ -242,3 +242,9 @@ def list_top_picks():
 def delete_top_pick(pick_id):
     with _conn() as c:
         c.execute("DELETE FROM top_picks WHERE id=?", (pick_id,))
+
+
+def delete_top_picks_session(scan_date, market):
+    """Belirli bir tarama oturumuna ait tüm hisseleri sil."""
+    with _conn() as c:
+        c.execute("DELETE FROM top_picks WHERE scan_date=? AND market=?", (scan_date, market))

@@ -212,12 +212,9 @@
                     <table style="width:100%;border-collapse:collapse;font-size:13px;">
                         <thead>
                             <tr style="color:#64748b;border-bottom:1px solid #1e293b;">
-                                <th style="text-align:left;padding:6px 10px;">Tarih</th>
-                                <th style="text-align:left;padding:6px 10px;">Piyasa</th>
-                                <th style="text-align:left;padding:6px 10px;">Hisse</th>
-                                <th style="text-align:left;padding:6px 10px;">Durum</th>
-                                <th style="text-align:right;padding:6px 10px;">RS</th>
-                                <th style="text-align:right;padding:6px 10px;">Fiyat</th>
+                                <th style="text-align:left;padding:6px 10px;">Tarama Tarihi</th>
+                                <th style="text-align:left;padding:6px 10px;">Borsa</th>
+                                <th style="text-align:left;padding:6px 10px;">Bulunan Hisseler (Sıralı)</th>
                                 <th style="text-align:center;padding:6px 10px;">Sil</th>
                             </tr>
                         </thead>
@@ -817,25 +814,51 @@
                     return;
                 }
 
-                panel.style.display = 'block';
-                const statusLabel = {BREAKOUT:'🟢 Breakout', PIVOT_NEAR:'🟡 Pivot Yakın', SETUP:'🔵 Setup'};
+                // Tarama oturumlarına göre grupla (scan_date + market)
+                const sessions = {};
+                data.picks.forEach(p => {
+                    const key = p.scan_date + '|' + p.market;
+                    if (!sessions[key]) sessions[key] = {scan_date: p.scan_date, market: p.market, tickers: []};
+                    sessions[key].tickers.push({ticker: p.ticker, rank: p.rank, status: p.status});
+                });
 
-                tbody.innerHTML = data.picks.map(p => `
-                    <tr>
-                        <td style="color:#94a3b8;font-size:12px">${p.scan_date}</td>
-                        <td><span style="font-size:11px;background:${p.market==='BIST'?'#1e3a5f':'#1a3a2a'};padding:2px 6px;border-radius:4px">${p.market==='BIST'?'🇹🇷':'🇺🇸'} ${p.market}</span></td>
-                        <td style="font-weight:700;color:#f1f5f9">#${p.rank} ${p.ticker}</td>
-                        <td>${statusLabel[p.status] || p.status || '-'}</td>
-                        <td style="color:#f59e0b">${p.rs != null ? p.rs.toFixed(1) : '-'}</td>
-                        <td style="color:#94a3b8">${p.price != null ? p.price.toFixed(2) : '-'}</td>
-                        <td><button onclick="deleteTopPick(${p.id})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:16px" title="Sil">🗑</button></td>
-                    </tr>`).join('');
+                // saved_at'e göre en yeni oturum üstte (picks zaten saved_at DESC sıralı)
+                panel.style.display = 'block';
+                const marketLabel = {
+                    'BIST':    '🇹🇷 BIST TÜM',
+                    'BISTTUM': '🇹🇷 BIST TÜM',
+                    'BIST100': '🇹🇷 BIST 100',
+                    'BIST100X':'🇹🇷 BIST 100 Dışı',
+                    'BIST_XUTUM': '🇹🇷 XUTUM',
+                    'BIST_XTUMY': '🇹🇷 XTUMY',
+                    'US':      '🇺🇸 USA',
+                    'USA':     '🇺🇸 USA',
+                };
+                const statusColor = {BREAKOUT:'#22c55e', PIVOT_NEAR:'#f59e0b', SETUP:'#60a5fa'};
+
+                tbody.innerHTML = Object.values(sessions).map(s => {
+                    const mLabel = marketLabel[s.market] || ('🌍 ' + s.market);
+                    const tickerBadges = s.tickers
+                        .sort((a,b) => a.rank - b.rank)
+                        .map(t => `<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;border-radius:6px;background:#1e293b;color:${statusColor[t.status]||'#94a3b8'};font-weight:700;font-size:13px">#${t.rank} ${t.ticker}</span>`)
+                        .join('');
+                    return `<tr style="border-bottom:1px solid #1e293b;">
+                        <td style="padding:10px;color:#94a3b8;font-size:13px;white-space:nowrap">${s.scan_date}</td>
+                        <td style="padding:10px;white-space:nowrap"><span style="font-size:12px;background:#0f172a;border:1px solid #334155;padding:3px 8px;border-radius:6px">${mLabel}</span></td>
+                        <td style="padding:10px;line-height:1.8">${tickerBadges}</td>
+                        <td style="padding:10px;text-align:center"><button onclick="deleteTopPickSession('${s.scan_date}','${s.market}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:16px" title="Bu taramayı sil">🗑</button></td>
+                    </tr>`;
+                }).join('');
             } catch(e) {}
         }
 
-        async function deleteTopPick(id) {
-            if (!confirm('Bu hisseyi Top Picks listesinden kaldırmak istiyor musunuz?')) return;
-            await fetch(`/api/top-picks/${id}`, {method: 'DELETE'});
+        async function deleteTopPickSession(scanDate, market) {
+            if (!confirm(`"${scanDate} - ${market}" tarama sonucunu listeden kaldırmak istiyor musunuz?`)) return;
+            await fetch('/api/top-picks/session', {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({scan_date: scanDate, market: market})
+            });
             loadSavedTopPicks();
         }
 

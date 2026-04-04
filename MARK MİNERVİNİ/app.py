@@ -666,6 +666,17 @@ def api_delete_top_pick(pick_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/top-picks/session', methods=['DELETE'])
+def api_delete_top_picks_session():
+    try:
+        data      = request.get_json()
+        scan_date = data.get('scan_date', '')
+        market    = data.get('market', '')
+        storage.delete_top_picks_session(scan_date, market)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @app.route('/api/signals/history', methods=['GET'])
 def api_signals_history():
