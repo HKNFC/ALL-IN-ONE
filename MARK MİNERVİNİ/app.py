@@ -639,6 +639,34 @@ def api_delete_from_portfolio(ticker):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/top-picks', methods=['GET'])
+def api_list_top_picks():
+    try:
+        return jsonify({'success': True, 'picks': storage.list_top_picks()})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/top-picks', methods=['POST'])
+def api_save_top_picks():
+    try:
+        data      = request.get_json()
+        scan_date = data.get('scan_date', datetime.now().strftime('%Y-%m-%d'))
+        market    = data.get('market', 'BIST')
+        picks     = data.get('picks', [])
+        storage.save_top_picks(scan_date, market, picks)
+        return jsonify({'success': True, 'saved': len(picks)})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/top-picks/<int:pick_id>', methods=['DELETE'])
+def api_delete_top_pick(pick_id):
+    try:
+        storage.delete_top_pick(pick_id)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/signals/history', methods=['GET'])
 def api_signals_history():
     """Sinyal geçmişi"""
@@ -767,6 +795,7 @@ def api_market_status():
     bist = analyze('XU100.IS', 'BIST (XU100)')
     us   = analyze('^GSPC', 'ABD (S&P 500)')
     payload = {'success': True, 'bist': bist, 'us': us}
+    payload = _sanitize(payload)
     _market_status_cache['data'] = payload
     _market_status_cache['ts']   = _time.time()
     return jsonify(payload)

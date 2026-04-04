@@ -205,6 +205,27 @@
                 <div id="scan-status" style="text-align: center; margin-top: 1rem; font-weight: 600;"></div>
             </div>
             
+            <!-- ⭐ Kaydedilen Top Picks Paneli -->
+            <div id="saved-top-picks-panel" style="display:none;margin-bottom:24px;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:20px;">
+                <h3 style="margin:0 0 14px;color:#f8fafc;font-size:16px;">⭐ Kaydedilen Top Picks</h3>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="color:#64748b;border-bottom:1px solid #1e293b;">
+                                <th style="text-align:left;padding:6px 10px;">Tarih</th>
+                                <th style="text-align:left;padding:6px 10px;">Piyasa</th>
+                                <th style="text-align:left;padding:6px 10px;">Hisse</th>
+                                <th style="text-align:left;padding:6px 10px;">Durum</th>
+                                <th style="text-align:right;padding:6px 10px;">RS</th>
+                                <th style="text-align:right;padding:6px 10px;">Fiyat</th>
+                                <th style="text-align:center;padding:6px 10px;">Sil</th>
+                            </tr>
+                        </thead>
+                        <tbody id="saved-top-picks-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Results Section -->
             <div id="results-section" style="display: none;">
                 <div class="results-header">
@@ -498,6 +519,27 @@
             const topPickRank = {};
             topPicks.forEach((s, i) => { topPickRank[s.Ticker || s.ticker] = i + 1; });
 
+            // En iyi 5 hisseyi SQLite'a kaydet
+            const top5 = topPicks.slice(0, 5).map((s, i) => ({
+                ticker: s.Ticker || s.ticker,
+                status: s.Status || s.status,
+                rs:     getRsValue(s),
+                price:  s.current_price_tl || s.current_price || s.Price || 0,
+                rank:   i + 1
+            }));
+            if (top5.length > 0) {
+                const scanDate = document.getElementById('scan-date')?.value || new Date().toISOString().slice(0,10);
+                const market   = document.getElementById('market-select')?.value || 'BIST';
+                fetch('/api/top-picks', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({scan_date: scanDate, market, picks: top5})
+                }).then(() => {
+                    loadSavedTopPicks();
+                    showToast(`⭐ ${top5.length} hisse Top Picks listesine eklendi`);
+                }).catch(() => {});
+            }
+
             let html = '';
 
             results.forEach(stock => {
@@ -743,6 +785,62 @@
         function viewDetails(ticker, market) {
             window.open(`/stock/${ticker}?market=${market}`, '_blank');
         }
+
+        // ── Toast bildirimi ─────────────────────────────────────────────────
+        function showToast(msg) {
+            let t = document.getElementById('tp-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'tp-toast';
+                t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:opacity .4s';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.opacity = '1';
+            clearTimeout(t._hide);
+            t._hide = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+        }
+
+        // ── Kaydedilen Top Picks paneli ─────────────────────────────────────
+        async function loadSavedTopPicks() {
+            try {
+                const res  = await fetch('/api/top-picks');
+                const data = await res.json();
+                if (!data.success) return;
+
+                const panel = document.getElementById('saved-top-picks-panel');
+                const tbody = document.getElementById('saved-top-picks-body');
+                if (!panel || !tbody) return;
+
+                if (data.picks.length === 0) {
+                    panel.style.display = 'none';
+                    return;
+                }
+
+                panel.style.display = 'block';
+                const statusLabel = {BREAKOUT:'🟢 Breakout', PIVOT_NEAR:'🟡 Pivot Yakın', SETUP:'🔵 Setup'};
+
+                tbody.innerHTML = data.picks.map(p => `
+                    <tr>
+                        <td style="color:#94a3b8;font-size:12px">${p.scan_date}</td>
+                        <td><span style="font-size:11px;background:${p.market==='BIST'?'#1e3a5f':'#1a3a2a'};padding:2px 6px;border-radius:4px">${p.market==='BIST'?'🇹🇷':'🇺🇸'} ${p.market}</span></td>
+                        <td style="font-weight:700;color:#f1f5f9">#${p.rank} ${p.ticker}</td>
+                        <td>${statusLabel[p.status] || p.status || '-'}</td>
+                        <td style="color:#f59e0b">${p.rs != null ? p.rs.toFixed(1) : '-'}</td>
+                        <td style="color:#94a3b8">${p.price != null ? p.price.toFixed(2) : '-'}</td>
+                        <td><button onclick="deleteTopPick(${p.id})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:16px" title="Sil">🗑</button></td>
+                    </tr>`).join('');
+            } catch(e) {}
+        }
+
+        async function deleteTopPick(id) {
+            if (!confirm('Bu hisseyi Top Picks listesinden kaldırmak istiyor musunuz?')) return;
+            await fetch(`/api/top-picks/${id}`, {method: 'DELETE'});
+            loadSavedTopPicks();
+        }
+
+        // Sayfa yüklenince mevcut Top Picks göster
+        document.addEventListener('DOMContentLoaded', loadSavedTopPicks);
     </script>
 </body>
 </html>

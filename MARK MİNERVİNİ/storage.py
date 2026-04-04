@@ -48,6 +48,19 @@ def init_db():
                 created_at TEXT NOT NULL,
                 data_json  TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS top_picks (
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                scan_date TEXT NOT NULL,
+                market    TEXT NOT NULL,
+                ticker    TEXT NOT NULL,
+                status    TEXT,
+                rs        REAL,
+                price     REAL,
+                rank      INTEGER,
+                saved_at  TEXT NOT NULL,
+                UNIQUE(scan_date, market, ticker)
+            );
         """)
 
 
@@ -199,3 +212,33 @@ def list_signals(limit=200):
             (limit,)
         ).fetchall()
     return [json.loads(r['data_json']) for r in rows]
+
+
+# ── Top Picks ─────────────────────────────────────────────────────────────────
+
+def save_top_picks(scan_date, market, picks):
+    """En iyi 5 hisseyi kaydet. Aynı scan_date+market+ticker varsa güncelle."""
+    now = datetime.now().strftime('%Y-%m-%d %H:%M')
+    with _conn() as c:
+        for p in picks:
+            c.execute("""
+                INSERT INTO top_picks (scan_date, market, ticker, status, rs, price, rank, saved_at)
+                VALUES (?,?,?,?,?,?,?,?)
+                ON CONFLICT(scan_date, market, ticker)
+                DO UPDATE SET status=excluded.status, rs=excluded.rs,
+                              price=excluded.price, rank=excluded.rank, saved_at=excluded.saved_at
+            """, (scan_date, market, p.get('ticker',''), p.get('status'),
+                  p.get('rs'), p.get('price'), p.get('rank'), now))
+
+
+def list_top_picks():
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT * FROM top_picks ORDER BY saved_at DESC, rank ASC"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def delete_top_pick(pick_id):
+    with _conn() as c:
+        c.execute("DELETE FROM top_picks WHERE id=?", (pick_id,))
