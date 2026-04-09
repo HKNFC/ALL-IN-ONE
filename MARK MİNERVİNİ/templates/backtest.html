@@ -321,26 +321,20 @@
                         </select>
                     </div>
                     <div class="config-item">
+                        <label>Portföy Büyüklüğü (Hisse Sayısı)</label>
+                        <select id="portfolio-size">
+                            <option value="3">3 Hisse</option>
+                            <option value="5">5 Hisse</option>
+                            <option value="7" selected>7 Hisse</option>
+                            <option value="9">9 Hisse</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
                         <label>Başlangıç Sermayesi (<span id="cap-currency-label">$</span>)</label>
                         <input type="number" id="initial-capital" value="100000" step="10000" min="1000">
                     </div>
                 </div>
                 <button class="run-btn" id="run-btn" onclick="startBacktest()">🚀 Backtest Başlat</button>
-
-                <!-- ⚙️ Tarama Motoru Seçici -->
-                <div style="margin-top:16px;padding:14px 16px;background:#0f172a;border:1px solid #334155;border-radius:10px;">
-                    <div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:10px;">⚙️ Tarama Motoru</div>
-                    <div style="display:flex;gap:20px;flex-wrap:wrap;">
-                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text);font-size:14px;">
-                            <input type="radio" name="bt-engine" value="classic" checked style="accent-color:#3b82f6;">
-                            <span><strong>Klasik Sistem</strong> <span style="color:#64748b;font-size:12px;">(Mevcut)</span></span>
-                        </label>
-                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text);font-size:14px;">
-                            <input type="radio" name="bt-engine" value="calibrated" style="accent-color:#8b5cf6;">
-                            <span><strong>Pazar Bazlı Kalibrasyon</strong> <span style="color:#64748b;font-size:12px;">(Yeni — BIST/USA dinamik ağırlık)</span></span>
-                        </label>
-                    </div>
-                </div>
             </div>
 
             <!-- Progress -->
@@ -596,13 +590,13 @@
     // Start
     // ---------------------------------------------------------------
     async function startBacktest() {
-        const startDate = document.getElementById('start-date').value;
-        const endDate   = document.getElementById('end-date').value;
-        const market    = document.getElementById('market').value;
-        const method    = document.getElementById('selection-method').value;
-        const frequency = document.getElementById('rebalance-frequency').value;
-        const capital   = parseFloat(document.getElementById('initial-capital').value);
-        const engine    = document.querySelector('input[name="bt-engine"]:checked')?.value || 'classic';
+        const startDate     = document.getElementById('start-date').value;
+        const endDate       = document.getElementById('end-date').value;
+        const market        = document.getElementById('market').value;
+        const method        = document.getElementById('selection-method').value;
+        const frequency     = document.getElementById('rebalance-frequency').value;
+        const capital       = parseFloat(document.getElementById('initial-capital').value);
+        const portfolioSize = parseInt(document.getElementById('portfolio-size').value);
 
         if (!startDate || !endDate) { alert('Başlangıç ve bitiş tarihini seçin!'); return; }
         if (new Date(startDate) >= new Date(endDate)) { alert('Başlangıç tarihi bitiş tarihinden önce olmalı!'); return; }
@@ -633,7 +627,7 @@
             const res  = await fetch('/api/backtest', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ start_date: startDate, end_date: endDate, market, initial_capital: capital, method, frequency, engine })
+                body: JSON.stringify({ start_date: startDate, end_date: endDate, market, initial_capital: capital, method, frequency, portfolio_size: portfolioSize })
             });
             const data = await res.json();
 

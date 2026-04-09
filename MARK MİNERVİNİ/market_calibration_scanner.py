@@ -32,11 +32,11 @@ BIST_PROFILE = {
     "name":      "BIST Profile",
     "benchmark": "XU100.IS",
     "weights": {
-        "rs":          0.35,
-        "trend":       0.25,
-        "debt_equity": 0.20,
-        "roic":        0.10,
-        "vcp":         0.10,
+        "rs":          0.45,
+        "trend":       0.35,
+        "vcp":         0.20,
+        "debt_equity": 0.0,
+        "roic":        0.0,
     },
     "roic_bands": [
         # (üst_eşik, puan) — küçükten büyüğe sıralı
@@ -54,11 +54,11 @@ USA_PROFILE = {
     "name":      "USA Profile",
     "benchmark": "SPY",
     "weights": {
-        "rs":    0.30,
-        "trend": 0.20,
-        "peg":   0.30,
-        "roic":  0.10,
-        "vcp":   0.10,
+        "rs":    0.40,
+        "trend": 0.30,
+        "vcp":   0.20,
+        "peg":   0.0,
+        "roic":  0.0,
     },
     "roic_bands": [
         (8,   20),
@@ -246,54 +246,27 @@ def calculate_calibrated_score(ticker, market, stock_df, benchmark_df, scanner):
     if status == 'WATCHING':
         return None
 
-    # ── Temel veriler (Yahoo Finance info) ──
-    roic_val = None
-    de_val   = None
-    peg_val  = None
-    try:
-        info = yf.Ticker(ticker).info
-        # ROIC yaklaşımı: returnOnEquity * (1 - debtToEquity / (1 + debtToEquity))
-        roe = info.get('returnOnEquity')
-        de  = info.get('debtToEquity')
-        if roe is not None:
-            roe_pct = float(roe) * 100
-            if de is not None and float(de) > 0:
-                de_ratio = float(de) / 100
-                roic_val = roe_pct / (1 + de_ratio)
-            else:
-                roic_val = roe_pct
-        if de is not None:
-            de_val = float(de) / 100  # normalize
-        peg_val = info.get('pegRatio')
-    except Exception:
-        pass
+    # ── Temel veriler: nötr puan (look-ahead bias'ı önlemek için yf.info KULLANILMIYOR) ──
+    # Tarihsel fundamental data mevcut olmadığından sabit nötr puan atanır.
+    # Bu şekilde backtest ve scanner deterministik ve tutarlı çalışır.
+    roic_val  = None
+    de_val    = None
+    peg_val   = None
+    roic_score = 50.0
+    de_score   = 50.0
+    peg_score  = 50.0
 
     # ── Puanlama ──
     rs_score    = score_rs(rs_raw)
     trend_score = trend_pct
-    roic_score  = score_roic(roic_val, profile['roic_bands'])
     vcp_score   = score_vcp(vcp)
     weights     = profile['weights']
 
-    if is_bist:
-        de_score = score_debt_equity(de_val)
-        total_score = (
-            weights.get('rs',          0) * rs_score   +
-            weights.get('trend',       0) * trend_score +
-            weights.get('debt_equity', 0) * de_score   +
-            weights.get('roic',        0) * roic_score  +
-            weights.get('vcp',         0) * vcp_score
-        )
-    else:
-        peg_score = score_peg(peg_val)
-        de_score  = 0
-        total_score = (
-            weights.get('rs',    0) * rs_score   +
-            weights.get('trend', 0) * trend_score +
-            weights.get('peg',   0) * peg_score  +
-            weights.get('roic',  0) * roic_score  +
-            weights.get('vcp',   0) * vcp_score
-        )
+    total_score = (
+        weights.get('rs',    0) * rs_score    +
+        weights.get('trend', 0) * trend_score +
+        weights.get('vcp',   0) * vcp_score
+    )
 
     price = ind.get('price', 0)
 
@@ -319,17 +292,17 @@ def calculate_calibrated_score(ticker, market, stock_df, benchmark_df, scanner):
             'profile':    profile['name'],
             'benchmark':  profile['benchmark'],
             'weights':    weights,
-            'roic_label': profile['roic_label'],
-            'roic_val':   round(roic_val, 2) if roic_val is not None else None,
-            'de_val':     round(de_val, 4) if de_val is not None else None,
-            'peg_val':    round(peg_val, 2) if peg_val is not None else None,
+            'roic_label': 'nötr (50p) — tarihsel fundamental data yok',
+            'roic_val':   None,
+            'de_val':     None,
+            'peg_val':    None,
             'scores': {
                 'rs':    round(rs_score, 1),
                 'trend': round(trend_score, 1),
-                'roic':  round(roic_score, 1),
+                'roic':  50.0,
                 'vcp':   round(vcp_score, 1),
-                'de':    round(de_score if is_bist else 0, 1),
-                'peg':   round(score_peg(peg_val) if not is_bist else 0, 1),
+                'de':    50.0,
+                'peg':   50.0,
             }
         }
     }
@@ -378,12 +351,24 @@ def scan_with_calibration(tickers: list, market: str, cutoff=None,
 
     if cache is not None:
         benchmark_df = cache.get_slice(benchmark_ticker, cutoff)
+        if benchmark_df is None or benchmark_df.empty:
+            print(f"⚠️  Benchmark {benchmark_ticker} cache'de yok — doğrudan indiriliyor...", flush=True)
+            benchmark_df = _dl(benchmark_ticker)
+            if not benchmark_df.empty:
+                try:
+                    cache._store(benchmark_ticker, benchmark_df)
+                except Exception:
+                    pass
     else:
         benchmark_df = _dl(benchmark_ticker)
 
     if benchmark_df is None or benchmark_df.empty:
-        print(f"⚠️  Benchmark {benchmark_ticker} indirilemedi", flush=True)
-        benchmark_df = pd.DataFrame()
+        print(f"❌ Benchmark {benchmark_ticker} indirilemedi — tarama iptal.", flush=True)
+        return []
+
+    # cutoff'a göre benchmark'ı kısıtla
+    if cutoff is not None and not benchmark_df.empty:
+        benchmark_df = benchmark_df[benchmark_df.index <= cutoff]
 
     results = []
     total = len(tickers)

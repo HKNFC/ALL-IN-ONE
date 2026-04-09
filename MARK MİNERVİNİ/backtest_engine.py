@@ -11,6 +11,7 @@ Her rebalancing periyodunda veri yeniden indirilmez — hafızadan dilimle kulla
 - RS ve Minervini yöntemleri
 """
 
+import math
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -37,7 +38,8 @@ def _to_float(val):
     if isinstance(val, pd.Series):
         val = val.iloc[0] if len(val) > 0 else 0.0
     try:
-        return float(val)
+        f = float(val)
+        return f if (not math.isnan(f) and not math.isinf(f)) else 0.0
     except Exception:
         return 0.0
 
@@ -493,11 +495,13 @@ class MinerviniBacktest:
         return top
 
     def _fetch_price_at(self, ticker, date):
-        """Belirli tarihteki kapanış fiyatını önbellekten getir."""
+        """Belirli tarihteki kapanış fiyatını önbellekten getir. NaN/0 → None döndür."""
         df = self._cache.get_slice(ticker, date)
         if df is not None and not df.empty:
-            return _to_float(df['Close'].iloc[-1])
-        return None
+            price = _to_float(df['Close'].iloc[-1])
+            if price > 0:
+                return price
+        return None  # explicit None → or fallback doğru çalışır
 
     def rebalance_portfolio(self, new_stocks, current_date):
         currency = '₺' if getattr(self, '_market', 'US') == 'BIST' else '$'
@@ -508,7 +512,10 @@ class MinerviniBacktest:
             qty       = pos['quantity']
             entry     = pos['entry_price']
 
-            exit_price = self._fetch_price_at(yf_ticker, current_date) or entry
+            exit_price = self._fetch_price_at(yf_ticker, current_date)
+            if not exit_price or exit_price <= 0:
+                exit_price = entry  # fiyat yoksa giriş fiyatıyla kapat (P&L = 0)
+                print(f"    ⚠️ {ticker}: fiyat bulunamadı, giriş fiyatı kullanıldı ({currency}{entry:.2f})", flush=True)
             sale_value = qty * exit_price
             self.current_capital += sale_value
 
@@ -586,7 +593,7 @@ class MinerviniBacktest:
     # Ana backtest döngüsü
     # ──────────────────────────────────────────────────────────────────
 
-    def run_backtest(self, market='BOTH', method='rs', frequency='monthly', engine='classic'):
+    def run_backtest(self, market='BOTH', method='rs', frequency='monthly', engine='classic', portfolio_size=7):
         self._market = market
         self._method = method
         self._frequency = frequency
@@ -638,9 +645,9 @@ class MinerviniBacktest:
                 scan_results = self.scan_market_at_date(date, market)
 
             if method == 'minervini':
-                top_stocks = self.select_top_stocks_minervini(scan_results, top_n=5)
+                top_stocks = self.select_top_stocks_minervini(scan_results, top_n=portfolio_size)
             else:
-                top_stocks = self.select_top_stocks(scan_results, top_n=5)
+                top_stocks = self.select_top_stocks(scan_results, top_n=portfolio_size)
 
             self.rebalance_portfolio(top_stocks, date)
 

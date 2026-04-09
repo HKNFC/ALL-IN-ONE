@@ -34,7 +34,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sepa_scanner import SEPAScanner
 from universal_scanner import UniversalStockScanner
 from backtest_engine import MinerviniBacktest
-import market_calibration_scanner as mcs
 
 app = Flask(__name__)
 CORS(app)
@@ -192,7 +191,6 @@ def api_full_scan():
         market    = data.get('market', 'BOTH')
         scan_date = data.get('scan_date', None)   # "YYYY-MM-DD" veya None
         scan_type = data.get('scan_type', 'BISTTUM')
-        engine    = data.get('engine', 'classic')  # 'classic' | 'calibrated'
         manual_list_raw = data.get('manual_list', '')
         manual_list = [t.strip() for t in manual_list_raw.split(',') if t.strip()] if manual_list_raw else []
 
@@ -219,51 +217,19 @@ def api_full_scan():
             total = len(tickers_override)
             _set_progress(5, f'Veriler indiriliyor ({total} hisse)...')
 
-            if engine == 'calibrated':
-                # Kalibrasyon motoru — önce veriyi prefetch et, sonra scan
-                bt._global_prefetch(tickers_override, market)
-                done_count = [0]
-                def _prog(done, tot):
-                    done_count[0] = done
-                    pct = 5 + int(done / tot * 90) if tot > 0 else 95
-                    _set_progress(pct, f'Kalibrasyon taraması {done}/{tot}...')
-                results = mcs.scan_with_calibration(
-                    tickers_override, market, cutoff=scan_dt,
-                    cache=bt._cache, progress_cb=_prog
-                )
-            else:
-                results = _scan_with_progress(bt, scan_dt, market, tickers_override)
+            results = _scan_with_progress(bt, scan_dt, market, tickers_override)
 
             _set_progress(100, f'Tamamlandı — {len(results)} hisse bulundu')
-            return jsonify(_sanitize({
+            return _safe_jsonify({
                 'success': True,
                 'count': len(results),
                 'results': results,
                 'market': market,
                 'scan_date': scan_date,
-                'engine': engine,
                 'timestamp': datetime.now().isoformat()
-            }))
+            })
 
-        # ── BUGÜN: canlı tarama ──
-        scanner = UniversalStockScanner()
-
-        if engine == 'calibrated':
-            if market == 'US':
-                tickers_live = scanner.us_tickers
-            elif market == 'BIST':
-                tickers_live = scanner.get_tickers_by_scan_type(scan_type, manual_list)
-            else:
-                tickers_live = scanner.us_tickers + scanner.get_tickers_by_scan_type(scan_type, manual_list)
-
-            results = mcs.scan_with_calibration(tickers_live, market)
-            return jsonify(_sanitize({
-                'success': True, 'count': len(results), 'results': results,
-                'market': market, 'scan_date': 'today', 'engine': engine,
-                'timestamp': datetime.now().isoformat()
-            }))
-
-        # ── BUGÜN: canlı tarama (mevcut mantık) ──
+        # ── BUGÜN: canlı tarama (klasik sistem) ──
         scanner = UniversalStockScanner()
 
         if market == 'US':
@@ -279,10 +245,10 @@ def api_full_scan():
             if _VALIDATOR_AVAILABLE and us_results:
                 print("🔍 Cross-validation başlıyor (US)...", flush=True)
                 us_results = validate_scan_results(us_results, is_bist=False)
-            return jsonify(_sanitize({
+            return _safe_jsonify({
                 'success': True, 'count': len(us_results), 'results': us_results,
                 'market': 'US', 'scan_date': 'today', 'timestamp': datetime.now().isoformat()
-            }))
+            })
 
         elif market == 'BIST':
             bist_results = []
@@ -298,10 +264,10 @@ def api_full_scan():
             if _VALIDATOR_AVAILABLE and bist_results:
                 print("🔍 Cross-validation başlıyor (BIST)...", flush=True)
                 bist_results = validate_scan_results(bist_results, is_bist=True)
-            return jsonify(_sanitize({
+            return _safe_jsonify({
                 'success': True, 'count': len(bist_results), 'results': bist_results,
                 'market': 'BIST', 'scan_date': 'today', 'timestamp': datetime.now().isoformat()
-            }))
+            })
 
         else:  # BOTH
             results = scanner.run_universal_scan()
@@ -309,10 +275,10 @@ def api_full_scan():
                 print("🔍 Cross-validation başlıyor (BOTH)...", flush=True)
                 is_bist = any(r.get('Market') == 'BIST' for r in results[:5])
                 results = validate_scan_results(results, is_bist=False)
-            return jsonify(_sanitize({
+            return _safe_jsonify({
                 'success': True, 'count': len(results), 'results': results,
                 'market': 'BOTH', 'scan_date': 'today', 'timestamp': datetime.now().isoformat()
-            }))
+            })
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -925,7 +891,48 @@ def _sanitize(obj):
         return _sanitize(obj.to_dict())
     if isinstance(obj, float):
         return None if (math.isnan(obj) or math.isinf(obj)) else obj
+    # pd.NA, pd.NaT ve diğer pandas özel değerler
+    try:
+        if pd.isna(obj):
+            return None
+    except Exception:
+        pass
     return obj
+
+
+def _safe_jsonify(data):
+    """NaN/Inf içeren veriyi güvenli JSON response'a çevirir."""
+    import math
+    import numpy as np
+
+    class SafeEncoder(json.JSONEncoder):
+        def default(self, obj):
+            import numpy as np
+            import pandas as pd
+            if isinstance(obj, (np.integer,)):
+                return int(obj)
+            if isinstance(obj, (np.floating,)):
+                v = float(obj)
+                return None if (math.isnan(v) or math.isinf(v)) else v
+            if isinstance(obj, (np.bool_,)):
+                return bool(obj)
+            if isinstance(obj, (pd.Series, pd.DataFrame)):
+                return obj.to_dict()
+            return super().default(obj)
+
+        def encode(self, obj):
+            # NaN ve Inf değerlerini null'a çevir
+            result = super().encode(obj)
+            return result
+
+        def iterencode(self, obj, _one_shot=False):
+            for chunk in super().iterencode(obj, _one_shot=_one_shot):
+                yield chunk
+
+    sanitized = _sanitize(data)
+    resp_str = json.dumps(sanitized, cls=SafeEncoder, allow_nan=False, ensure_ascii=False)
+    from flask import Response
+    return Response(resp_str, mimetype='application/json')
 
 @app.route('/api/data_source_status', methods=['GET'])
 def api_data_source_status():
@@ -953,23 +960,22 @@ _backtest_tasks = {}
 _backtest_lock  = threading.Lock()
 
 
-def _run_backtest_task(task_id, start_date, end_date, initial_capital, market, method, frequency, engine='classic'):
+def _run_backtest_task(task_id, start_date, end_date, initial_capital, market, method, frequency, portfolio_size=7):
     """Arka planda backtest çalıştır, sonucu _backtest_tasks'a yaz."""
     try:
         backtest = MinerviniBacktest(start_date, end_date, initial_capital)
-        report   = backtest.run_backtest(market, method=method, frequency=frequency, engine=engine)
+        report   = backtest.run_backtest(market, method=method, frequency=frequency, portfolio_size=portfolio_size)
         report   = _sanitize(report)
 
         bt_id         = str(uuid.uuid4())[:8]
         freq_labels   = {'monthly': 'Aylık', 'biweekly': '15 Günlük', 'weekly': 'Haftalık'}
         method_labels = {'rs': 'RS', 'minervini': 'Minervini'}
-        engine_label = ' • Kalibrasyon' if engine == 'calibrated' else ''
         name = (f"{market} • {method_labels.get(method, method)} • "
-                f"{freq_labels.get(frequency, frequency)}{engine_label} • {start_date} → {end_date}")
+                f"{freq_labels.get(frequency, frequency)} • {portfolio_size} hisse • {start_date} → {end_date}")
         params = {'start_date': start_date, 'end_date': end_date,
                   'market': market, 'method': method,
                   'frequency': frequency, 'initial_capital': initial_capital,
-                  'engine': engine}
+                  'portfolio_size': portfolio_size}
         storage.save_backtest(bt_id, name, params, report)
 
         with _backtest_lock:
@@ -993,10 +999,11 @@ def api_run_backtest():
         market          = data.get('market', 'US')
         method          = data.get('method', 'rs')
         frequency       = data.get('frequency', 'monthly')
+        portfolio_size  = int(data.get('portfolio_size', 7))
         engine          = data.get('engine', 'classic')
 
         # ── Duplicate kontrolü ──────────────────────────────────────────────
-        params_key  = f"{market}_{method}_{frequency}_{start_date}_{end_date}_{initial_capital}_{engine}"
+        params_key  = f"{market}_{method}_{frequency}_{start_date}_{end_date}_{initial_capital}_{portfolio_size}"
         existing_id = storage.find_duplicate_backtest(params_key)
         if existing_id:
             existing = storage.get_backtest(existing_id)
@@ -1016,7 +1023,7 @@ def api_run_backtest():
 
         t = threading.Thread(
             target=_run_backtest_task,
-            args=(task_id, start_date, end_date, initial_capital, market, method, frequency, engine),
+            args=(task_id, start_date, end_date, initial_capital, market, method, frequency, portfolio_size),
             daemon=True
         )
         t.start()
