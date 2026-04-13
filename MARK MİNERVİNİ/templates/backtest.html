@@ -5,6 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Backtest - Minervini Platform</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shortcut-buttons-flatpickr@0.4.0/dist/shortcut-buttons-flatpickr.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shortcut-buttons-flatpickr@0.4.0/dist/themes/light.min.css">
+    <style>
+        .flatpickr-input { 
+            width:100%; padding:8px 12px; background:#1a1f2e;
+            border:1px solid #374151; border-radius:8px; color:#00C896 !important;
+            font-size:14px; font-weight:600; cursor:pointer; box-sizing:border-box;
+        }
+        .flatpickr-input:focus { outline:none; border-color:#00C896; }
+        .flatpickr-calendar { background:#13192b !important; border:1px solid #2a3447 !important; }
+        .flatpickr-months { background:#13192b !important; }
+        .flatpickr-month  { background:#13192b !important; color:#f0f4ff !important; }
+        .flatpickr-current-month { color:#f0f4ff !important; font-size:14px !important; }
+        .flatpickr-current-month .cur-month { color:#00C896 !important; font-weight:700 !important; }
+        .flatpickr-current-month input.cur-year { color:#00C896 !important; font-weight:700 !important; }
+        .flatpickr-weekday { color:#6b7a99 !important; }
+        .flatpickr-day { color:#c8d0e0 !important; border-radius:6px !important; }
+        .flatpickr-day:hover { background:#1e2740 !important; color:#00C896 !important; }
+        .flatpickr-day.selected { background:#00C896 !important; border-color:#00C896 !important; color:#0a0e1a !important; }
+        .flatpickr-day.today { border-color:#00C896 !important; }
+        .numInputWrapper:hover { background:#1e2740 !important; }
+        .numInput { color:#00C896 !important; }
+        .flatpickr-prev-month, .flatpickr-next-month { color:#00C896 !important; fill:#00C896 !important; }
+        .shortcut-buttons-flatpickr-wrapper { background:#13192b !important; padding:6px !important; }
+        .shortcut-buttons-flatpickr-button { background:#00C896 !important; color:#0a0e1a !important; border:none !important; border-radius:6px !important; padding:5px 14px !important; font-weight:700 !important; cursor:pointer !important; width:100% !important; }
+        .shortcut-buttons-flatpickr-button:hover { background:#00a87d !important; }
+        /* Yıl/Ay tıklama navigasyonu */
+        .flatpickr-monthDropdown-months { 
+            background:#13192b !important; color:#f0f4ff !important;
+            border:1px solid #2a3447 !important; cursor:pointer;
+        }
+        .flatpickr-monthDropdown-month { background:#13192b !important; color:#f0f4ff !important; }
+    </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
@@ -291,11 +328,11 @@
                 <div class="config-grid">
                     <div class="config-item">
                         <label>Başlangıç Tarihi</label>
-                        <input type="date" id="start-date" value="2023-01-01">
+                        <input type="text" id="start-date" value="2023-01-01" readonly placeholder="YYYY-MM-DD" autocomplete="off">
                     </div>
                     <div class="config-item">
                         <label>Bitiş Tarihi</label>
-                        <input type="date" id="end-date" value="2024-12-31">
+                        <input type="text" id="end-date" value="2024-12-31" readonly placeholder="YYYY-MM-DD" autocomplete="off">
                     </div>
                     <div class="config-item">
                         <label>Market</label>
@@ -1045,5 +1082,46 @@
     }
 
     </script>
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var commonCfg = {
+        locale: "tr",
+        dateFormat: "Y-m-d",
+        allowInput: false,
+        disableMobile: true,
+        showMonths: 1,
+    };
+    flatpickr("#start-date", Object.assign({}, commonCfg, {
+        defaultDate: "2023-01-01",
+        maxDate: "today",
+    }));
+    flatpickr("#end-date", Object.assign({}, commonCfg, {
+        defaultDate: "2024-12-31",
+        maxDate: "today",
+        plugins: [
+            ShortcutButtonsPlugin({
+                button: [{ label: "📅 Bugün" }],
+                onClick: function(index, fp) {
+                    var today = new Date();
+                    var y = today.getFullYear();
+                    var m = String(today.getMonth()+1).padStart(2,'0');
+                    var d = String(today.getDate()).padStart(2,'0');
+                    var iso = y+'-'+m+'-'+d;
+                    fp.setDate(iso, true);
+                    fp.element.value = iso;
+                    fp.close();
+                }
+            })
+        ]
+    }));
+});
+</script>
+
 </body>
 </html>
