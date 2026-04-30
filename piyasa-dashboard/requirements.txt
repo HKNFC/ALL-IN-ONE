@@ -1,0 +1,11 @@
+streamlit
+plotly
+pandas
+numpy
+yfinance
+twelvedata
+requests
+beautifulsoup4
+curl_cffi
+evds
+python-dotenv

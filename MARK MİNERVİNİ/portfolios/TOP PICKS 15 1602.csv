@@ -1,0 +1,5 @@
+Ticker,Maliyet,Adet,Alış_Tarihi,Stop_Seviyesi,Backstop_Aktif,Market
+CVKMD,47.8,2092,2026-02-22,44.45,False,BIST
+BAHKM,137.9,725,2026-02-22,128.25,False,BIST
+GUNDG,294.5,340,2026-02-22,273.88,False,BIST
+VANGD,75.5,1324,2026-02-22,70.22,False,BIST

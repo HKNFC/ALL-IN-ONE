@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minervini Platform Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 { 
+            color: #2563eb; 
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .status {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn:hover { 
+            background: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        #result { 
+            margin-top: 30px; 
+            padding: 20px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            display: none;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .loading {
+            color: #f59e0b;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        pre {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .info {
+            background: #e0f2fe;
+            padding: 15px;
+            border-left: 4px solid #2563eb;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📈 Mark Minervini Trading Platform</h1>
+        <p class="status">✅ Server Çalışıyor</p>
+        
+        <div class="info">
+            <p><strong>🌐 Server URL:</strong> http://localhost:8888</p>
+            <p><strong>📡 API Base:</strong> http://localhost:8888/api</p>
+            <p><strong>⏰ Status:</strong> <span id="server-time">Kontrol ediliyor...</span></p>
+        </div>
+        
+        <hr>
+        
+        <h2>🧪 API Test Panel</h2>
+        <p>Butonlara tıklayarak API'yi test edin:</p>
+        
+        <button class="btn" onclick="testAPI('US')">🇺🇸 Test US Scan</button>
+        <button class="btn" onclick="testAPI('BIST')">🇹🇷 Test BIST Scan</button>
+        <button class="btn" onclick="testStats()">📊 Test Stats API</button>
+        <button class="btn" onclick="openMainSite()">🚀 Ana Siteyi Aç</button>
+        
+        <div id="result"></div>
+        
+        <hr style="margin-top: 30px;">
+        
+        <h3>💡 Sorun mu Yaşıyorsunuz?</h3>
+        <ol>
+            <li>Bu test sayfası çalışıyorsa, server sorunsuz çalışıyor demektir</li>
+            <li>Ana sayfa açılmıyorsa, tarayıcı cache'ini temizleyin (Cmd+Shift+R)</li>
+            <li>Farklı bir tarayıcı deneyin (Chrome, Safari, Firefox)</li>
+            <li>Gizli pencere modunda deneyin (Cmd+Shift+N)</li>
+        </ol>
+    </div>
+
+    <script>
+        // Server time check
+        setInterval(() => {
+            const now = new Date().toLocaleTimeString('tr-TR');
+            document.getElementById('server-time').textContent = now;
+        }, 1000);
+        
+        function testAPI(market) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p class="loading">⏳ ' + market + ' piyasası taranıyor...</p>';
+            
+            const startTime = Date.now();
+            
+            fetch('http://localhost:8888/api/scan/quick', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({market: market})
+            })
+            .then(res => res.json())
+            .then(data => {
+                const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                if (data.success) {
+                    let html = `
+                        <h3>✅ ${market} Taraması Başarılı!</h3>
+                        <p><strong>⏱️ Süre:</strong> ${duration} saniye</p>
+                        <p><strong>📊 Bulunan Hisse:</strong> ${data.count} adet</p>
+                    `;
+                    
+                    if (data.count > 0) {
+                        html += '<h4>Sonuçlar:</h4>';
+                        data.results.forEach((stock, i) => {
+                            const currency = market === 'BIST' ? '₺' : '$';
+                            const price = stock.current_price_tl || stock.current_price || stock.Price || 0;
+                            html += `
+                                <div style="background: white; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #10b981;">
+                                    <strong>${i+1}. ${stock.Ticker || stock.ticker}</strong> - 
+                                    ${currency}${price.toFixed(2)} - 
+                                    <span style="background: #2563eb; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">
+                                        ${stock.Status || stock.status}
+                                    </span>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    html += '<details style="margin-top: 20px;"><summary>📋 JSON Verisi (Tıklayın)</summary><pre>' + 
+                            JSON.stringify(data, null, 2) + '</pre></details>';
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3>❌ Hata:</h3>
+                        <p style="color: red;">${data.error}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `
+                    <h3>❌ Bağlantı Hatası:</h3>
+                    <p style="color: red;">${error}</p>
+                    <p>Server çalışmıyor olabilir. Kontrol edin.</p>
+                `;
+            });
+        }
+        
+        function testStats() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p class="loading">⏳ İstatistikler yükleniyor...</p>';
+            
+            fetch('http://localhost:8888/api/stats')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <h3>✅ Platform İstatistikleri:</h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                            <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem;">📊</div>
+                                <div style="font-size: 2rem; font-weight: bold; color: #2563eb;">${data.stats.total_scans}</div>
+                                <div>Toplam Tarama</div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem;">💼</div>
+                                <div style="font-size: 2rem; font-weight: bold; color: #10b981;">${data.stats.active_positions}</div>
+                                <div>Aktif Pozisyon</div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem;">🎯</div>
+                                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b;">${data.stats.total_signals}</div>
+                                <div>Toplam Sinyal</div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem;">⏰</div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: #6b7280;">${data.stats.last_scan || 'Never'}</div>
+                                <div>Son Tarama</div>
+                            </div>
+                        </div>
+                        <details style="margin-top: 20px;"><summary>📋 JSON Verisi</summary><pre>${JSON.stringify(data, null, 2)}</pre></details>
+                    `;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<h3>❌ Hata:</h3><p style="color: red;">${error}</p>`;
+            });
+        }
+        
+        function openMainSite() {
+            window.open('http://localhost:8888', '_blank');
+        }
+    </script>
+</body>
+</html>

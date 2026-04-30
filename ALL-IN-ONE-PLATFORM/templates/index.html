@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALL-IN-ONE Investing Platform</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #0f172a;
+      --sidebar-bg: #1e293b;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --text: #f1f5f9;
+      --text-muted: #64748b;
+      --border: #334155;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────── */
+    #sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .sidebar-section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 16px 16px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-radius: 0;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      user-select: none;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: rgba(59,130,246,0.12);
+    }
+
+    .nav-item.active {
+      background: rgba(59,130,246,0.18);
+      border-left-color: var(--accent);
+    }
+
+    .nav-item.active .nav-name {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-text {
+      flex: 1;
+    }
+
+    .nav-name {
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .nav-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .status-dot.online  { background: var(--green); }
+    .status-dot.offline { background: var(--red); }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* ── MAIN AREA ───────────────────────────── */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #topbar {
+      background: var(--sidebar-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    #active-app-icon { font-size: 14px; }
+
+    #active-app-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .topbar-badge {
+      font-size: 10px;
+      background: rgba(59,130,246,0.2);
+      color: var(--accent);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    #content-iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+      height: calc(100vh - 40px);
+      background: var(--bg);
+    }
+
+    /* Loading overlay */
+    #loading {
+      position: absolute;
+      top: 40px; left: 220px; right: 0; bottom: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    #loading.visible { opacity: 1; pointer-events: all; }
+
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text { font-size: 13px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">ALL-IN-ONE</div>
+    <div class="logo-sub">Investing Platform</div>
+  </div>
+
+  <div class="sidebar-section-label">Dashboard</div>
+
+  <div class="nav-item active" id="nav-gemini" onclick="switchApp('gemini')">
+    <span class="nav-icon">⏱️</span>
+    <div class="nav-text">
+      <div class="nav-name">Piyasa Zamanlaması</div>
+      <div class="nav-desc">Gemini AI · BIST / USA</div>
+    </div>
+    <span class="status-dot" id="dot-gemini"></span>
+  </div>
+
+  <div class="sidebar-section-label">Hisse Tarayıcılar</div>
+
+  <div class="nav-item" id="nav-minervini" onclick="switchApp('minervini')">
+    <span class="nav-icon">📊</span>
+    <div class="nav-text">
+      <div class="nav-name">Mark Minervini</div>
+      <div class="nav-desc">SEPA · Backtest · Portföy</div>
+    </div>
+    <span class="status-dot" id="dot-minervini"></span>
+  </div>
+
+  <div class="nav-item" id="nav-borsa" onclick="switchApp('borsa')">
+    <span class="nav-icon">🔍</span>
+    <div class="nav-text">
+      <div class="nav-name">Portföy Optimizer</div>
+      <div class="nav-desc">BIST · USA Screener</div>
+    </div>
+    <span class="status-dot" id="dot-borsa"></span>
+  </div>
+
+  <div class="nav-item" id="nav-super" onclick="switchApp('super')">
+    <span class="nav-icon">🏆</span>
+    <div class="nav-text">
+      <div class="nav-name">Super Investor</div>
+      <div class="nav-desc">Kurumsal Skor Sistemi</div>
+    </div>
+    <span class="status-dot" id="dot-super"></span>
+  </div>
+
+  <div class="nav-item" id="nav-ensemble" onclick="switchApp('ensemble')">
+    <span class="nav-icon">🎯</span>
+    <div class="nav-text">
+      <div class="nav-name">Ensemble Portföy</div>
+      <div class="nav-desc">3 Model · 9 Hisse · Eşit Ağırlık</div>
+    </div>
+    <span class="status-dot" id="dot-ensemble"></span>
+  </div>
+
+  <div class="sidebar-footer">
+    ALL-IN-ONE Platform v1.0<br>
+    <span id="last-check" style="font-size:9px">Durum kontrol ediliyor...</span>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <span id="active-app-icon">⏱️</span>
+    <span id="active-app-name">Piyasa Zamanlaması</span>
+    <span class="topbar-badge">Gemini AI</span>
+  </div>
+  <iframe id="content-iframe" src="http://localhost:8501" allowfullscreen></iframe>
+</div>
+
+<!-- LOADING OVERLAY -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Uygulama yükleniyor...</div>
+</div>
+
+<script>
+const APPS = {
+  gemini:    { url: 'http://localhost:8501', name: 'Piyasa Zamanlaması', icon: '⏱️', badge: 'Gemini AI' },
+  minervini: { url: 'http://localhost:5555', name: 'Mark Minervini',      icon: '📊', badge: 'SEPA · Backtest' },
+  borsa:     { url: 'http://localhost:8505', name: 'Portföy Optimizer',        icon: '🔍', badge: 'BIST · USA' },
+  super:     { url: 'http://localhost:8503', name: 'Super Investor',      icon: '🏆', badge: 'Kurumsal Skor' },
+  ensemble:  { url: 'http://localhost:8506', name: 'Ensemble Portföy',    icon: '🎯', badge: '3 Model · 9 Hisse' },
+};
+
+let currentApp = 'gemini';
+
+function switchApp(key) {
+  if (key === currentApp) return;
+  const app = APPS[key];
+  if (!app) return;
+
+  // Loading overlay
+  const loading = document.getElementById('loading');
+  document.getElementById('loading-text').textContent = `${app.name} yükleniyor...`;
+  loading.classList.add('visible');
+
+  // iframe src değiştir
+  const iframe = document.getElementById('content-iframe');
+  iframe.src = app.url;
+
+  // Topbar güncelle
+  document.getElementById('active-app-icon').textContent = app.icon;
+  document.getElementById('active-app-name').textContent = app.name;
+  document.querySelector('.topbar-badge').textContent = app.badge;
+
+  // Nav vurgula
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + key).classList.add('active');
+
+  currentApp = key;
+
+  // iframe yüklenince overlay kaldır
+  iframe.onload = () => {
+    setTimeout(() => loading.classList.remove('visible'), 300);
+  };
+
+  // 8sn sonra her durumda kaldır
+  setTimeout(() => loading.classList.remove('visible'), 8000);
+}
+
+async function checkStatuses() {
+  try {
+    const r = await fetch('/api/apps');
+    if (!r.ok) return;
+    const data = await r.json();
+    for (const [key, info] of Object.entries(data)) {
+      const dot = document.getElementById('dot-' + key);
+      if (dot) {
+        dot.className = 'status-dot ' + info.status;
+        dot.title = info.status === 'online' ? 'Çalışıyor' : 'Çalışmıyor';
+      }
+    }
+    const now = new Date().toLocaleTimeString('tr-TR');
+    document.getElementById('last-check').textContent = `Son kontrol: ${now}`;
+  } catch (e) {}
+}
+
+// Başlangıç
+checkStatuses();
+setInterval(checkStatuses, 30000);
+
+// İlk iframe yüklenince overlay temizle (zaten yoktu ama)
+document.getElementById('content-iframe').onload = () => {
+  document.getElementById('loading').classList.remove('visible');
+};
+</script>
+</body>
+</html>

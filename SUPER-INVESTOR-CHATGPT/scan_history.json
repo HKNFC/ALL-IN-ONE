@@ -1,0 +1,824 @@
+{
+  "entries": [
+    {
+      "id": "c8a956060742",
+      "type": "scan",
+      "timestamp": 1777498611.0255308,
+      "datetime": "2026-04-30 00:36",
+      "market": "ABD Hisseleri",
+      "segment": "S&P 500",
+      "scan_mode": "Standart Tarama",
+      "profile": "Standart",
+      "quality": "Kapalı",
+      "sort_by": "Timing Score",
+      "top_n": 20,
+      "result_count": 503,
+      "top_stocks": [
+        "HUM",
+        "IEX",
+        "INVH",
+        "STX",
+        "WDC",
+        "MCHP",
+        "MU",
+        "PWR",
+        "NXPI",
+        "AMD"
+      ],
+      "scan_date": null
+    },
+    {
+      "id": "fc3d944e9eb9",
+      "type": "backtest",
+      "timestamp": 1777410061.4607842,
+      "datetime": "2026-04-29 00:01",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-04-28"
+      },
+      "total_return": 105.85,
+      "benchmark_return": 26.92,
+      "num_periods": 4,
+      "sharpe": 2.9,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2026-01-02",
+          "tickers": [
+            "TRHOL",
+            "AHSGY",
+            "KTLEV"
+          ],
+          "period_return": 59.01,
+          "scores": {
+            "TRHOL": 93.1,
+            "AHSGY": 89.1,
+            "KTLEV": 88.4
+          }
+        },
+        {
+          "date": "2026-02-02",
+          "tickers": [
+            "TRHOL",
+            "KTLEV",
+            "A1CAP"
+          ],
+          "period_return": 6.79,
+          "scores": {
+            "TRHOL": 92.1,
+            "KTLEV": 88.8,
+            "A1CAP": 85.7
+          }
+        },
+        {
+          "date": "2026-03-03",
+          "tickers": [
+            "TRHOL",
+            "ESCOM",
+            "HEDEF"
+          ],
+          "period_return": 2.32,
+          "scores": {
+            "TRHOL": 93.4,
+            "ESCOM": 93.2,
+            "HEDEF": 91.5
+          }
+        },
+        {
+          "date": "2026-04-02",
+          "tickers": [
+            "TRHOL",
+            "HEDEF",
+            "KTLEV"
+          ],
+          "period_return": 18.47,
+          "scores": {
+            "TRHOL": 92.8,
+            "HEDEF": 88.8,
+            "KTLEV": 88.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "04a97d04a3eb",
+      "type": "backtest",
+      "timestamp": 1777406215.937923,
+      "datetime": "2026-04-28 22:56",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 5,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-04-28"
+      },
+      "total_return": 136.09,
+      "benchmark_return": 26.92,
+      "num_periods": 4,
+      "sharpe": 5.12,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2026-01-02",
+          "tickers": [
+            "TRHOL",
+            "AHSGY",
+            "KTLEV",
+            "TCKRC",
+            "BULGS"
+          ],
+          "period_return": 43.03,
+          "scores": {
+            "TRHOL": 93.1,
+            "AHSGY": 89.1,
+            "KTLEV": 88.4,
+            "TCKRC": 83.1,
+            "BULGS": 82.4
+          }
+        },
+        {
+          "date": "2026-02-02",
+          "tickers": [
+            "TRHOL",
+            "KTLEV",
+            "A1CAP",
+            "AHSGY",
+            "RYGYO"
+          ],
+          "period_return": 3.42,
+          "scores": {
+            "TRHOL": 92.1,
+            "KTLEV": 88.8,
+            "A1CAP": 85.7,
+            "AHSGY": 84.5,
+            "RYGYO": 81.5
+          }
+        },
+        {
+          "date": "2026-03-03",
+          "tickers": [
+            "TRHOL",
+            "ESCOM",
+            "HEDEF",
+            "KTLEV",
+            "ISGSY"
+          ],
+          "period_return": 31.61,
+          "scores": {
+            "TRHOL": 93.4,
+            "ESCOM": 93.2,
+            "HEDEF": 91.5,
+            "KTLEV": 89.0,
+            "ISGSY": 87.1
+          }
+        },
+        {
+          "date": "2026-04-02",
+          "tickers": [
+            "TRHOL",
+            "HEDEF",
+            "KTLEV",
+            "VANGD",
+            "YGGYO"
+          ],
+          "period_return": 21.28,
+          "scores": {
+            "TRHOL": 92.8,
+            "HEDEF": 88.8,
+            "KTLEV": 88.7,
+            "VANGD": 88.3,
+            "YGGYO": 85.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "f0686d9c3f71",
+      "type": "backtest",
+      "timestamp": 1777395010.9251132,
+      "datetime": "2026-04-28 19:50",
+      "params": {
+        "market": "ABD Hisseleri",
+        "universe": "Tüm USA (S&P 500 + MidCap 400)",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Kapalı",
+        "sort_by": "Timing Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "SPX",
+        "start": "2026-01-01",
+        "end": "2026-04-28"
+      },
+      "total_return": 63.21,
+      "benchmark_return": -23.08,
+      "num_periods": 4,
+      "sharpe": 1.7,
+      "max_drawdown": -5.81,
+      "rebalance_history": [
+        {
+          "date": "2026-01-02",
+          "tickers": [
+            "MU",
+            "SNDK",
+            "AA"
+          ],
+          "period_return": 64.73,
+          "scores": {
+            "MU": 97.1,
+            "SNDK": 93.9,
+            "AA": 93.2
+          }
+        },
+        {
+          "date": "2026-02-03",
+          "tickers": [
+            "TER",
+            "FTI",
+            "WDC"
+          ],
+          "period_return": 3.23,
+          "scores": {
+            "TER": 95.7,
+            "FTI": 95.3,
+            "WDC": 91.6
+          }
+        },
+        {
+          "date": "2026-03-05",
+          "tickers": [
+            "NYT",
+            "ROIV",
+            "VLO"
+          ],
+          "period_return": 1.89,
+          "scores": {
+            "NYT": 96.2,
+            "ROIV": 94.2,
+            "VLO": 94.0
+          }
+        },
+        {
+          "date": "2026-04-06",
+          "tickers": [
+            "CAR",
+            "HL",
+            "FIVE"
+          ],
+          "period_return": -5.81,
+          "scores": {
+            "CAR": 95.2,
+            "HL": 92.8,
+            "FIVE": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "23817936542c",
+      "type": "scan",
+      "timestamp": 1777394772.210572,
+      "datetime": "2026-04-28 19:46",
+      "market": "ABD Hisseleri",
+      "segment": "Tüm USA (S&P 500 + MidCap 400)",
+      "scan_mode": "Standart Tarama",
+      "profile": "Standart",
+      "quality": "Kapalı",
+      "sort_by": "Timing Score",
+      "top_n": 20,
+      "result_count": 903,
+      "top_stocks": [
+        "KIM",
+        "WDC",
+        "INVH",
+        "FTI",
+        "HUM",
+        "MTG",
+        "WFRD",
+        "KVUE",
+        "STX",
+        "KEYS"
+      ],
+      "scan_date": null
+    },
+    {
+      "id": "c68e7b1eec59",
+      "type": "scan",
+      "timestamp": 1777394625.943873,
+      "datetime": "2026-04-28 19:43",
+      "market": "ABD Hisseleri",
+      "segment": "S&P 500",
+      "scan_mode": "Standart Tarama",
+      "profile": "Standart",
+      "quality": "Kapalı",
+      "sort_by": "Timing Score",
+      "top_n": 20,
+      "result_count": 503,
+      "top_stocks": [
+        "KIM",
+        "INVH",
+        "WDC",
+        "KVUE",
+        "HUM",
+        "KEYS",
+        "IEX",
+        "STX",
+        "GOOGL",
+        "GOOG"
+      ],
+      "scan_date": null
+    },
+    {
+      "id": "64fb851d763f",
+      "type": "backtest",
+      "timestamp": 1777394256.0876238,
+      "datetime": "2026-04-28 19:37",
+      "params": {
+        "market": "ABD Hisseleri",
+        "universe": "S&P 500",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Kapalı",
+        "sort_by": "Timing Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "SPX",
+        "start": "2026-01-01",
+        "end": "2026-04-28"
+      },
+      "total_return": 99.9,
+      "benchmark_return": -23.08,
+      "num_periods": 4,
+      "sharpe": 2.36,
+      "max_drawdown": -3.49,
+      "rebalance_history": [
+        {
+          "date": "2026-01-02",
+          "tickers": [
+            "MU",
+            "SNDK",
+            "AMAT"
+          ],
+          "period_return": 68.06,
+          "scores": {
+            "MU": 97.2,
+            "SNDK": 93.4,
+            "AMAT": 90.5
+          }
+        },
+        {
+          "date": "2026-02-03",
+          "tickers": [
+            "TER",
+            "WDC",
+            "CHRW"
+          ],
+          "period_return": -3.49,
+          "scores": {
+            "TER": 95.3,
+            "WDC": 91.1,
+            "CHRW": 90.6
+          }
+        },
+        {
+          "date": "2026-03-05",
+          "tickers": [
+            "VLO",
+            "APA",
+            "ROST"
+          ],
+          "period_return": 14.51,
+          "scores": {
+            "VLO": 94.5,
+            "APA": 92.0,
+            "ROST": 90.8
+          }
+        },
+        {
+          "date": "2026-04-06",
+          "tickers": [
+            "APA",
+            "WDC",
+            "ROST"
+          ],
+          "period_return": 7.62,
+          "scores": {
+            "APA": 92.2,
+            "WDC": 90.6,
+            "ROST": 90.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "678dbf81a6cf",
+      "type": "backtest",
+      "timestamp": 1777394168.7076092,
+      "datetime": "2026-04-28 19:36",
+      "params": {
+        "market": "ABD Hisseleri",
+        "universe": "S&P 500",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Kapalı",
+        "sort_by": "Timing Score",
+        "top_n": 5,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "SPX",
+        "start": "2026-01-01",
+        "end": "2026-04-28"
+      },
+      "total_return": 108.8,
+      "benchmark_return": -23.08,
+      "num_periods": 4,
+      "sharpe": 2.99,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2026-01-02",
+          "tickers": [
+            "MU",
+            "SNDK",
+            "AMAT",
+            "WDC",
+            "TER"
+          ],
+          "period_return": 59.03,
+          "scores": {
+            "MU": 97.2,
+            "SNDK": 93.4,
+            "AMAT": 90.5,
+            "WDC": 89.5,
+            "TER": 89.2
+          }
+        },
+        {
+          "date": "2026-02-03",
+          "tickers": [
+            "TER",
+            "WDC",
+            "CHRW",
+            "FDX",
+            "XOM"
+          ],
+          "period_return": 0.15,
+          "scores": {
+            "TER": 95.3,
+            "WDC": 91.1,
+            "CHRW": 90.6,
+            "FDX": 90.5,
+            "XOM": 90.2
+          }
+        },
+        {
+          "date": "2026-03-05",
+          "tickers": [
+            "VLO",
+            "APA",
+            "ROST",
+            "CF",
+            "MPC"
+          ],
+          "period_return": 14.56,
+          "scores": {
+            "VLO": 94.5,
+            "APA": 92.0,
+            "ROST": 90.8,
+            "CF": 90.1,
+            "MPC": 88.5
+          }
+        },
+        {
+          "date": "2026-04-06",
+          "tickers": [
+            "APA",
+            "WDC",
+            "ROST",
+            "CIEN",
+            "STX"
+          ],
+          "period_return": 14.42,
+          "scores": {
+            "APA": 92.2,
+            "WDC": 90.6,
+            "ROST": 90.4,
+            "CIEN": 89.7,
+            "STX": 89.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "48604523094c",
+      "type": "scan",
+      "timestamp": 1777393262.6005492,
+      "datetime": "2026-04-28 19:21",
+      "market": "BIST (Türkiye)",
+      "segment": "BIST TÜM",
+      "scan_mode": "Standart Tarama",
+      "profile": "Değer + Onay",
+      "quality": "Sıkı",
+      "sort_by": "Institutional Score",
+      "top_n": 20,
+      "result_count": 97,
+      "top_stocks": [
+        "HLGYO",
+        "ESCOM",
+        "RGYAS",
+        "RYGYO",
+        "CATES",
+        "RTALB",
+        "ISGSY",
+        "PAGYO",
+        "YGGYO",
+        "IHLGM"
+      ],
+      "scan_date": null
+    },
+    {
+      "id": "ca7a7df45c09",
+      "type": "backtest",
+      "timestamp": 1777382329.658798,
+      "datetime": "2026-04-28 16:18",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-04-28"
+      },
+      "total_return": 105.85,
+      "benchmark_return": 26.92,
+      "num_periods": 4,
+      "sharpe": 2.9,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2026-01-02",
+          "tickers": [
+            "TRHOL",
+            "AHSGY",
+            "KTLEV"
+          ],
+          "period_return": 59.01,
+          "scores": {
+            "TRHOL": 93.1,
+            "AHSGY": 89.1,
+            "KTLEV": 88.4
+          }
+        },
+        {
+          "date": "2026-02-02",
+          "tickers": [
+            "TRHOL",
+            "KTLEV",
+            "A1CAP"
+          ],
+          "period_return": 6.79,
+          "scores": {
+            "TRHOL": 92.1,
+            "KTLEV": 88.8,
+            "A1CAP": 85.7
+          }
+        },
+        {
+          "date": "2026-03-03",
+          "tickers": [
+            "TRHOL",
+            "ESCOM",
+            "HEDEF"
+          ],
+          "period_return": 2.32,
+          "scores": {
+            "TRHOL": 93.4,
+            "ESCOM": 93.2,
+            "HEDEF": 91.5
+          }
+        },
+        {
+          "date": "2026-04-02",
+          "tickers": [
+            "TRHOL",
+            "HEDEF",
+            "KTLEV"
+          ],
+          "period_return": 18.47,
+          "scores": {
+            "TRHOL": 92.8,
+            "HEDEF": 88.8,
+            "KTLEV": 88.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "de566491691c",
+      "type": "backtest",
+      "timestamp": 1777382305.477171,
+      "datetime": "2026-04-28 16:18",
+      "params": {
+        "market": "ABD Hisseleri",
+        "universe": "Tüm USA (S&P 500 + MidCap 400)",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Kapalı",
+        "sort_by": "Timing Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "SPX",
+        "start": "2026-01-01",
+        "end": "2026-04-28"
+      },
+      "total_return": 63.91,
+      "benchmark_return": -23.08,
+      "num_periods": 4,
+      "sharpe": 1.71,
+      "max_drawdown": -5.41,
+      "rebalance_history": [
+        {
+          "date": "2026-01-02",
+          "tickers": [
+            "MU",
+            "SNDK",
+            "AA"
+          ],
+          "period_return": 64.73,
+          "scores": {
+            "MU": 97.1,
+            "SNDK": 93.8,
+            "AA": 93.2
+          }
+        },
+        {
+          "date": "2026-02-03",
+          "tickers": [
+            "TER",
+            "FTI",
+            "WDC"
+          ],
+          "period_return": 3.23,
+          "scores": {
+            "TER": 95.7,
+            "FTI": 95.4,
+            "WDC": 91.7
+          }
+        },
+        {
+          "date": "2026-03-05",
+          "tickers": [
+            "NYT",
+            "ROIV",
+            "VLO"
+          ],
+          "period_return": 1.89,
+          "scores": {
+            "NYT": 96.2,
+            "ROIV": 94.2,
+            "VLO": 94.1
+          }
+        },
+        {
+          "date": "2026-04-06",
+          "tickers": [
+            "CAR",
+            "APA",
+            "FIVE"
+          ],
+          "period_return": -5.41,
+          "scores": {
+            "CAR": 95.3,
+            "APA": 92.0,
+            "FIVE": 92.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "6245fd0b5f44",
+      "type": "backtest",
+      "timestamp": 1777381868.436547,
+      "datetime": "2026-04-28 16:11",
+      "params": {
+        "market": "ABD Hisseleri",
+        "universe": "Tüm USA (S&P 500 + MidCap 400)",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Kapalı",
+        "sort_by": "Timing Score",
+        "top_n": 5,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "SPX",
+        "start": "2026-01-01",
+        "end": "2026-04-28"
+      },
+      "total_return": 59.83,
+      "benchmark_return": -23.08,
+      "num_periods": 4,
+      "sharpe": 1.98,
+      "max_drawdown": -3.52,
+      "rebalance_history": [
+        {
+          "date": "2026-01-02",
+          "tickers": [
+            "MU",
+            "SNDK",
+            "AA",
+            "VICR",
+            "AMAT"
+          ],
+          "period_return": 51.08,
+          "scores": {
+            "MU": 97.1,
+            "SNDK": 93.8,
+            "AA": 93.2,
+            "VICR": 92.1,
+            "AMAT": 90.8
+          }
+        },
+        {
+          "date": "2026-02-03",
+          "tickers": [
+            "TER",
+            "FTI",
+            "WDC",
+            "FDX",
+            "CHRW"
+          ],
+          "period_return": 1.51,
+          "scores": {
+            "TER": 95.7,
+            "FTI": 95.4,
+            "WDC": 91.7,
+            "FDX": 91.2,
+            "CHRW": 91.2
+          }
+        },
+        {
+          "date": "2026-03-05",
+          "tickers": [
+            "NYT",
+            "ROIV",
+            "VLO",
+            "PBF",
+            "APA"
+          ],
+          "period_return": 8.02,
+          "scores": {
+            "NYT": 96.2,
+            "ROIV": 94.2,
+            "VLO": 94.1,
+            "PBF": 92.3,
+            "APA": 92.0
+          }
+        },
+        {
+          "date": "2026-04-06",
+          "tickers": [
+            "CAR",
+            "APA",
+            "FIVE",
+            "DAR",
+            "FTI"
+          ],
+          "period_return": -3.52,
+          "scores": {
+            "CAR": 95.3,
+            "APA": 92.0,
+            "FIVE": 92.0,
+            "DAR": 91.2,
+            "FTI": 90.5
+          }
+        }
+      ]
+    }
+  ]
+}

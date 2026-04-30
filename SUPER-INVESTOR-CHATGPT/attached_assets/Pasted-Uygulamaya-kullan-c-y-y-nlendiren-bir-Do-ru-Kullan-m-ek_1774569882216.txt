@@ -1,0 +1,89 @@
+Uygulamaya kullanıcıyı yönlendiren bir “Doğru Kullanım Şekli” bilgi bölümü ekle.
+
+İstediklerim:
+
+- Sol menüye yeni bir bölüm ekle: "Hakkında"
+- "Hakkında" altında bir alt sekme oluştur: "Doğru Kullanım Şekli"
+
+Bu bölüm statik bilgi ekranı gibi çalışsın ve kullanıcıya sistemin nasıl doğru kullanılacağını anlatsın.
+
+İçerik aşağıdaki gibi düzenli ve okunabilir formatta gösterilsin:
+
+---
+
+BAŞLIK:
+"Doğru Kullanım Şekli"
+
+---
+
+BÖLÜM 1: En İyi Kullanıcı Akışı
+
+Alt başlık: "1. Genel Fırsat Tarama"
+- Piyasa: BIST
+- Evren: BIST100
+- Tarama Modu: Standart Tarama
+- Temel Kalite Seviyesi: Temel
+- Sıralama: Combined Score
+
+Alt başlık: "2. Akıllı Para Girişi Bulma"
+- Piyasa: BIST
+- Evren: BISTTUM
+- Tarama Modu: Sadece Akıllı Para Girenler
+- Temel Kalite Seviyesi: Temel
+- Sıralama: Combined Score
+
+Alt başlık: "3. Erken Accumulation Yakalama"
+- Piyasa: BIST
+- Evren: BIST100 DIŞI
+- Tarama Modu: Erken Accumulation Yakalama
+- Temel Kalite Seviyesi: Kapalı veya Temel
+- Sıralama: Technical Score veya Combined Score
+
+---
+
+BÖLÜM 2: En Doğru Sıralama Mantığı
+
+Alt başlık: "Standart Tarama"
+- Varsayılan sıralama: Combined Score
+
+Alt başlık: "Akıllı Para Girenler"
+- Önerilen sıralama: Combined Score veya Technical Score
+
+Alt başlık: "Erken Accumulation"
+- Önerilen sıralama: Technical Score veya Combined Score
+
+Not:
+- İlk kullanımda Combined Score önerilir
+
+---
+
+BÖLÜM 3: Temel Mantık (Kullanıcıya açıklama)
+
+- Tarama Modu → piyasadaki davranışı seçer
+- Temel Kalite Seviyesi → şirket kalitesini filtreler
+- Sıralama Türü → sonuçları hangi kritere göre dizdiğini belirler
+
+---
+
+BÖLÜM 4: Kullanım Tavsiyeleri
+
+- Çok sıkı filtreler az sonuç getirir
+- Erken fırsatlar için kalite filtresi gevşetilebilir
+- En iyi sonuçlar Combined Score ile alınır
+- Backtest ile strateji doğrulaması yapılmalıdır
+
+---
+
+UI Kuralları:
+
+- Başlıklar kalın ve belirgin olsun
+- Alt başlıklar görsel olarak ayrılmış olsun
+- Madde işaretleri kullanılsın
+- Okunabilir spacing olsun
+- İster markdown ister Streamlit formatı kullanılabilir
+
+Ek Kurallar:
+
+- Bu bölüm sadece bilgilendirme amaçlıdır, herhangi bir hesaplama yapmaz
+- Uygulamanın mevcut çalışan sistemini bozma
+- Minimal güvenli değişiklik yap

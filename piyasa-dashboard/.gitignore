@@ -1,0 +1,39 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment & secrets
+.env
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Logs
+*.log
+
+# Replit internal files
+.local/
+.replit
+.replitignore
+replit.md
+.upm/
+.config/
+
+# Node / pnpm
+node_modules/
+artifacts/
+lib/
+scripts/
+pnpm-workspace.yaml
+pnpm-lock.yaml
+package.json
+package-lock.json
+tsconfig*.json
+*.tsbuildinfo
+
+# macOS
+.DS_Store

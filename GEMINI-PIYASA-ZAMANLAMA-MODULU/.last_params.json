@@ -1,0 +1,11 @@
+{
+  "selected_market": "ABD Borsaları (USA)",
+  "risk_profile": "Dengeli",
+  "policy_rate": 42.5,
+  "annual_inflation": 37.86,
+  "cds_value": 257,
+  "yabanci_oran": 30.0,
+  "yabanci_onceki": 30.0,
+  "pc_ratio_val": 1.08,
+  "usa_index": "SPY"
+}

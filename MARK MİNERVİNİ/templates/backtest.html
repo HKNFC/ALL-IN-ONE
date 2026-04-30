@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backtest - Minervini Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shortcut-buttons-flatpickr@0.4.0/dist/shortcut-buttons-flatpickr.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shortcut-buttons-flatpickr@0.4.0/dist/themes/light.min.css">
+    <style>
+        .flatpickr-input { 
+            width:100%; padding:8px 12px; background:#1a1f2e;
+            border:1px solid #374151; border-radius:8px; color:#00C896 !important;
+            font-size:14px; font-weight:600; cursor:pointer; box-sizing:border-box;
+        }
+        .flatpickr-input:focus { outline:none; border-color:#00C896; }
+        .flatpickr-calendar { background:#13192b !important; border:1px solid #2a3447 !important; }
+        .flatpickr-months { background:#13192b !important; }
+        .flatpickr-month  { background:#13192b !important; color:#f0f4ff !important; }
+        .flatpickr-current-month { color:#f0f4ff !important; font-size:14px !important; }
+        .flatpickr-current-month .cur-month { color:#00C896 !important; font-weight:700 !important; }
+        .flatpickr-current-month input.cur-year { color:#00C896 !important; font-weight:700 !important; }
+        .flatpickr-weekday { color:#6b7a99 !important; }
+        .flatpickr-day { color:#c8d0e0 !important; border-radius:6px !important; }
+        .flatpickr-day:hover { background:#1e2740 !important; color:#00C896 !important; }
+        .flatpickr-day.selected { background:#00C896 !important; border-color:#00C896 !important; color:#0a0e1a !important; }
+        .flatpickr-day.today { border-color:#00C896 !important; }
+        .numInputWrapper:hover { background:#1e2740 !important; }
+        .numInput { color:#00C896 !important; }
+        .flatpickr-prev-month, .flatpickr-next-month { color:#00C896 !important; fill:#00C896 !important; }
+        .shortcut-buttons-flatpickr-wrapper { background:#13192b !important; padding:6px !important; }
+        .shortcut-buttons-flatpickr-button { background:#00C896 !important; color:#0a0e1a !important; border:none !important; border-radius:6px !important; padding:5px 14px !important; font-weight:700 !important; cursor:pointer !important; width:100% !important; }
+        .shortcut-buttons-flatpickr-button:hover { background:#00a87d !important; }
+        /* Yıl/Ay tıklama navigasyonu */
+        .flatpickr-monthDropdown-months { 
+            background:#13192b !important; color:#f0f4ff !important;
+            border:1px solid #2a3447 !important; cursor:pointer;
+        }
+        .flatpickr-monthDropdown-month { background:#13192b !important; color:#f0f4ff !important; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --green: #10b981;
+            --red: #ef4444;
+            --blue: #2563eb;
+            --orange: #f59e0b;
+            --purple: #8b5cf6;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --text: #111827;
+            --muted: #6b7280;
+        }
+
+        body { background: var(--bg); font-family: 'Inter', sans-serif; }
+
+        /* Config panel */
+        .config-panel {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+        .config-panel h2 { margin: 0 0 0.4rem; font-size: 1.3rem; }
+        .config-panel p  { color: var(--muted); margin: 0 0 1.5rem; font-size: 0.92rem; }
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .config-item label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        .config-item input,
+        .config-item select {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: var(--bg);
+            transition: border-color .2s;
+            box-sizing: border-box;
+        }
+        .config-item input:focus,
+        .config-item select:focus { border-color: var(--blue); outline: none; }
+
+        .run-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s;
+            letter-spacing: .03em;
+        }
+        .run-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37,99,235,.4);
+        }
+        .run-btn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
+
+        /* Progress */
+        .progress-panel {
+            display: none;
+            background: var(--card);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            text-align: center;
+        }
+        .progress-spinner {
+            width: 52px; height: 52px;
+            border: 5px solid #e5e7eb;
+            border-top-color: var(--blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .progress-bar-wrap {
+            background: #e5e7eb;
+            border-radius: 99px;
+            height: 8px;
+            margin: 1rem 0 0.5rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+            border-radius: 99px;
+            width: 0%;
+            transition: width .4s ease;
+        }
+        .progress-label { color: var(--muted); font-size: 0.9rem; }
+
+        /* Results hidden until ready */
+        .results-wrap { display: none; }
+
+        /* KPI cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 1.4rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-top: 4px solid var(--border);
+            transition: transform .2s;
+        }
+        .kpi-card:hover { transform: translateY(-3px); }
+        .kpi-card.green  { border-top-color: var(--green); }
+        .kpi-card.red    { border-top-color: var(--red); }
+        .kpi-card.blue   { border-top-color: var(--blue); }
+        .kpi-card.orange { border-top-color: var(--orange); }
+        .kpi-card.purple { border-top-color: var(--purple); }
+        .kpi-icon  { font-size: 1.7rem; margin-bottom: 0.4rem; }
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0.2rem 0;
+            line-height: 1;
+        }
+        .kpi-value.up   { color: var(--green); }
+        .kpi-value.down { color: var(--red); }
+        .kpi-label { color: var(--muted); font-size: 0.82rem; font-weight: 500; }
+
+        /* Chart cards */
+        .chart-row {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .chart-row.full  { grid-template-columns: 1fr; }
+        .chart-row.half  { grid-template-columns: 1fr 1fr; }
+        .chart-row.third { grid-template-columns: 1fr 1fr 1fr; }
+
+        @media(max-width: 900px) {
+            .chart-row.half  { grid-template-columns: 1fr; }
+            .chart-row.third { grid-template-columns: 1fr; }
+        }
+
+        .chart-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+        .chart-card h3 {
+            margin: 0 0 1.2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .chart-canvas-wrap { position: relative; }
+
+        /* Trade table */
+        .table-card {
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            margin-bottom: 2rem;
+        }
+        .table-card h3 {
+            margin: 0;
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+        }
+        .table-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        thead th {
+            background: #f1f5f9;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: .06em;
+            white-space: nowrap;
+        }
+        tbody td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+        tbody tr:hover { background: #f9fafb; }
+        .tag-buy  { background:#d1fae5; color:#065f46; padding:.2rem .6rem; border-radius:99px; font-weight:700; font-size:.8rem; }
+        .tag-sell { background:#fee2e2; color:#991b1b; padding:.2rem .6rem; border-radius:99px; font-weight:700; font-size:.8rem; }
+        .up   { color: var(--green); font-weight: 600; }
+        .down { color: var(--red);   font-weight: 600; }
+        .saved-table { width:100%; border-collapse:collapse; font-size:.88rem; }
+        .saved-table th { background:#f8fafc; padding:.6rem .8rem; text-align:left; font-weight:700; color:var(--muted); border-bottom:2px solid var(--border); }
+        .saved-table td { padding:.65rem .8rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+        .saved-table tr:hover td { background:#f9fafb; }
+        .saved-table .ret-pos { color:var(--green); font-weight:700; }
+        .saved-table .ret-neg { color:var(--red); font-weight:700; }
+        .btn-open   { padding:.35rem .85rem; background:var(--blue); color:white; border:none; border-radius:6px; font-size:.82rem; font-weight:600; cursor:pointer; }
+        .btn-del-bt { padding:.35rem .85rem; background:#fee2e2; color:var(--red); border:none; border-radius:6px; font-size:.82rem; font-weight:600; cursor:pointer; }
+        .btn-del-bt:hover { background:var(--red); color:white; }
+        .active-row td { background:#eff6ff !important; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand"><h1>📈 Minervini Platform</h1></div>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/scanner">Scanner</a></li>
+                <li><a href="/backtest" class="active">Backtest</a></li>
+                <li><a href="/portfolio">Portfolio</a></li>
+                <li><a href="/signals">Signals</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section style="padding: 2rem 0 4rem;">
+        <div class="container">
+            <h1 class="section-title" style="margin-bottom:1.5rem;">⏮️ Backtest — Geçmiş Performans Analizi</h1>
+
+            <!-- Saved Backtests Panel -->
+            <div class="config-panel" id="saved-panel">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.5rem;">
+                    <h2 style="margin:0;">💾 Kaydedilen Backtestler</h2>
+                    <button onclick="loadSavedList()" style="padding:.45rem 1rem;background:#f1f5f9;border:1px solid #e5e7eb;border-radius:7px;font-size:.88rem;cursor:pointer;font-weight:600;">🔄 Yenile</button>
+                </div>
+
+                <!-- BIST -->
+                <div style="margin-bottom:1.5rem;">
+                    <h3 style="margin:0 0 .75rem;font-size:.95rem;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:.4rem;">
+                        🇹🇷 BIST Backtestleri
+                    </h3>
+                    <div id="saved-list-bist">
+                        <p style="color:var(--muted);font-size:.9rem;">Yükleniyor...</p>
+                    </div>
+                </div>
+
+                <!-- USA -->
+                <div>
+                    <h3 style="margin:0 0 .75rem;font-size:.95rem;font-weight:700;color:#2563eb;display:flex;align-items:center;gap:.4rem;">
+                        🇺🇸 USA Backtestleri
+                    </h3>
+                    <div id="saved-list-us">
+                        <p style="color:var(--muted);font-size:.9rem;">Yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Config -->
+            <div class="config-panel">
+                <h2>🔧 Backtest Ayarları</h2>
+                <p>Her ayın ilk işlem günü BREAKOUT / PIVOT_NEAR / SETUP hisselerden RS skoruna göre top 5 seçilir, portföy aylık yeniden dengelenir.</p>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>Başlangıç Tarihi</label>
+                        <input type="text" id="start-date" value="2023-01-01" readonly placeholder="YYYY-MM-DD" autocomplete="off">
+                    </div>
+                    <div class="config-item">
+                        <label>Bitiş Tarihi</label>
+                        <input type="text" id="end-date" value="2024-12-31" readonly placeholder="YYYY-MM-DD" autocomplete="off">
+                    </div>
+                    <div class="config-item">
+                        <label>Market</label>
+                        <select id="market" onchange="updateCurrencyLabel()">
+                            <option value="US">🇺🇸 US Markets</option>
+                            <option value="BIST">🇹🇷 BIST</option>
+                            <option value="BOTH">🌍 Her İkisi</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label>Seçim Yöntemi</label>
+                        <select id="selection-method">
+                            <option value="rs">📊 RS Yöntemi — Saf RS skoruna göre</option>
+                            <option value="minervini">⭐ Minervini Yöntemi — BREAKOUT › PIVOT_NEAR › SETUP</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label>Rebalancing Sıklığı</label>
+                        <select id="rebalance-frequency">
+                            <option value="monthly">📅 Aylık (Her ayın ilk işlem günü)</option>
+                            <option value="biweekly">🗓️ 15 Günlük (Her 2 haftada bir)</option>
+                            <option value="weekly">⚡ Haftalık (Her Pazartesi)</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label>Portföy Büyüklüğü (Hisse Sayısı)</label>
+                        <select id="portfolio-size">
+                            <option value="3">3 Hisse</option>
+                            <option value="5">5 Hisse</option>
+                            <option value="7" selected>7 Hisse</option>
+                            <option value="9">9 Hisse</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label>Başlangıç Sermayesi (<span id="cap-currency-label">$</span>)</label>
+                        <input type="number" id="initial-capital" value="100000" step="10000" min="1000">
+                    </div>
+                </div>
+                <button class="run-btn" id="run-btn" onclick="startBacktest()">🚀 Backtest Başlat</button>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-panel" id="progress-panel">
+                <div class="progress-spinner"></div>
+                <h3 style="margin:0 0 0.4rem;">Backtest Çalışıyor...</h3>
+                <p style="color:var(--muted);margin:0 0 1rem;font-size:.9rem;">Bu işlem birkaç dakika sürebilir. Lütfen bekleyin.</p>
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" id="prog-fill"></div>
+                </div>
+                <div class="progress-label" id="prog-label">Hazırlanıyor...</div>
+            </div>
+
+            <!-- Results -->
+            <div class="results-wrap" id="results-wrap">
+
+                <!-- KPI row -->
+                <div class="kpi-grid" id="kpi-grid"></div>
+
+                <!-- Chart 1: Equity Curve (full width) -->
+                <div class="chart-row full">
+                    <div class="chart-card">
+                        <h3>📈 Sermaye Eğrisi</h3>
+                        <div class="chart-canvas-wrap" style="height:320px;">
+                            <canvas id="c-equity"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2 + 3: Monthly Return bars + Drawdown -->
+                <div class="chart-row half">
+                    <div class="chart-card">
+                        <h3>📊 Aylık Getiri (%)</h3>
+                        <div class="chart-canvas-wrap" style="height:280px;">
+                            <canvas id="c-monthly"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>📉 Drawdown Grafiği</h3>
+                        <div class="chart-canvas-wrap" style="height:280px;">
+                            <canvas id="c-drawdown"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 4 + 5: Win/Loss pie + Trade P&L scatter -->
+                <div class="chart-row half">
+                    <div class="chart-card">
+                        <h3>🎯 Kazanan / Kaybeden Dağılımı</h3>
+                        <div class="chart-canvas-wrap" style="height:280px;">
+                            <canvas id="c-winloss"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>💹 İşlem Başına P&amp;L (%)</h3>
+                        <div class="chart-canvas-wrap" style="height:280px;">
+                            <canvas id="c-pnl"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trade History Table -->
+                <div class="table-card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">
+                        <h3 style="margin:0;">📋 İşlem Geçmişi</h3>
+                        <button onclick="exportTradesToExcel()" id="btn-export-excel"
+                            style="padding:.45rem 1rem;background:#16a34a;color:white;border:none;border-radius:7px;font-size:.85rem;font-weight:600;cursor:pointer;display:none;">
+                            📥 Excel İndir
+                        </button>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>İşlem</th>
+                                    <th>Ticker</th>
+                                    <th>Adet</th>
+                                    <th>Fiyat</th>
+                                    <th>Değer</th>
+                                    <th>Kar/Zarar</th>
+                                    <th>K/Z %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trade-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div><!-- /results-wrap -->
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Mark Minervini Trading Platform © 2026</p>
+            <p>SEPA Metodolojisi • Yatırım Tavsiyesi Değildir</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+    // ---------------------------------------------------------------
+    // State
+    // ---------------------------------------------------------------
+    const charts = {};
+    let CURRENCY      = '$';
+    let CURRENCY_NAME = 'USD';
+    let activeBacktestId = null;
+
+    // ---------------------------------------------------------------
+    // Saved Backtests
+    // ---------------------------------------------------------------
+    function _buildTable(list) {
+        if (list.length === 0) {
+            return '<p style="color:var(--muted);font-size:.9rem;margin:0;">Henüz backtest yok.</p>';
+        }
+        const rows = list.map(bt => {
+            const s        = bt.summary || {};
+            const p        = bt.params  || {};
+            const ret      = s.total_return_pct ?? s.total_return ?? null;
+            const retStr   = ret !== null
+                ? `<span class="${ret >= 0 ? 'ret-pos' : 'ret-neg'}">${ret >= 0 ? '+' : ''}${Number(ret).toFixed(1)}%</span>`
+                : '—';
+            const wr       = s.win_rate    != null ? Number(s.win_rate).toFixed(0)    + '%' : '—';
+            const dd       = s.max_drawdown != null ? Number(s.max_drawdown).toFixed(1) + '%' : '—';
+            const startDt  = p.start_date  || '—';
+            const endDt    = p.end_date    || '—';
+            const isActive = bt.id === activeBacktestId;
+            return `
+                <tr id="row-${bt.id}" class="${isActive ? 'active-row' : ''}">
+                    <td><strong>${bt.name}</strong></td>
+                    <td style="font-size:.82rem;">${startDt}</td>
+                    <td style="font-size:.82rem;">${endDt}</td>
+                    <td>${retStr}</td>
+                    <td>${wr}</td>
+                    <td>${dd}</td>
+                    <td style="white-space:nowrap;display:flex;gap:.4rem;">
+                        <button class="btn-open" onclick="openSaved('${bt.id}')">📂 Aç</button>
+                        <button class="btn-del-bt" onclick="deleteSaved('${bt.id}')">🗑️</button>
+                    </td>
+                </tr>`;
+        }).join('');
+        return `
+            <div style="overflow-x:auto;">
+                <table class="saved-table">
+                    <thead><tr>
+                        <th>İsim</th><th>Başlangıç</th><th>Bitiş</th><th>Getiri</th>
+                        <th>Win Rate</th><th>Max DD</th><th>İşlem</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    }
+
+    async function loadSavedList() {
+        const bistContainer = document.getElementById('saved-list-bist');
+        const usContainer   = document.getElementById('saved-list-us');
+        try {
+            const res  = await fetch('/api/backtests');
+            const data = await res.json();
+            const list = data.backtests || [];
+
+            const bistList = list
+                .filter(bt => (bt.params?.market || '').toUpperCase() === 'BIST')
+                .sort((a, b) => new Date(b.params?.start_date || 0) - new Date(a.params?.start_date || 0));
+            const usList = list
+                .filter(bt => (bt.params?.market || '').toUpperCase() !== 'BIST')
+                .sort((a, b) => new Date(b.params?.start_date || 0) - new Date(a.params?.start_date || 0));
+
+            bistContainer.innerHTML = _buildTable(bistList);
+            usContainer.innerHTML   = _buildTable(usList);
+        } catch(e) {
+            const msg = `<p style="color:var(--red);">❌ Liste yüklenemedi: ${e.message}</p>`;
+            bistContainer.innerHTML = msg;
+            usContainer.innerHTML   = msg;
+        }
+    }
+
+    async function openSaved(btId) {
+        try {
+            const res  = await fetch(`/api/backtests/${btId}`);
+            const data = await res.json();
+            if (!data.success) { alert('❌ ' + data.error); return; }
+
+            const bt = data.data;
+            const p  = bt.params || {};
+
+            // Formu doldur
+            if (p.start_date)      document.getElementById('start-date').value        = p.start_date;
+            if (p.end_date)        document.getElementById('end-date').value          = p.end_date;
+            if (p.market)          document.getElementById('market').value            = p.market;
+            if (p.method)          document.getElementById('selection-method').value  = p.method;
+            if (p.frequency)       document.getElementById('rebalance-frequency').value = p.frequency;
+            if (p.initial_capital) document.getElementById('initial-capital').value   = p.initial_capital;
+            updateCurrencyLabel();
+
+            activeBacktestId = btId;
+
+            // Sonuçları göster
+            render(bt.report, p.initial_capital || 100000);
+
+            // Aktif satırı vurgula
+            document.querySelectorAll('.saved-table tr').forEach(r => r.classList.remove('active-row'));
+            const row = document.getElementById(`row-${btId}`);
+            if (row) row.classList.add('active-row');
+
+            document.getElementById('results-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch(e) {
+            alert('❌ Yüklenemedi: ' + e.message);
+        }
+    }
+
+    async function deleteSaved(btId) {
+        if (!confirm('Bu backtest kaydı silinsin mi?')) return;
+        try {
+            const res  = await fetch(`/api/backtests/${btId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) {
+                if (activeBacktestId === btId) {
+                    activeBacktestId = null;
+                    document.getElementById('results-wrap').style.display = 'none';
+                }
+                loadSavedList();
+            } else {
+                alert('❌ ' + data.error);
+            }
+        } catch(e) {
+            alert('❌ ' + e.message);
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadSavedList);
+
+    // ---------------------------------------------------------------
+    // Utilities
+    // ---------------------------------------------------------------
+    function fmtMoney(v) {
+        return CURRENCY + Number(v).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+    const fmtPct = v => (v >= 0 ? '+' : '') + Number(v).toFixed(2) + '%';
+
+    function updateCurrencyLabel() {
+        const market = document.getElementById('market').value;
+        document.getElementById('cap-currency-label').textContent = market === 'BIST' ? '₺' : '$';
+    }
+
+    function destroyAll() {
+        Object.keys(charts).forEach(k => { if (charts[k]) { charts[k].destroy(); delete charts[k]; } });
+    }
+
+    // ---------------------------------------------------------------
+    // Start
+    // ---------------------------------------------------------------
+    async function startBacktest() {
+        const startDate     = document.getElementById('start-date').value;
+        const endDate       = document.getElementById('end-date').value;
+        const market        = document.getElementById('market').value;
+        const method        = document.getElementById('selection-method').value;
+        const frequency     = document.getElementById('rebalance-frequency').value;
+        const capital       = parseFloat(document.getElementById('initial-capital').value);
+        const portfolioSize = parseInt(document.getElementById('portfolio-size').value);
+
+        if (!startDate || !endDate) { alert('Başlangıç ve bitiş tarihini seçin!'); return; }
+        if (new Date(startDate) >= new Date(endDate)) { alert('Başlangıç tarihi bitiş tarihinden önce olmalı!'); return; }
+
+        const btn = document.getElementById('run-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Çalışıyor...';
+
+        document.getElementById('progress-panel').style.display = 'block';
+        document.getElementById('results-wrap').style.display   = 'none';
+
+        // Animated progress bar
+        let pct = 0;
+        const msgs = [
+            'Tarihsel veriler indiriliyor...',
+            'Hisseler taranıyor...',
+            'Portföy simüle ediliyor...',
+            'Performans hesaplanıyor...',
+            'Grafikler hazırlanıyor...'
+        ];
+        const progInt = setInterval(() => {
+            pct = Math.min(pct + 1.2, 90);
+            document.getElementById('prog-fill').style.width = pct + '%';
+            document.getElementById('prog-label').textContent = msgs[Math.floor(pct / 20)] || msgs[4];
+        }, 600);
+
+        try {
+            const res  = await fetch('/api/backtest', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ start_date: startDate, end_date: endDate, market, initial_capital: capital, method, frequency, portfolio_size: portfolioSize })
+            });
+            const data = await res.json();
+
+            if (!data.success) throw new Error(data.error || 'Bilinmeyen hata');
+
+            // Duplicate veya çok hızlı biten backtest — direkt sonuç
+            if (data.status === 'done') {
+                clearInterval(progInt);
+                document.getElementById('prog-fill').style.width = '100%';
+                document.getElementById('prog-label').textContent = data.duplicate
+                    ? '⚠️ Bu parametrelerle kayıtlı backtest bulundu — mevcut sonuç gösteriliyor'
+                    : '✅ Tamamlandı!';
+                setTimeout(() => {
+                    document.getElementById('progress-panel').style.display = 'none';
+                    activeBacktestId = data.saved_id || null;
+                    render(data.report, capital);
+                    loadSavedList();
+                }, data.duplicate ? 1500 : 700);
+                return;
+            }
+
+            // Arka planda çalışıyor — polling başlat
+            const taskId = data.task_id;
+            const pollInterval = setInterval(async () => {
+                try {
+                    const sr = await fetch(`/api/backtest/status/${taskId}`);
+                    const sd = await sr.json();
+
+                    if (sd.status === 'running') return; // devam ediyor
+
+                    clearInterval(pollInterval);
+                    clearInterval(progInt);
+
+                    if (!sd.success || sd.status === 'error') {
+                        document.getElementById('progress-panel').style.display = 'none';
+                        alert('❌ Hata: ' + (sd.error || 'Bilinmeyen hata'));
+                        btn.disabled = false;
+                        btn.textContent = '🚀 Backtest Başlat';
+                        return;
+                    }
+
+                    document.getElementById('prog-fill').style.width = '100%';
+                    document.getElementById('prog-label').textContent = '✅ Tamamlandı!';
+                    setTimeout(() => {
+                        document.getElementById('progress-panel').style.display = 'none';
+                        activeBacktestId = sd.saved_id || null;
+                        render(sd.report, capital);
+                        loadSavedList();
+                        btn.disabled = false;
+                        btn.textContent = '🚀 Backtest Başlat';
+                    }, 700);
+                } catch (pollErr) {
+                    // geçici ağ hatası — polling devam etsin
+                }
+            }, 3000); // her 3 saniyede bir sorgula
+            return; // finally bloğu btn'yi erken serbest bırakmasın
+
+        } catch(e) {
+            clearInterval(progInt);
+            document.getElementById('progress-panel').style.display = 'none';
+            alert('❌ Hata: ' + e.message);
+        } finally {
+            // polling durumunda btn finally'den değil pollInterval'dan serbest bırakılır
+            // sadece hata/duplicate durumlarında buraya düşer
+            if (!document.getElementById('progress-panel').style.display ||
+                document.getElementById('progress-panel').style.display === 'none') {
+                btn.disabled = false;
+                btn.textContent = '🚀 Backtest Başlat';
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Render all
+    // ---------------------------------------------------------------
+    function render(report, initialCapital) {
+        destroyAll();
+        const s = report.summary;
+
+        // Para birimini güncelle
+        CURRENCY      = s.currency      || '$';
+        CURRENCY_NAME = s.currency_name || 'USD';
+
+        const eq     = report.equity_curve  || [];
+        const trades = report.trade_history || [];
+        const sells  = trades.filter(t => t.action === 'SELL');
+
+        renderKPIs(s);
+        renderEquity(eq, initialCapital);
+        renderMonthly(eq);
+        renderDrawdown(eq);
+        renderWinLoss(s);
+        renderPnL(sells);
+        renderTable(trades);
+
+        document.getElementById('results-wrap').style.display = 'block';
+        document.getElementById('results-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ---------------------------------------------------------------
+    // KPI cards
+    // ---------------------------------------------------------------
+    function renderKPIs(s) {
+        const ret = s.total_return_pct ?? s.total_return ?? 0;
+        const dd  = s.max_drawdown ?? 0;
+        const wr  = s.win_rate ?? 0;
+        const sh  = s.sharpe_ratio ?? 0;
+
+        const cards = [
+            { icon:'💰', label:'Final Değer',     value: fmtMoney(s.final_value),         cls:'blue',   valCls:'' },
+            { icon:'📈', label:'Toplam Getiri',   value: fmtPct(ret),                  cls: ret>=0?'green':'red', valCls: ret>=0?'up':'down' },
+            { icon:'📉', label:'Max Drawdown',    value: fmtPct(dd),                   cls:'red',    valCls:'down' },
+            { icon:'🎯', label:'Win Rate',        value: wr.toFixed(1)+'%',            cls: wr>=50?'green':'orange', valCls: wr>=50?'up':'' },
+            { icon:'📊', label:'Sharpe Ratio',   value: sh.toFixed(2),                cls: sh>=1?'green':'orange', valCls: sh>=1?'up':'' },
+            { icon:'🔄', label:'Toplam İşlem',   value: String(s.total_trades ?? 0),  cls:'purple', valCls:'' },
+            { icon:'✅', label:'Kazanan İşlem',  value: String(s.winning_trades ?? 0), cls:'green',  valCls:'up' },
+            { icon:'❌', label:'Kaybeden İşlem', value: String(s.losing_trades  ?? 0), cls:'red',    valCls:'down' },
+        ];
+
+        document.getElementById('kpi-grid').innerHTML = cards.map(c => `
+            <div class="kpi-card ${c.cls}">
+                <div class="kpi-icon">${c.icon}</div>
+                <div class="kpi-value ${c.valCls}">${c.value}</div>
+                <div class="kpi-label">${c.label}</div>
+            </div>`).join('');
+    }
+
+    // ---------------------------------------------------------------
+    // 1. Equity Curve
+    // ---------------------------------------------------------------
+    function renderEquity(eq, initialCapital) {
+        const labels  = eq.map(e => e.date);
+        const values  = eq.map(e => e.value);
+        const colors  = values.map((v, i) => v >= (i === 0 ? initialCapital : values[i-1]) ? '#10b981' : '#ef4444');
+
+        charts.equity = new Chart(document.getElementById('c-equity').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: `Portföy Değeri (${CURRENCY_NAME})`,
+                        data: values,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37,99,235,0.08)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: values.length < 30 ? 5 : 0,
+                        pointHoverRadius: 6,
+                        borderWidth: 2.5
+                    },
+                    {
+                        label: 'Başlangıç Sermayesi',
+                        data: values.map(() => initialCapital),
+                        borderColor: '#9ca3af',
+                        borderDash: [6, 4],
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.dataset.label + ': ' + fmtMoney(ctx.parsed.y)
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        ticks: { callback: v => CURRENCY + (v/1000).toFixed(0) + 'K' },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------
+    // 2. Monthly Returns
+    // ---------------------------------------------------------------
+    function renderMonthly(eq) {
+        if (eq.length < 2) return;
+
+        const monthlyReturns = [];
+        for (let i = 1; i < eq.length; i++) {
+            const prev = eq[i-1].value;
+            const curr = eq[i].value;
+            const pct  = prev > 0 ? ((curr - prev) / prev) * 100 : 0;
+            monthlyReturns.push({ label: eq[i].date, pct });
+        }
+
+        charts.monthly = new Chart(document.getElementById('c-monthly').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: monthlyReturns.map(m => m.label),
+                datasets: [{
+                    label: 'Aylık Getiri (%)',
+                    data: monthlyReturns.map(m => parseFloat(m.pct.toFixed(2))),
+                    backgroundColor: monthlyReturns.map(m => m.pct >= 0 ? 'rgba(16,185,129,0.75)' : 'rgba(239,68,68,0.75)'),
+                    borderColor:     monthlyReturns.map(m => m.pct >= 0 ? '#10b981' : '#ef4444'),
+                    borderWidth: 1.5,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } },
+                    y: {
+                        ticks: { callback: v => v.toFixed(1) + '%' },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------
+    // 3. Drawdown
+    // ---------------------------------------------------------------
+    function renderDrawdown(eq) {
+        if (!eq.length) return;
+        let peak = eq[0].value;
+        const dd = eq.map(e => {
+            if (e.value > peak) peak = e.value;
+            return peak > 0 ? parseFloat((((e.value - peak) / peak) * 100).toFixed(2)) : 0;
+        });
+
+        charts.dd = new Chart(document.getElementById('c-drawdown').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: eq.map(e => e.date),
+                datasets: [{
+                    label: 'Drawdown (%)',
+                    data: dd,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239,68,68,0.12)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 0,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } },
+                    y: {
+                        ticks: { callback: v => v.toFixed(1) + '%' },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------
+    // 4. Win/Loss Doughnut
+    // ---------------------------------------------------------------
+    function renderWinLoss(s) {
+        const w = s.winning_trades ?? 0;
+        const l = s.losing_trades  ?? 0;
+        const avgW = (s.avg_win_pct  ?? 0).toFixed(2);
+        const avgL = (s.avg_loss_pct ?? 0).toFixed(2);
+
+        charts.wl = new Chart(document.getElementById('c-winloss').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: [`Kazanan (${w}) — Ort. ${avgW}%`, `Kaybeden (${l}) — Ort. ${avgL}%`],
+                datasets: [{
+                    data: [w || 0.01, l || 0.01],
+                    backgroundColor: ['rgba(16,185,129,0.8)', 'rgba(239,68,68,0.8)'],
+                    borderColor:     ['#10b981', '#ef4444'],
+                    borderWidth: 2,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 12 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.label + ' işlem'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------
+    // 5. P&L Bar per Trade
+    // ---------------------------------------------------------------
+    function renderPnL(sells) {
+        if (!sells.length) return;
+        const top = sells.slice(-40); // son 40 işlem
+
+        charts.pnl = new Chart(document.getElementById('c-pnl').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: top.map(t => t.ticker),
+                datasets: [{
+                    label: 'P&L (%)',
+                    data: top.map(t => parseFloat((t.profit_pct ?? 0).toFixed(2))),
+                    backgroundColor: top.map(t => (t.profit_pct ?? 0) >= 0 ? 'rgba(16,185,129,0.75)' : 'rgba(239,68,68,0.75)'),
+                    borderColor:     top.map(t => (t.profit_pct ?? 0) >= 0 ? '#10b981' : '#ef4444'),
+                    borderWidth: 1.5,
+                    borderRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 60, font: { size: 10 } } },
+                    y: {
+                        ticks: { callback: v => v.toFixed(1) + '%' },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------
+    // Trade Table
+    // ---------------------------------------------------------------
+    let _currentTrades = [];
+
+    function renderTable(trades) {
+        _currentTrades = trades;
+        const btn = document.getElementById('btn-export-excel');
+        if (btn) btn.style.display = trades.length ? 'inline-block' : 'none';
+
+        const tbody = document.getElementById('trade-tbody');
+        if (!trades.length) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--muted);">İşlem bulunamadı</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = trades.map(t => {
+            const isBuy  = t.action === 'BUY';
+            const pct    = t.profit_pct ?? 0;
+            const profit = t.profit ?? 0;
+            return `
+            <tr>
+                <td>${t.date}</td>
+                <td><span class="${isBuy ? 'tag-buy' : 'tag-sell'}">${t.action}</span></td>
+                <td><strong>${t.ticker}</strong></td>
+                <td>${t.quantity}</td>
+                <td>${fmtMoney(t.price)}</td>
+                <td>${fmtMoney(t.value)}</td>
+                <td class="${isBuy ? '' : pct >= 0 ? 'up' : 'down'}">${isBuy ? '—' : fmtMoney(profit)}</td>
+                <td class="${isBuy ? '' : pct >= 0 ? 'up' : 'down'}">${isBuy ? '—' : fmtPct(pct)}</td>
+            </tr>`;
+        }).join('');
+    }
+    // ---------------------------------------------------------------
+    // Excel Export
+    // ---------------------------------------------------------------
+    function exportTradesToExcel() {
+        if (!_currentTrades.length) { alert('İndirilecek işlem yok.'); return; }
+
+        const headers = ['Tarih', 'İşlem', 'Hisse', 'Adet', 'Fiyat', 'Değer', 'Kâr/Zarar', 'Kâr/Zarar %'];
+        const rows = _currentTrades.map(t => [
+            t.date        ?? '',
+            t.action      ?? '',
+            t.ticker      ?? '',
+            t.quantity    ?? '',
+            t.price       ?? '',
+            t.value       ?? '',
+            t.profit      != null ? t.profit      : '',
+            t.profit_pct  != null ? t.profit_pct  : '',
+        ]);
+
+        const wsData = [headers, ...rows];
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        // Sütun genişlikleri
+        ws['!cols'] = [
+            {wch:12},{wch:8},{wch:10},{wch:8},{wch:10},
+            {wch:14},{wch:14},{wch:12}
+        ];
+
+        // Başlık satırı kalın
+        headers.forEach((_, i) => {
+            const cell = ws[XLSX.utils.encode_cell({r:0, c:i})];
+            if (cell) cell.s = { font: { bold: true } };
+        });
+
+        XLSX.utils.book_append_sheet(wb, ws, 'İşlem Geçmişi');
+
+        // Dosya adı: backtest adı + tarih
+        const btName = (document.querySelector('#result-title')?.textContent || 'backtest')
+            .replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ _-]/g, '').trim();
+        const today  = new Date().toISOString().slice(0,10);
+        XLSX.writeFile(wb, `${btName}_islem_gecmisi_${today}.xlsx`);
+    }
+
+    </script>
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var commonCfg = {
+        locale: "tr",
+        dateFormat: "Y-m-d",
+        allowInput: false,
+        disableMobile: true,
+        showMonths: 1,
+    };
+    flatpickr("#start-date", Object.assign({}, commonCfg, {
+        defaultDate: "2023-01-01",
+        maxDate: "today",
+    }));
+    flatpickr("#end-date", Object.assign({}, commonCfg, {
+        defaultDate: "2024-12-31",
+        maxDate: "today",
+        plugins: [
+            ShortcutButtonsPlugin({
+                button: [{ label: "📅 Bugün" }],
+                onClick: function(index, fp) {
+                    var today = new Date();
+                    var y = today.getFullYear();
+                    var m = String(today.getMonth()+1).padStart(2,'0');
+                    var d = String(today.getDate()).padStart(2,'0');
+                    var iso = y+'-'+m+'-'+d;
+                    fp.setDate(iso, true);
+                    fp.element.value = iso;
+                    fp.close();
+                }
+            })
+        ]
+    }));
+});
+</script>
+
+</body>
+</html>

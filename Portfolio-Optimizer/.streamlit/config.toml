@@ -1,0 +1,24 @@
+[server]
+headless = true
+address = "0.0.0.0"
+port = 5556
+maxUploadSize = 200
+enableCORS = false
+enableXsrfProtection = false
+
+# Oturum zaman aşımı — uzun süre kullanılmasa bile bağlantı kesilmez
+maxMessageSize = 200
+
+[browser]
+gatherUsageStats = false
+serverAddress = "localhost"
+serverPort = 5556
+
+[runner]
+# Hata olsa bile çalışmaya devam et
+fastReruns = true
+
+[client]
+# Bağlantı kopunca otomatik yeniden bağlan
+showErrorDetails = false
+toolbarMode = "minimal"

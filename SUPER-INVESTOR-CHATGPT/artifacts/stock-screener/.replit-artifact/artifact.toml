@@ -1,0 +1,29 @@
+kind = "web"
+previewPath = "/"
+title = "Stock Screener"
+version = "1.0.0"
+id = "artifacts/stock-screener"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 5000
+
+[services.development]
+run = "cd /home/runner/workspace && streamlit run app.py --server.port 5000"
+
+[services.production]
+
+[services.production.build]
+args = ["echo", "no build needed"]
+
+[services.production.run]
+args = ["bash", "-c", "cd /home/runner/workspace && streamlit run app.py --server.port 5000"]
+
+[services.env]
+PORT = "5000"
+BASE_PATH = "/"

@@ -1,0 +1,481 @@
+Bana Python ile çalışan, profesyonel görünümlü, modüler yapıda bir web uygulaması geliştir.
+
+Uygulamanın amacı:
+BIST (Borsa İstanbul) ve USA (S&P 500 / Nasdaq) piyasalarında işlem yapıp yapmama kararı vermek için makro, teknik, risk ve piyasa içi göstergeleri analiz eden bir karar destek sistemi oluşturmak.
+
+Uygulama yatırım tavsiyesi vermez. Sadece “işlem ortamı uygun mu değil mi” mantığında çalışır.
+
+Genel Kurgu:
+- İki ayrı piyasa modülü olacak:
+  1. BIST Modülü
+  2. USA Modülü
+- Her modül kendi piyasa dinamiklerine göre ayrı değerlendirme yapacak.
+- Sistem önce “rejim analizi” yapacak, sonra “zamanlama analizi” yapacak.
+- Sonuçta kullanıcıya:
+  - Genel Piyasa Rejimi
+  - Toplam Skor
+  - Alt Skorlar
+  - Nihai Karar
+  - Risk Seviyesi
+  - Gerekçeli açıklama
+gösterecek.
+
+Teknik Gereksinimler:
+- Python tabanlı olsun
+- Arayüz için Streamlit tercih et
+- Kod modüler olsun
+- Her gösterge ayrı fonksiyon olarak yazılsın
+- Sonradan kolay geliştirilebilir mimari kur
+- Dosya yapısı profesyonel olsun
+- Mock data ile çalışabilecek şekilde başla
+- Sonra gerçek veri kaynakları kolay eklenebilsin
+- Hata yönetimi ve veri eksikliği kontrolü ekle
+
+Önerilen dosya yapısı:
+- app.py
+- config.py
+- data_fetcher.py
+- indicators.py
+- market_regime.py
+- scoring_bist.py
+- scoring_usa.py
+- decision_engine.py
+- backtest.py
+- utils.py
+
+Uygulama ekran yapısı:
+1. Sol sidebar:
+   - Piyasa seçimi: BIST / USA
+   - Tarih seçimi
+   - Veri kaynağı seçimi (mock / live)
+   - Backtest modu aç-kapat
+   - Risk profili seçimi: Korumacı / Dengeli / Agresif
+
+2. Ana ekran üst bölüm:
+   - Piyasa adı
+   - Güncel rejim
+   - Nihai karar
+   - Toplam skor
+   - Risk seviyesi
+
+3. Ana ekran orta bölüm:
+   - Alt kırılımlar:
+     - Makro skor
+     - Teknik skor
+     - Breadth skor
+     - Risk skor
+     - Hacim/Momentum skor
+
+4. Ana ekran alt bölüm:
+   - Göstergelerin tek tek durumu
+   - Her gösterge için:
+     - mevcut değer
+     - eşik
+     - sinyal
+     - puan katkısı
+     - kısa açıklama
+
+5. Backtest ekranı:
+   - Tarih aralığı seçimi
+   - Piyasa seçimi
+   - Strateji profili seçimi
+   - Sonuçlar:
+     - toplam getiri
+     - max drawdown
+     - kazanma oranı
+     - işlem sayısı
+     - benchmark karşılaştırması
+     - equity curve
+     - işlem logları
+
+==================================================
+1) BIST MODÜLÜ
+==================================================
+
+BIST modülü salt teknik değil, makro ağırlıklı çalışsın.
+
+BIST için 3 katmanlı model kur:
+
+A. Makro Rejim Katmanı
+B. Piyasa Sağlığı Katmanı
+C. Zamanlama Katmanı
+
+--------------------------------
+A) BIST Makro Rejim Katmanı
+--------------------------------
+
+Aşağıdaki göstergeleri kullan:
+
+1. CDS Risk Primi
+- CDS < 250 => güçlü pozitif
+- CDS 250-300 => hafif pozitif / nötr
+- CDS 300-500 => negatif
+- CDS > 500 => override: RİSKLİ / BEKLE
+
+2. Reel Faiz
+- Reel faiz negatif => pozitif
+- Reel faiz hafif pozitif => nötr
+- Reel faiz yüksek pozitif => negatif
+
+3. BIST USD Bazlı Trend
+- BIST/USD SMA200 üzerinde => pozitif
+- altında => negatif
+
+4. USDTRY Volatilitesi
+- düşük / stabil => pozitif
+- ani yükseliş / yüksek oynaklık => negatif
+
+5. Yabancı ilgisi veya temsili sermaye akımı metriği
+- veri yoksa placeholder fonksiyon yaz
+- artan yabancı ilgisi => pozitif
+- azalan => negatif
+
+Makro katmanda bu göstergelere teknik göstergelerden daha yüksek ağırlık ver.
+
+Örnek ağırlık:
+- CDS: 3
+- Reel faiz: 2
+- BIST/USD: 2
+- USDTRY volatilite: 2
+- yabancı ilgisi: 1
+
+Makro rejim sınıfları:
+- Güçlü Pozitif
+- Pozitif
+- Nötr
+- Negatif
+- Kriz
+
+--------------------------------
+B) BIST Piyasa Sağlığı Katmanı
+--------------------------------
+
+1. Breadth: SMA50 üzerindeki hisse oranı
+- > %60 => pozitif
+- 40-60 => nötr
+- < %40 => negatif
+
+2. Breadth: SMA200 üzerindeki hisse oranı
+- > %55 => pozitif
+- düşük => negatif
+
+3. New High / New Low oranı
+- yeni zirveler diplerden belirgin yüksekse => pozitif
+- yeni dipler baskınsa => negatif
+
+4. Hacim + OBV skoru
+- Volume + OBV birlikte güçlü => pozitif
+- zayıf => negatif
+
+5. Sektör liderliği
+- Banka / sanayi / holding gibi ana sektörlerde geniş katılımlı güç varsa => pozitif
+- endeks sadece az sayıda hisseyle yükseliyorsa => negatif
+
+--------------------------------
+C) BIST Zamanlama Katmanı
+--------------------------------
+
+1. Fiyat vs SMA50 / SMA200
+- her ikisinin üstünde => pozitif
+- karışık => nötr
+- her ikisinin altında => negatif
+
+2. SMA50 eğimi
+- pozitif => +1
+- negatif => -1
+
+3. SMA200 eğimi
+- pozitif => +1
+- negatif => -1
+
+4. RSI
+- 45-65 arası => sağlıklı pozitif
+- >70 => aşırı alım, tek başına sert negatif verme, hafif eksi yaz
+- <35 => dikkat, ama diğer momentumla birlikte değerlendir
+
+5. MACD histogram
+- pozitif => pozitif
+- negatif => negatif
+
+6. ADX
+- >20 ise trend var
+- düşükse trend zayıf
+
+7. Volatilite
+- düşen / normal volatilite => olumlu
+- yükselen ve satışla birlikte artan volatilite => negatif
+
+--------------------------------
+BIST Nihai Karar Mantığı
+--------------------------------
+
+Önce override kurallarını kontrol et:
+- CDS > 500 => “RİSKLİ / BEKLE”
+- Makro rejim “Kriz” => “RİSKLİ / BEKLE”
+- BIST/USD negatif + reel faiz yüksek pozitif + breadth zayıf => “GİRMEYİN”
+
+Sonra toplam skoru değerlendir:
+- Güçlü skor + pozitif makro => “UYGUN”
+- Orta skor + karışık görünüm => “DİKKATLİ / KADEMELİ”
+- Negatif skor => “GİRMEYİN”
+- Teknik iyi ama makro zayıfsa => “SADECE KISA VADELİ DİKKATLİ”
+
+Kararlar:
+- UYGUN
+- DİKKATLİ
+- KADEMELİ ALIM
+- BEKLE
+- GİRMEYİN
+- RİSKLİ / OVERRIDE
+
+==================================================
+2) USA MODÜLÜ
+==================================================
+
+USA modülü puan tabanlı olacak ama rejim filtresi ile desteklenecek.
+
+3 katmanlı sistem kur:
+A. Risk Rejimi
+B. Piyasa İç Yapısı
+C. Zamanlama
+
+--------------------------------
+A) USA Risk Rejimi Katmanı
+--------------------------------
+
+1. VIX
+- <15 => pozitif
+- 15-25 => nötr
+- >25 => override: RİSKLİ / NAKİTTE BEKLE
+
+2. 10Y Treasury Yield
+- <3.5 => pozitif
+- 3.5-4.5 => nötr
+- >4.5 => negatif
+
+3. DXY
+- zayıf dolar => pozitif
+- güçlü dolar => negatif
+
+4. Kredi spread / HY spread
+- daralan spread => pozitif
+- açılan spread => negatif
+
+5. Yield curve durumu
+- normale dönme / risk iştahı artışı => pozitif
+- bozulma => negatif
+
+6. Likidite / finansal koşullar göstergesi
+- gevşeyen finansal koşullar => pozitif
+- sıkılaşan => negatif
+
+--------------------------------
+B) USA Piyasa İç Yapısı
+--------------------------------
+
+1. Breadth
+- Advance/Decline olumlu => pozitif
+- zayıf => negatif
+
+2. % hisselerin SMA50 üzeri
+- yüksek => pozitif
+- düşük => negatif
+
+3. % hisselerin SMA200 üzeri
+- yüksek => pozitif
+- düşük => negatif
+
+4. New High / New Low oranı
+- yeni zirveler baskın => pozitif
+- yeni dipler baskın => negatif
+
+5. Equal Weight S&P vs Cap Weight S&P
+- eşit ağırlıklı endeks güçlü ise => sağlıklı yükseliş
+- sadece mega-cap kaynaklı yükseliş varsa => zayıf kalite
+
+6. QQQ/SPY ve IWM/SPY relative strength
+- risk-on liderlik varsa => pozitif
+- small cap ve growth çöküyorsa => negatif
+
+--------------------------------
+C) USA Zamanlama Katmanı
+--------------------------------
+
+1. Fiyat vs SMA200
+- üzerinde => +1
+- altında => -2
+
+2. SMA50 eğimi
+- pozitif => +1
+- negatif => -1
+
+3. MACD histogram
+- pozitif => +1
+- negatif => -1
+
+4. RSI
+- sağlıklı bölge => +1
+- aşırı coşku => -1
+- aşırı zayıflıkta tek başına negatif verme, trendle birlikte değerlendir
+
+5. Put/Call ratio
+- >1.0 korku => ters sinyal olarak hafif pozitif
+- <0.7 aşırı coşku => negatif
+
+6. Hacim
+- yükseliş hacimle destekleniyorsa => +1
+- zayıf hacim => -1
+
+--------------------------------
+USA Nihai Karar Mantığı
+--------------------------------
+
+Override kuralları:
+- VIX > 25 => “RİSKLİ / NAKİTTE BEKLE”
+- Fiyat SMA200 altında VE breadth zayıf => “KORUMACI MOD”
+- kredi spread bozuluyorsa agresif sinyali bastır
+
+Puan bazlı karar:
+- Puan >= 3 => “AGRESİF ALIM UYGUN”
+- Puan 1–2 => “KADEMELİ / DİKKATLİ”
+- Puan 0 ile -1 => “NÖTR / BEKLE”
+- Puan <= -2 => “GİRMEYİN / KORUMACI MOD”
+
+==================================================
+3) SKORLAMA MANTIĞI
+==================================================
+
+Skorlama sistemini esnek yap:
+- göstergelerin ağırlıkları config.py içinde tanımlansın
+- kullanıcı isterse ağırlıkları sonradan değiştirebilsin
+- tüm skorlar normalize edilebilsin
+- nihai skor:
+  toplam_skor = makro_skor + breadth_skor + teknik_skor + risk_skor + momentum_skor
+
+Ayrıca şu alt skorlar ayrı gösterilsin:
+- Makro Skor
+- Teknik Skor
+- Breadth Skor
+- Risk Skor
+- Momentum Skor
+
+==================================================
+4) REJİM TESPİTİ
+==================================================
+
+Hem BIST hem USA için piyasa rejimi belirleyen ayrı bir motor yaz.
+
+Rejimler:
+- Risk-On
+- Nötr
+- Risk-Off
+- Kriz
+
+Rejim belirleme mantığı:
+- trend
+- breadth
+- volatilite
+- faiz
+- dolar
+- kredi stresi
+- makro skor
+
+Örnek:
+- trend güçlü + breadth güçlü + volatilite kontrollü => Risk-On
+- karışık veriler => Nötr
+- trend bozuk + breadth zayıf + volatilite yüksek => Risk-Off
+- CDS/VIX gibi override seviyeleri => Kriz
+
+==================================================
+5) BACKTEST MODÜLÜ
+==================================================
+
+Backtest modülü ekle.
+
+Backtest kuralları:
+- sistem her gün için sinyal üretsin
+- sinyal “UYGUN” veya “AGRESİF ALIM UYGUN” ise pozisyona girsin
+- “DİKKATLİ / KADEMELİ” ise yarım pozisyon düşünsün
+- “BEKLE / GİRMEYİN / RİSKLİ” ise nakitte kalsın
+
+Backtest çıktıları:
+- toplam getiri
+- yıllıklandırılmış getiri
+- max drawdown
+- Sharpe benzeri basit oran
+- işlem sayısı
+- kazanma oranı
+- benchmark kıyaslaması
+- equity curve
+
+Ayrıca backtestte şunları da göster:
+- hangi göstergeler en çok katkı verdi
+- hangi piyasa rejiminde sistem daha iyi çalıştı
+- yanlış sinyaller en çok hangi koşullarda oluştu
+
+==================================================
+6) AÇIKLAMA MOTORU
+==================================================
+
+Kullanıcıya sadece skor gösterme, açıklama da ver.
+
+Her karar için doğal dil açıklama üret:
+Örnek:
+- “Makro görünüm zayıf olsa da teknik yapı toparlanıyor. Breadth henüz güçlü değil. Bu nedenle agresif giriş yerine kademeli ve dikkatli yaklaşım önerilir.”
+- “VIX yüksek ve piyasa genişliği zayıf. Risk rejimi bozuk olduğu için puan uygun görünse bile override nedeniyle nakitte bekleme modu aktif.”
+
+==================================================
+7) MOCK DATA VE GELİŞTİRME SIRASI
+==================================================
+
+İlk aşamada gerçek veri API’lerine bağlı kalma.
+Önce mock data ile çalışan çalışan bir demo oluştur.
+Sonra veri çekme katmanını ayrı soyutla ki sonradan gerçek kaynaklar kolay eklensin.
+
+Örnek veri kaynakları sonradan bağlanabilecek şekilde placeholder bırak:
+- Yahoo Finance
+- FRED
+- Alpha Vantage
+- Twelve Data
+- manuel csv yükleme
+
+==================================================
+8) GELİŞTİRME STANDARTLARI
+==================================================
+
+Kod temiz olsun.
+Her fonksiyonun görevi net olsun.
+Yorum satırları ekle.
+Try/except ile hata kontrolü kur.
+Eksik veri varsa uygulama çökmesin, uyarı versin.
+UI sade ama profesyonel olsun.
+Koyu tema ile uyumlu modern kutucuklar kullan.
+Renkler:
+- pozitif: yeşil
+- dikkat: sarı
+- negatif: kırmızı
+- nötr: gri
+
+==================================================
+9) İLK TESLİM İÇİN İSTEDİĞİM ŞEYLER
+==================================================
+
+Bana ilk etapta aşağıdakileri üret:
+1. Dosya yapısı
+2. app.py
+3. config.py
+4. indicators.py
+5. market_regime.py
+6. scoring_bist.py
+7. scoring_usa.py
+8. decision_engine.py
+9. örnek mock data yapısı
+10. çalışır bir Streamlit demo
+
+Ayrıca kodun sonunda:
+- nasıl çalıştırılacağını yaz
+- eksik kalan geliştirme adımlarını yaz
+- sonraki aşamada gerçek veri entegrasyon planını yaz
+
+Kod tek seferde mümkün olduğunca çalışır halde olsun.
+Önce minimum çalışan sürümü üret, sonra bunu genişletmeye uygun tasarla.

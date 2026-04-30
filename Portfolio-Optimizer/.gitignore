@@ -1,0 +1,30 @@
+# Hassas bilgiler
+.env
+
+# Veritabanı
+*.db
+*.db-shm
+*.db-wal
+
+# Cache
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+
+# Build / dist
+build/
+dist/
+*.spec
+
+# Loglar
+logs/
+
+# macOS
+.DS_Store
+.local/
+
+# Icon dosyaları (isteğe bağlı)
+icon.icns
+icon.ico
+icon.png

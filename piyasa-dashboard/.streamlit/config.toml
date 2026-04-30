@@ -1,0 +1,15 @@
+[server]
+headless = false
+address = "localhost"
+port = 8501
+enableCORS = true
+enableXsrfProtection = true
+runOnSave = true
+
+[browser]
+gatherUsageStats = false
+serverAddress = "localhost"
+serverPort = 8501
+
+[runner]
+fastReruns = true
