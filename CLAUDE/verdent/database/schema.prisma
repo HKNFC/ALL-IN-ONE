@@ -1,0 +1,330 @@
+// VERDENT — Prisma Schema
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STOCK & PRICE DATA
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Stock {
+  id        String   @id @default(cuid())
+  symbol    String   @unique
+  name      String
+  market    String // "BIST" | "NYSE/NASDAQ"
+  sector    String?
+  marketCap Float?
+  createdAt DateTime @default(now())
+
+  prices      StockPrice[]
+  scanResults ScanResult[]
+
+  @@index([market])
+  @@index([sector])
+  @@map("stocks")
+}
+
+model StockPrice {
+  id      String   @id @default(cuid())
+  stockId String
+  date    DateTime
+
+  // OHLCV
+  open   Float
+  high   Float
+  low    Float
+  close  Float
+  volume Float
+
+  // ── Momentum / Trend indicators ──────────────────────────────────────────
+  rsi14      Float?
+  macd       Float?
+  macdSignal Float?
+  ema20      Float?
+  ema50      Float?
+  ema200     Float?
+  sma50      Float?
+  sma200     Float?
+
+  // ── Volatility / Volume indicators ───────────────────────────────────────
+  atr14    Float?
+  obv      Float?
+  vwap     Float?
+  bbUpper  Float?
+  bbLower  Float?
+  bbMiddle Float?
+
+  // ── Trend strength ────────────────────────────────────────────────────────
+  adx14  Float?
+  stochK Float?
+  stochD Float?
+
+  // ── Fundamental data (updated quarterly) ─────────────────────────────────
+  pe             Float?
+  pb             Float?
+  roe            Float?
+  debtEquity     Float?
+  revenueGrowth  Float?
+  earningsGrowth Float?
+  freeCashFlow   Float?
+
+  stock Stock @relation(fields: [stockId], references: [id], onDelete: Cascade)
+
+  @@unique([stockId, date])
+  @@index([stockId])
+  @@index([date])
+  @@map("stock_prices")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MARKET CONDITIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model MarketCondition {
+  id           String   @id @default(cuid())
+  date         DateTime @unique
+  market       String // "BIST" | "US"
+  condition    String // "BULL" | "BEAR" | "SIDEWAYS"
+  vixLevel     Float?
+  breadthIndex Float?
+  sp500Trend   String?
+  bistTrend    String?
+  confidence   Float // 0–100
+  indicators   Json // full indicator snapshot
+
+  @@index([market])
+  @@index([condition])
+  @@map("market_conditions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREENING CRITERIA
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Criteria {
+  id             String   @id @default(cuid())
+  name           String // "ALFA" | "BETA" | "DELTA"
+  displayName    String
+  market         String // "BULL" | "BEAR" | "SIDEWAYS" | "ALL"
+  description    String
+  rules          Json // Array of screening rule objects
+  scoringWeights Json // Weight map for scoring components
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  scanResults ScanResult[]
+  backtests   Backtest[]
+
+  @@index([market])
+  @@index([isActive])
+  @@map("criteria")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCAN RESULTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ScanResult {
+  id          String   @id @default(cuid())
+  scanDate    DateTime
+  criteriaId  String
+  stockId     String
+  score       Float // 0–100
+  rank        Int
+  signals     Json // Detailed signal breakdown per indicator
+  entryPrice  Float
+  targetPrice Float?
+  stopLoss    Float?
+
+  criteria Criteria @relation(fields: [criteriaId], references: [id], onDelete: Restrict)
+  stock    Stock    @relation(fields: [stockId], references: [id], onDelete: Cascade)
+
+  @@unique([scanDate, criteriaId, stockId])
+  @@index([scanDate])
+  @@index([criteriaId])
+  @@index([stockId])
+  @@index([score])
+  @@map("scan_results")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BACKTEST
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Backtest {
+  id              String   @id @default(cuid())
+  name            String
+  criteriaType    String // "ALFA" | "BETA" | "DELTA" | "HYBRID"
+  criteriaId      String?
+  startDate       DateTime
+  endDate         DateTime
+  rebalancePeriod String // "WEEKLY" | "MONTHLY"
+  market          String // "BIST" | "US" | "BOTH"
+  initialCapital  Float    @default(100000)
+  status          String // "RUNNING" | "COMPLETED" | "FAILED"
+  createdAt       DateTime @default(now())
+  isDeleted       Boolean  @default(false)
+
+  // ── Summary results ───────────────────────────────────────────────────────
+  totalReturn      Float?
+  annualizedReturn Float?
+  maxDrawdown      Float?
+  sharpeRatio      Float?
+  winRate          Float?
+  totalTrades      Int?
+
+  criteria           Criteria?          @relation(fields: [criteriaId], references: [id], onDelete: SetNull)
+  portfolioSnapshots BacktestSnapshot[]
+  trades             BacktestTrade[]
+
+  @@index([status])
+  @@index([criteriaType])
+  @@index([market])
+  @@index([isDeleted])
+  @@map("backtests")
+}
+
+model BacktestSnapshot {
+  id              String   @id @default(cuid())
+  backtestId      String
+  date            DateTime
+  portfolioValue  Float
+  holdings        Json // [{symbol, shares, price, value}]
+  criteriaUsed    String // Active criteria name on this date
+  marketCondition String // Market regime on this date
+
+  backtest Backtest @relation(fields: [backtestId], references: [id], onDelete: Cascade)
+
+  @@index([backtestId])
+  @@index([date])
+  @@map("backtest_snapshots")
+}
+
+model BacktestTrade {
+  id         String   @id @default(cuid())
+  backtestId String
+  symbol     String
+  action     String // "BUY" | "SELL"
+  date       DateTime
+  price      Float
+  shares     Float
+  value      Float
+  reason     String
+
+  backtest Backtest @relation(fields: [backtestId], references: [id], onDelete: Cascade)
+
+  @@index([backtestId])
+  @@index([symbol])
+  @@index([date])
+  @@map("backtest_trades")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// USER, PORTFOLIO & WATCHLIST  (kept from original schema)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  portfolios BacktestRun[]
+  alerts     Alert[]
+  watchlists Watchlist[]
+
+  @@map("users")
+}
+
+model BacktestRun {
+  id             String         @id @default(cuid())
+  symbol         String
+  strategy       String
+  period         String
+  initialCapital Float
+  finalValue     Float?
+  totalReturn    Float?
+  sharpeRatio    Float?
+  maxDrawdown    Float?
+  winRate        Float?
+  totalTrades    Int?
+  profitFactor   Float?
+  params         Json           @default("{}")
+  equityCurve    Json?
+  trades         Json?
+  status         BacktestStatus @default(PENDING)
+  startedAt      DateTime       @default(now())
+  completedAt    DateTime?
+  userId         String?
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([symbol])
+  @@index([strategy])
+  @@map("backtest_runs")
+}
+
+enum BacktestStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model Watchlist {
+  id        String   @id @default(cuid())
+  name      String   @default("Default")
+  symbols   String[]
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("watchlists")
+}
+
+model Alert {
+  id          String    @id @default(cuid())
+  symbol      String
+  type        AlertType
+  condition   String
+  value       Float
+  message     String?
+  isActive    Boolean   @default(true)
+  triggeredAt DateTime?
+  createdAt   DateTime  @default(now())
+  userId      String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([symbol])
+  @@map("alerts")
+}
+
+enum AlertType {
+  PRICE_ABOVE
+  PRICE_BELOW
+  PERCENT_CHANGE
+  VOLUME_SPIKE
+  PATTERN_DETECTED
+}
+
+model MarketDataCache {
+  id        String   @id @default(cuid())
+  symbol    String
+  period    String
+  data      Json
+  cachedAt  DateTime @default(now())
+  expiresAt DateTime
+
+  @@unique([symbol, period])
+  @@map("market_data_cache")
+}

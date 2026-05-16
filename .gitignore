@@ -1,0 +1,28 @@
+# Büyük veri dosyaları
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache dosyaları
+*/.cache/
+BIST:USA/.cache/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Log dosyaları
+*.log
+
+# Build/dist
+**/build/
+**/dist/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Portfolio Optimizer cache
+Portfolio-Optimizer/data_cache/

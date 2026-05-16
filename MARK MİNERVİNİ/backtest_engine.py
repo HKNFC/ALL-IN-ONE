@@ -26,12 +26,18 @@ import os
 import hashlib
 import pickle
 
+# SQLite fiyat DB (deterministik backtest için)
+try:
+    from stock_db import get_db as _get_stock_db
+    _STOCK_DB_AVAILABLE = True
+except ImportError:
+    _STOCK_DB_AVAILABLE = False
+
 warnings.filterwarnings('ignore')
 logging.getLogger('yfinance').setLevel(logging.CRITICAL)
 logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
 from universal_scanner import UniversalStockScanner
-import market_calibration_scanner as mcs
 
 
 def _to_float(val):
@@ -56,7 +62,7 @@ class MarketDataCache:
     """
 
     DISK_CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_cache')
-    CACHE_TTL_DAYS = 1   # 1 günden eski disk cache taze veri çeker
+    CACHE_TTL_DAYS = 90  # 90 gün — geçmiş veri değişmez, her gün yeniden indirmeye gerek yok
 
     # Proses-level RAM cache — disk'e bile gitmeden aynı oturumda hızlı döner
     _RAM_CACHE: dict = {}
@@ -135,7 +141,7 @@ class MarketDataCache:
             self._save_disk(ticker, start, end, df)
 
     def get_or_fetch_disk(self, ticker, start, end):
-        """Önce instance cache, sonra RAM cache, sonra disk cache."""
+        """Önce instance cache, sonra RAM cache, sonra SQLite DB, sonra disk cache."""
         if ticker in self._data:
             return self._data[ticker]
 
@@ -145,6 +151,20 @@ class MarketDataCache:
             df = MarketDataCache._RAM_CACHE[ram_key]
             self._data[ticker] = df
             return df
+
+        # ── SQLite DB katmanı (deterministik) ──────────────────────────
+        if _STOCK_DB_AVAILABLE:
+            try:
+                db = _get_stock_db()
+                if db.has_data(ticker, min_rows=50):
+                    db_df = db.get_prices(ticker, start, end)
+                    if db_df is not None and not db_df.empty:
+                        self._data[ticker] = db_df
+                        MarketDataCache._RAM_CACHE[ram_key] = db_df
+                        print(f"  📦 DB'den yüklendi: {ticker} ({len(db_df)} gün)", flush=True)
+                        return db_df
+            except Exception as _e:
+                pass  # DB hatası → disk/live fallback'e devam
 
         disk_df = self._load_disk(ticker, start, end)
         if disk_df is not None:
@@ -158,17 +178,17 @@ class MarketDataCache:
         return None
 
     def _is_stale(self, ticker, cached_df):
-        """Cache'deki son fiyat gerçek fiyatın 3x-10x fazlaysa stale."""
+        """Cache geçerlilik kontrolü — sadece veri boşluğuna bakılır, live fiyat sorgulanmaz.
+        Live fiyat kontrolü kaldırıldı: tarife krizi gibi yüksek volatilite dönemlerinde
+        historik fiyatlar / anlık fiyat oranı yanlış stale sinyali verebiliyordu."""
         try:
-            cached_last = float(cached_df['Close'].dropna().iloc[-1])
-            import yfinance as yf
-            info = yf.Ticker(ticker).fast_info
-            live = getattr(info, 'last_price', None) or getattr(info, 'previous_close', None)
-            if not live or live <= 0:
-                return False
-            ratio = cached_last / live
-            # 5 kattan fazla sapma → stale
-            return ratio > 5 or ratio < 0.2
+            if cached_df is None or cached_df.empty:
+                return True
+            if 'Close' not in cached_df.columns:
+                return True
+            # Veri tutarlılık kontrolü: aşırı NaN oranı varsa stale
+            nan_ratio = cached_df['Close'].isna().mean()
+            return nan_ratio > 0.5
         except Exception:
             return False
 
@@ -243,7 +263,16 @@ class MarketDataCache:
                     if len(chunk) == 1:
                         df = raw.copy()
                         if isinstance(df.columns, pd.MultiIndex):
-                            df.columns = df.columns.get_level_values(0)
+                            # group_by='ticker' ile level-0=ticker, level-1=OHLCV
+                            # Her iki düzeni de destekle
+                            lvl0 = df.columns.get_level_values(0).tolist()
+                            lvl1 = df.columns.get_level_values(1).tolist()
+                            if 'Close' in lvl1:
+                                df.columns = lvl1
+                            elif 'Close' in lvl0:
+                                df.columns = lvl0
+                            else:
+                                df.columns = lvl1
                     else:
                         if isinstance(raw.columns, pd.MultiIndex):
                             lvls = raw.columns.get_level_values(1)
@@ -320,8 +349,11 @@ class MinerviniBacktest:
                 current += timedelta(days=15)
 
         else:
+            # Sabit aralık: başlangıç tarihinden itibaren tam 1'er ay
             while current <= self.end_date:
-                d = self.get_first_trading_day_of_month(current.year, current.month)
+                d = current
+                while d.weekday() >= 5:
+                    d += timedelta(days=1)
                 if d <= self.end_date:
                     dates.append(d)
                 current += relativedelta(months=1)
@@ -346,28 +378,85 @@ class MinerviniBacktest:
 
         fetch_start = self.start_date - timedelta(days=420)
         # fetch_end her zaman bugün + 3 gün — scanner ile aynı cache key'i üretir
-        fetch_end   = datetime.now().date() + timedelta(days=3)
+        # fetch_end: bitiş tarihinden sonraki ilk pazartesiye yuvarla.
+        # Böylece aynı backtest parametreleriyle hafta içinde aynı cache key üretilir.
+        _raw_end = max(self.end_date.date(), datetime.now().date()) + timedelta(days=3)
+        # Haftanın gününe göre en yakın Pazartesiye yuvarla (deterministik key)
+        _days_to_monday = (7 - _raw_end.weekday()) % 7
+        fetch_end   = _raw_end + timedelta(days=_days_to_monday)
         fetch_end   = pd.Timestamp(fetch_end)
 
         benchmark    = ['^GSPC', 'XU100.IS', 'SPY']
         all_tickers  = list(dict.fromkeys(tickers + benchmark))
 
-        # Disk cache'den yüklenebilenleri belleğe al
+        # DB ve disk cache'den yüklenebilenleri belleğe al
         missing = []
         for t in all_tickers:
             cached = self._cache.get_or_fetch_disk(t, fetch_start, fetch_end)
             if cached is None:
                 missing.append(t)
 
+        # DB'de tam verisi olan hisseleri missing listesinden çıkar
+        if _STOCK_DB_AVAILABLE:
+            try:
+                _db = _get_stock_db()
+                _db_count = _db.ticker_count()
+                if _db_count > 0:
+                    missing = [t for t in missing if not _db.has_data(t, min_rows=50)]
+                    print(f"   📦 SQLite DB'de {_db_count} hisse var, indirme listesi: {len(missing)}", flush=True)
+            except Exception:
+                pass
+
+        # ── Bad tickers kalıcı listesini yükle ──────────────────────────
+        import json
+        _bad_path = os.path.join(self._cache.DISK_CACHE_DIR, 'bad_tickers.json')
+        if os.path.exists(_bad_path):
+            try:
+                with open(_bad_path) as _f:
+                    _saved_bad = set(json.load(_f))
+                self._cache._bad.update(_saved_bad)
+                print(f"   ⚠️  {len(_saved_bad)} kalıcı başarısız hisse yüklendi", flush=True)
+            except Exception:
+                pass
+
         if missing:
             print(f"\n📥 Veri indirme başlıyor: {fetch_start.date()} → {fetch_end.date()}", flush=True)
-            print(f"   {len(missing)} hisse + benchmark (disk cache'de olmayan)", flush=True)
-            self._cache.bulk_download(missing, fetch_start, fetch_end, label="hisse")
-            # Yeni indirilen verileri disk cache'e kaydet
-            for t in missing:
-                df = self._cache.get(t)
-                if df is not None and not df.empty:
-                    self._cache._save_disk(t, fetch_start, fetch_end, df)
+            # Bad ticker listesinden çıkar — zaten başarısız olduğu bilinen hisseleri tekrar deneme
+            missing_filtered = [t for t in missing if t not in self._cache._bad]
+            print(f"   {len(missing_filtered)} hisse (disk cache'de olmayan, başarısız listede olmayan)", flush=True)
+            if missing_filtered:
+                # İlk deneme
+                self._cache.bulk_download(missing_filtered, fetch_start, fetch_end, label="hisse")
+                # Yeni indirilen verileri disk cache'e kaydet
+                for t in missing_filtered:
+                    df = self._cache.get(t)
+                    if df is not None and not df.empty:
+                        self._cache._save_disk(t, fetch_start, fetch_end, df)
+
+                # Retry: ilk denemede başarısız olanları tekrar dene
+                _still_missing = [t for t in missing_filtered if self._cache.get(t) is None]
+                if _still_missing:
+                    print(f"   🔄 Retry: {len(_still_missing)} hisse tekrar deneniyor...", flush=True)
+                    import time as _time
+                    _time.sleep(2)
+                    self._cache.bulk_download(_still_missing, fetch_start, fetch_end, label="retry")
+                    for t in _still_missing:
+                        df = self._cache.get(t)
+                        if df is not None and not df.empty:
+                            self._cache._save_disk(t, fetch_start, fetch_end, df)
+
+                # Kalıcı olarak başarısız olanları kaydet
+                _perm_bad = [t for t in missing_filtered
+                             if self._cache.get(t) is None and t not in ('^', 'SPY')]
+                if _perm_bad:
+                    self._cache._bad.update(_perm_bad)
+                    try:
+                        _all_bad = list(self._cache._bad - {'^', 'SPY', 'XU100.IS', '^GSPC'})
+                        with open(_bad_path, 'w') as _f:
+                            json.dump(_all_bad, _f)
+                        print(f"   💾 {len(_perm_bad)} başarısız hisse kalıcı listeye eklendi", flush=True)
+                    except Exception:
+                        pass
         else:
             print(f"\n✅ Tüm veriler disk cache'den yüklendi ({len(all_tickers)} hisse)", flush=True)
 
@@ -420,10 +509,14 @@ class MinerviniBacktest:
                 return None
 
         workers = min(8, max(1, len(test_tickers)))
+        sorted_tickers = sorted(test_tickers)  # Deterministik ticker sırası
         with ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = {pool.submit(_score_ticker, t): t for t in test_tickers}
-            for fut in as_completed(futures):
-                res = fut.result()
+            future_map = {t: pool.submit(_score_ticker, t) for t in sorted_tickers}
+            for t in sorted_tickers:  # Sonuçları ticker alfabetik sırasında topla
+                try:
+                    res = future_map[t].result(timeout=30)
+                except Exception:
+                    res = None
                 if res:
                     results.append(res)
                     passed += 1
@@ -461,8 +554,32 @@ class MinerviniBacktest:
         else:
             df['RS_Score'] = 0
 
-        df = df.sort_values('RS_Score', ascending=False)
-        top = df.head(top_n).to_dict('records')
+        # Deterministik tie-breaking: RS_Score eşitse ticker adına göre sırala
+        df = df.sort_values(['RS_Score', 'Ticker'], ascending=[False, True])
+
+        # ── Duplikasyon filtresi: aynı fiyat datasına sahip hisseleri çıkar ──
+        selected = []
+        seen_prices = set()  # (son_kapanış, son_5_gün_toplam) imzası
+        for _, row in df.iterrows():
+            ticker = row.get('Ticker', '')
+            # Fiyat imzası oluştur
+            try:
+                stock_df = self._cache.get_slice(ticker, self.end_date)
+                if stock_df is not None and len(stock_df) >= 5:
+                    sig = (
+                        round(float(stock_df['Close'].iloc[-1]), 2),
+                        round(float(stock_df['Close'].iloc[-5:].sum()), 2),
+                    )
+                    if sig in seen_prices:
+                        print(f"  ⚠️ {ticker} çıkarıldı: aynı fiyat datasına sahip başka hisse seçildi", flush=True)
+                        continue
+                    seen_prices.add(sig)
+            except Exception:
+                pass
+            selected.append(row.to_dict())
+            if len(selected) >= top_n:
+                break
+        top = selected
 
         print(f"  📋 Top {len(top)} hisse (RS Yöntemi):", flush=True)
         for i, s in enumerate(top, 1):
@@ -487,7 +604,29 @@ class MinerviniBacktest:
 
         df['Status_Priority'] = df['Status'].map(STATUS_PRIORITY).fillna(0)
         df = df.sort_values(['Status_Priority', 'RS_Score'], ascending=[False, False])
-        top = df.head(top_n).to_dict('records')
+
+        # ── Duplikasyon filtresi ──
+        selected = []
+        seen_prices = set()
+        for _, row in df.iterrows():
+            ticker = row.get('Ticker', '')
+            try:
+                stock_df = self._cache.get_slice(ticker, self.end_date)
+                if stock_df is not None and len(stock_df) >= 5:
+                    sig = (
+                        round(float(stock_df['Close'].iloc[-1]), 2),
+                        round(float(stock_df['Close'].iloc[-5:].sum()), 2),
+                    )
+                    if sig in seen_prices:
+                        print(f"  ⚠️ {ticker} çıkarıldı: aynı fiyat datasına sahip başka hisse seçildi", flush=True)
+                        continue
+                    seen_prices.add(sig)
+            except Exception:
+                pass
+            selected.append(row.to_dict())
+            if len(selected) >= top_n:
+                break
+        top = selected
 
         print(f"  📋 Top {len(top)} hisse (Minervini):", flush=True)
         for i, s in enumerate(top, 1):

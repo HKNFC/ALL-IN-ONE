@@ -88,7 +88,7 @@ def get_time_series(symbol, start_date, end_date, interval='1day'):
             'interval':   interval,
             'start_date': start_str + ' 00:00:00',
             'end_date':   end_str   + ' 23:59:59',
-            'outputsize': 5000,
+            'outputsize': 800,
             'apikey':     TWELVEDATA_API_KEY,
             'format':     'JSON',
         }
@@ -152,7 +152,7 @@ def get_batch_time_series(symbols, start_date, end_date, interval='1day',
                 'interval':   interval,
                 'start_date': start_str + ' 00:00:00',
                 'end_date':   end_str   + ' 23:59:59',
-                'outputsize': 5000,
+                'outputsize': 800,
                 'apikey':     TWELVEDATA_API_KEY,
                 'format':     'JSON',
             }
@@ -169,24 +169,24 @@ def get_batch_time_series(symbols, start_date, end_date, interval='1day',
                     _cache[key] = df
                     results[orig] = df
                 else:
-                    results[orig] = _yf_fallback(orig, start_str, end_str)
+                    results[orig] = pd.DataFrame()  # fallback yok — hızlı geç
             else:
                 # Çoklu sembol → dict dönüyor
                 for orig, clean in zip(batch, clean_batch):
                     sym_data = data.get(clean, {})
                     if sym_data.get('status') == 'ok' and 'values' in sym_data:
                         df = _to_df(sym_data['values'], clean)
+                        key = _cache_key(clean, start_str, end_str, interval)
+                        if not df.empty:
+                            _cache[key] = df
+                        results[orig] = df
                     else:
-                        df = _yf_fallback(orig, start_str, end_str)
-                    key = _cache_key(clean, start_str, end_str, interval)
-                    if not df.empty:
-                        _cache[key] = df
-                    results[orig] = df
+                        results[orig] = pd.DataFrame()  # fallback yok — hızlı geç
 
-        except Exception:
-            # Tüm batch için fallback
+        except Exception as e:
+            # Hata durumunda boş DataFrame — yavaş fallback yok
             for orig in batch:
-                results[orig] = _yf_fallback(orig, start_str, end_str)
+                results[orig] = pd.DataFrame()
 
         if i + batch_size < len(missing):
             time.sleep(sleep_sec)

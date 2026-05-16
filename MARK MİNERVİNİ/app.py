@@ -118,8 +118,8 @@ def api_quick_scan():
         scanner = UniversalStockScanner()
         
         # Pazar verisi
-        sp500 = yf.Ticker("^GSPC").history(period="1y")
-        xu100 = yf.Ticker("XU100.IS").history(period="1y")
+        sp500 = yf.Ticker("^GSPC").history(period="2y")
+        xu100 = yf.Ticker("XU100.IS").history(period="2y")
         
         results = []
         
@@ -145,10 +145,22 @@ def api_quick_scan():
             'error': str(e)
         }), 500
 
+def _last_business_day(date: pd.Timestamp) -> pd.Timestamp:
+    """Verilen tarih bugün veya sonrasıysa bir önceki iş gününü döndür."""
+    today = pd.Timestamp.today().normalize()
+    d = date.normalize()
+    if d >= today:
+        d = today - pd.Timedelta(days=1)
+        while d.weekday() >= 5:   # Cumartesi=5, Pazar=6
+            d -= pd.Timedelta(days=1)
+    return d
+
+
 def _scan_with_progress(bt, scan_dt, market, tickers_override):
     """BacktestEngine taramasını ilerleme takibi ile çalıştırır."""
-    cutoff  = pd.Timestamp(scan_dt).normalize()
-    total   = len(tickers_override)
+    cutoff_raw = pd.Timestamp(scan_dt).normalize()
+    cutoff     = _last_business_day(cutoff_raw)   # bugün seçildiyse → son iş günü
+    total      = len(tickers_override)
 
     # Veri indir (%5 → %40)
     _set_progress(5, f'Veriler indiriliyor ({total} hisse)...')
@@ -217,6 +229,7 @@ def api_full_scan():
             total = len(tickers_override)
             _set_progress(5, f'Veriler indiriliyor ({total} hisse)...')
 
+            effective_cutoff = _last_business_day(scan_dt)
             results = _scan_with_progress(bt, scan_dt, market, tickers_override)
 
             _set_progress(100, f'Tamamlandı — {len(results)} hisse bulundu')
@@ -226,19 +239,37 @@ def api_full_scan():
                 'results': results,
                 'market': market,
                 'scan_date': scan_date,
+                'effective_cutoff': effective_cutoff.strftime('%Y-%m-%d'),
                 'timestamp': datetime.now().isoformat()
             })
 
         # ── BUGÜN: canlı tarama (klasik sistem) ──
         scanner = UniversalStockScanner()
 
+        # Seans öncesiyse son kapanış tarihini as_of_date olarak kullan
+        from datetime import datetime as _dt, date as _date, timedelta as _td
+        _now = _dt.now()
+        _wd = _now.weekday()
+        _live_as_of = None
+        _days_back = 0
+        if _wd == 5:    # Cumartesi
+            _days_back = 1
+        elif _wd == 6:  # Pazar
+            _days_back = 2
+        elif _wd == 0 and _now.hour < 10:  # Pazartesi seans öncesi
+            _days_back = 3
+        elif _wd in (1,2,3,4) and _now.hour < 10:  # Salı-Cuma seans öncesi
+            _days_back = 1
+        if _days_back > 0:
+            _live_as_of = (_date.today() - _td(days=_days_back)).strftime('%Y-%m-%d')
+
         if market == 'US':
             us_results = []
             import io, contextlib
             with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
-                sp500 = yf.Ticker("^GSPC").history(period="1y")
+                sp500 = yf.Ticker("^GSPC").history(period="2y")
             for ticker in scanner.us_tickers:
-                result = scanner.scan_us_stock(ticker, sp500)
+                result = scanner.scan_us_stock(ticker, sp500, as_of_date=_live_as_of)
                 if result:
                     us_results.append(result)
             # Cross-validation (Breakout + Pivot Near hisseler için)
@@ -254,10 +285,10 @@ def api_full_scan():
             bist_results = []
             import io, contextlib
             with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
-                xu100 = yf.Ticker("XU100.IS").history(period="1y")
+                xu100 = yf.Ticker("XU100.IS").history(period="2y")
             bist_list = scanner.get_tickers_by_scan_type(scan_type, manual_list)
             for ticker in bist_list:
-                result = scanner.scan_bist_stock(ticker, xu100)
+                result = scanner.scan_bist_stock(ticker, xu100, as_of_date=_live_as_of)
                 if result:
                     bist_results.append(result)
             # Cross-validation (Breakout + Pivot Near hisseler için)

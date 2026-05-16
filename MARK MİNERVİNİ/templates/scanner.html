@@ -240,7 +240,22 @@
                     </div>
                 </div>
                 
-                <div class="results-grid" id="results-container"></div>
+                <!-- BIST bölümü -->
+                <div id="bist-section" style="display:none;">
+                    <h3 style="color:#f59e0b;margin:1.5rem 0 0.75rem;font-size:1.1rem;border-bottom:2px solid #f59e0b;padding-bottom:0.5rem;">🇹🇷 BIST Tarama Sonuçları — <span id="bist-count">0</span> hisse</h3>
+                    <div class="results-grid" id="bist-container"></div>
+                </div>
+
+                <!-- USA bölümü -->
+                <div id="usa-section" style="display:none;">
+                    <h3 style="color:#3b82f6;margin:2rem 0 0.75rem;font-size:1.1rem;border-bottom:2px solid #3b82f6;padding-bottom:0.5rem;">🇺🇸 USA Tarama Sonuçları — <span id="usa-count">0</span> hisse</h3>
+                    <div class="results-grid" id="usa-container"></div>
+                </div>
+
+                <!-- Tek piyasa (eski uyumluluk) -->
+                <div id="single-container-wrap">
+                    <div class="results-grid" id="results-container"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -452,8 +467,14 @@
                 progressFill.style.width = '100%';
                 
                 if (data.success) {
+                    const effCutoff = data.effective_cutoff || scanDate;
+                    const isAdjusted = scanDate && effCutoff && effCutoff !== scanDate;
                     const dateLabel = scanDate ? ` — ${scanDate} tarihli tarama` : '';
-                    status.textContent = `✅ Tarama tamamlandı${dateLabel}! ${data.count} hisse bulundu.`;
+                    let cutoffNote = '';
+                    if (isAdjusted) {
+                        cutoffNote = ` <span style="color:#f59e0b;font-size:0.85rem;">(Veriler ${effCutoff} kapanışı baz alınarak hesaplandı)</span>`;
+                    }
+                    status.innerHTML = `✅ Tarama tamamlandı${dateLabel}! ${data.count} hisse bulundu.${cutoffNote}`;
                     scanResults = data.results;
                     // localStorage'a kaydet
                     saveResultsToStorage(data.results, {
@@ -498,6 +519,14 @@
         }
 
         function displayResults(results) {
+            const market = document.getElementById('market-select')?.value || 'BIST';
+            const isBoth = true; // Her zaman ayrı bölümlerde göster
+
+            // Bölümleri sıfırla
+            document.getElementById('bist-section').style.display = 'none';
+            document.getElementById('usa-section').style.display = 'none';
+            document.getElementById('single-container-wrap').style.display = 'none';
+
             const container = document.getElementById('results-container');
             const resultsSection = document.getElementById('results-section');
             const resultCount = document.getElementById('result-count');
@@ -514,7 +543,7 @@
             const topPicks = getTopPicks(results);
             const topPickTickers = topPicks.slice(0, 10).map(s => s.Ticker || s.ticker);
             const topPickRank = {};
-            topPicks.forEach((s, i) => { topPickRank[s.Ticker || s.ticker] = i + 1; });
+            topPicks.slice(0, 10).forEach((s, i) => { topPickRank[s.Ticker || s.ticker] = i + 1; });
 
             // En iyi 7 hisseyi SQLite'a kaydet
             const top5 = topPicks.slice(0, 7).map((s, i) => ({
@@ -537,6 +566,23 @@
                 }).catch(() => {});
             }
 
+            // Min RS filtresi uygula
+            const minRS = parseFloat(document.getElementById('min-rs')?.value || 0);
+            if (minRS > 0) {
+                results = results.filter(s => getRsValue(s) >= minRS);
+                resultCount.textContent = results.length;
+            }
+
+            // RS skoruna göre sırala: Top Picks önce (rsrank küçükten büyüğe), sonra diğerleri
+            results.sort((a, b) => {
+                const ta = a.Ticker || a.ticker;
+                const tb = b.Ticker || b.ticker;
+                const ra = topPickRank[ta] || 9999;
+                const rb = topPickRank[tb] || 9999;
+                if (ra !== rb) return ra - rb;
+                return getRsValue(b) - getRsValue(a);
+            });
+
             let html = '';
 
             results.forEach(stock => {
@@ -553,7 +599,7 @@
 
                 const flag = market === 'BIST' ? '🇹🇷' : '🇺🇸';
                 const rank = topPickRank[ticker];
-                const isTopPick = !!rank;
+                const isTopPick = topPickTickers.includes(ticker);
 
                 // Hacim teyidi
                 const hasVolumeConfirmation = volumeSpike >= 1.5;
@@ -609,8 +655,32 @@
                 // data-toppick + data-rsrank attribute for filtering/sorting
                 const topPickAttr = isTopPick ? ` data-toppick="true" data-rsrank="${rank}"` : ' data-rsrank="9999"';
 
-                html += `
-                    <div class="result-card" data-status="${status}"${topPickAttr}>
+                html += buildCard(stock, topPickAttr, {ticker, status, market, flag, currency, price, pivot, distance, rs, stopLoss, volumeIcon, volumeText, volumeColor, breakoutWarning, topPickBadge, topPickNote, dataWarningHtml, rank, isTopPick});
+            });
+
+            function buildCard(stock, topPickAttr, ctx) {
+                if (!ctx) {
+                    // ctx yoksa ham veriden hesapla
+                    const ticker = stock.Ticker || stock.ticker;
+                    const status = stock.Status || stock.status || 'SETUP';
+                    const market = stock.Market || stock.market || 'BIST';
+                    const flag = market === 'BIST' ? '🇹🇷' : '🇺🇸';
+                    const currency = market === 'BIST' ? '₺' : '$';
+                    const price = stock.Price || stock.price || 0;
+                    const pivot = stock.Pivot || stock.pivot || 0;
+                    const distance = stock['Distance_to_Pivot_%'] || 0;
+                    const rs = parseFloat(stock['RS'] || stock['RS_Divergence_%'] || stock.rs_score || 0);
+                    const stopLoss = stock.Stop_Level || stock.stop_loss || 0;
+                    const volumeSpike = parseFloat(stock.Volume_Spike_Ratio || 1);
+                    const hasVol = volumeSpike >= 1.5;
+                    const volumeIcon = hasVol ? '📊✅' : '📊⚠️';
+                    const volumeText = `${volumeSpike.toFixed(2)}x ${hasVol ? '(Teyit var!)' : '(Düşük hacim)'}`;
+                    const volumeColor = hasVol ? '#10b981' : '#f59e0b';
+                    ctx = {ticker,status,market,flag,currency,price,pivot,distance,rs,stopLoss,volumeIcon,volumeText,volumeColor,breakoutWarning:'',topPickBadge:'',topPickNote:'',dataWarningHtml:'',rank:9999,isTopPick:false};
+                }
+                const {ticker,status,market,flag,currency,price,pivot,distance,rs,stopLoss,volumeIcon,volumeText,volumeColor,breakoutWarning,topPickBadge,topPickNote,dataWarningHtml} = ctx;
+                return `
+                    <div class="result-card" data-status="${status}" data-market="${market}"${topPickAttr}>
                         <div class="result-header">
                             <h3>${flag} ${ticker}${topPickBadge}</h3>
                             <span class="badge badge-${status}">${status}</span>
@@ -640,9 +710,49 @@
                         </div>
                     </div>
                 `;
-            });
+            }
+            // (forEach kapandı, buildCard tanımlandı)
+            let _dummy;
 
-            container.innerHTML = html;
+            if (isBoth) {
+                // BIST ve USA ayrı gruplara böl
+                const bist = results.filter(s => (s.Market || s.market) === 'BIST');
+                const usa  = results.filter(s => (s.Market || s.market) !== 'BIST');
+
+                function renderGroup(list, containerId, countId, sectionId) {
+                    if (list.length === 0) return;
+                    // Sadece bu grubun kartlarını oluştur
+                    const saved = results;
+                    const topP  = getTopPicks(list);
+                    const tpTickers = topP.slice(0,10).map(s => s.Ticker || s.ticker);
+                    const tpRank    = {};
+                    topP.slice(0,10).forEach((s,i) => { tpRank[s.Ticker||s.ticker] = i+1; });
+
+                    list.sort((a,b) => {
+                        const ra = tpRank[a.Ticker||a.ticker] || 9999;
+                        const rb = tpRank[b.Ticker||b.ticker] || 9999;
+                        if (ra !== rb) return ra - rb;
+                        return getRsValue(b) - getRsValue(a);
+                    });
+
+                    let h = '';
+                    list.forEach(stock => {
+                        const ticker = stock.Ticker || stock.ticker;
+                        const rank   = tpRank[ticker];
+                        const isTop  = tpTickers.includes(ticker);
+                        const topAttr = isTop ? ` data-toppick="true" data-rsrank="${rank}"` : ' data-rsrank="9999"';
+                        h += buildCard(stock, topAttr);
+                    });
+                    document.getElementById(containerId).innerHTML = h;
+                    document.getElementById(countId).textContent = list.length;
+                    document.getElementById(sectionId).style.display = 'block';
+                }
+
+                renderGroup(bist, 'bist-container', 'bist-count', 'bist-section');
+                renderGroup(usa,  'usa-container',  'usa-count',  'usa-section');
+            } else {
+                container.innerHTML = html;
+            }
         }
         
         function filterResults(status) {
@@ -653,24 +763,43 @@
                 if (btn.dataset.filter === status) btn.classList.add('active');
             });
 
-            const container = document.getElementById('results-container');
-            const cards = Array.from(container.querySelectorAll('.result-card'));
+            // Tüm section içindeki kartları bul (bist-container / usa-container dahil)
+            const resultsSection = document.getElementById('results-section');
+            const cards = Array.from(resultsSection.querySelectorAll('.result-card'));
 
             if (status === 'TOPPICKS') {
-                // RS sırasına göre sırala (data-rsrank küçükten büyüğe)
+                // Kartları doğrudan results-container'a taşı (section yapısını by-pass et)
+                const container = document.getElementById('results-container');
                 cards.sort((a, b) => parseInt(a.dataset.rsrank || 9999) - parseInt(b.dataset.rsrank || 9999));
                 cards.forEach(card => {
-                    container.appendChild(card); // sıralı şekilde yeniden ekle
+                    container.appendChild(card);
                     card.style.display = card.dataset.toppick === 'true' ? 'block' : 'none';
                 });
+                // Section başlıklarını gizle
+                const bistSec = document.getElementById('bist-section');
+                const usaSec  = document.getElementById('usa-section');
+                if (bistSec) bistSec.querySelector('h3') && (bistSec.querySelector('h3').style.display = 'none');
+                if (usaSec)  usaSec.querySelector('h3')  && (usaSec.querySelector('h3').style.display  = 'none');
             } else {
+                // Section başlıklarını göster
+                const bistSec = document.getElementById('bist-section');
+                const usaSec  = document.getElementById('usa-section');
+                if (bistSec && bistSec.querySelector('h3')) bistSec.querySelector('h3').style.display = '';
+                if (usaSec  && usaSec.querySelector('h3'))  usaSec.querySelector('h3').style.display  = '';
+
+                let bistVisible = 0, usaVisible = 0;
                 cards.forEach(card => {
-                    if (status === 'all') {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = card.dataset.status === status ? 'block' : 'none';
+                    const show = status === 'all' || card.dataset.status === status;
+                    card.style.display = show ? 'block' : 'none';
+                    if (show) {
+                        const m = card.dataset.market || '';
+                        if (m === 'BIST') bistVisible++;
+                        else usaVisible++;
                     }
                 });
+                // Hiç görünen kart yoksa section'ı gizle
+                if (bistSec) bistSec.style.display = bistVisible > 0 ? 'block' : 'none';
+                if (usaSec)  usaSec.style.display  = usaVisible  > 0 ? 'block' : 'none';
             }
         }
         
@@ -823,7 +952,6 @@
                     sessions[key].tickers.push({ticker: p.ticker, rank: p.rank, status: p.status});
                 });
 
-                // saved_at'e göre en yeni oturum üstte (picks zaten saved_at DESC sıralı)
                 panel.style.display = 'block';
                 const marketLabel = {
                     'BIST':    '🇹🇷 BIST TÜM',
@@ -837,19 +965,75 @@
                 };
                 const statusColor = {BREAKOUT:'#22c55e', PIVOT_NEAR:'#f59e0b', SETUP:'#60a5fa'};
 
-                tbody.innerHTML = Object.values(sessions).map(s => {
-                    const mLabel = marketLabel[s.market] || ('🌍 ' + s.market);
-                    const tickerBadges = s.tickers
-                        .sort((a,b) => a.rank - b.rank)
-                        .map(t => `<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;border-radius:6px;background:#1e293b;color:${statusColor[t.status]||'#94a3b8'};font-weight:700;font-size:13px">#${t.rank} ${t.ticker}</span>`)
-                        .join('');
-                    return `<tr style="border-bottom:1px solid #1e293b;">
-                        <td style="padding:10px;color:#94a3b8;font-size:13px;white-space:nowrap">${s.scan_date}</td>
-                        <td style="padding:10px;white-space:nowrap"><span style="font-size:12px;background:#0f172a;border:1px solid #334155;padding:3px 8px;border-radius:6px;color:#f1f5f9;font-weight:600">${mLabel}</span></td>
-                        <td style="padding:10px;line-height:1.8">${tickerBadges}</td>
-                        <td style="padding:10px;text-align:center"><button onclick="deleteTopPickSession('${s.scan_date}','${s.market}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:16px" title="Bu taramayı sil">🗑</button></td>
-                    </tr>`;
-                }).join('');
+                const allSessions = Object.values(sessions);
+                const bistSessions = allSessions.filter(s => !['US','USA'].includes(s.market));
+                const usaSessions  = allSessions.filter(s =>  ['US','USA'].includes(s.market));
+
+                function buildSessionRows(list) {
+                    if (list.length === 0) return '<tr><td colspan="4" style="padding:12px;color:#475569;text-align:center;font-size:13px">Kayıtlı tarama yok</td></tr>';
+                    return list.map(s => {
+                        const mLabel = marketLabel[s.market] || ('🌍 ' + s.market);
+                        const tickerBadges = s.tickers
+                            .sort((a,b) => a.rank - b.rank)
+                            .map(t => `<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;border-radius:6px;background:#1e293b;color:${statusColor[t.status]||'#94a3b8'};font-weight:700;font-size:13px">#${t.rank} ${t.ticker}</span>`)
+                            .join('');
+                        return `<tr style="border-bottom:1px solid #1e293b;">
+                            <td style="padding:10px;color:#94a3b8;font-size:13px;white-space:nowrap">${s.scan_date}</td>
+                            <td style="padding:10px;white-space:nowrap"><span style="font-size:12px;background:#0f172a;border:1px solid #334155;padding:3px 8px;border-radius:6px;color:#f1f5f9;font-weight:600">${mLabel}</span></td>
+                            <td style="padding:10px;line-height:1.8">${tickerBadges}</td>
+                            <td style="padding:10px;text-align:center"><button onclick="deleteTopPickSession('${s.scan_date}','${s.market}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:16px" title="Bu taramayı sil">🗑</button></td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                // BIST bölümü
+                const bistSection = document.createElement('div');
+                bistSection.style.cssText = 'margin-bottom:20px';
+                bistSection.innerHTML = `
+                    <div style="padding:8px 12px;background:#0f2720;border-left:3px solid #22c55e;border-radius:4px;margin-bottom:10px;font-size:13px;font-weight:700;color:#22c55e;letter-spacing:.5px">
+                        🇹🇷 BIST TARAMA SONUÇLARI
+                    </div>
+                    <table style="width:100%;border-collapse:collapse">
+                        <thead><tr style="border-bottom:1px solid #334155">
+                            <th style="padding:8px;text-align:left;color:#64748b;font-size:12px">TARİH</th>
+                            <th style="padding:8px;text-align:left;color:#64748b;font-size:12px">PİYASA</th>
+                            <th style="padding:8px;text-align:left;color:#64748b;font-size:12px">SEÇİLEN HİSSELER</th>
+                            <th style="padding:8px;color:#64748b;font-size:12px"></th>
+                        </tr></thead>
+                        <tbody>${buildSessionRows(bistSessions)}</tbody>
+                    </table>`;
+
+                // USA bölümü
+                const usaSection = document.createElement('div');
+                usaSection.innerHTML = `
+                    <div style="padding:8px 12px;background:#0f172a;border-left:3px solid #3b82f6;border-radius:4px;margin-bottom:10px;font-size:13px;font-weight:700;color:#3b82f6;letter-spacing:.5px">
+                        🇺🇸 USA TARAMA SONUÇLARI
+                    </div>
+                    <table style="width:100%;border-collapse:collapse">
+                        <thead><tr style="border-bottom:1px solid #334155">
+                            <th style="padding:8px;text-align:left;color:#64748b;font-size:12px">TARİH</th>
+                            <th style="padding:8px;text-align:left;color:#64748b;font-size:12px">PİYASA</th>
+                            <th style="padding:8px;text-align:left;color:#64748b;font-size:12px">SEÇİLEN HİSSELER</th>
+                            <th style="padding:8px;color:#64748b;font-size:12px"></th>
+                        </tr></thead>
+                        <tbody>${buildSessionRows(usaSessions)}</tbody>
+                    </table>`;
+
+                tbody.innerHTML = '';
+                const wrapper = tbody.closest('table') || tbody.parentNode;
+                wrapper.style.display = 'none';
+                const container = wrapper.parentNode;
+                if (!document.getElementById('mm-bist-section')) {
+                    bistSection.id = 'mm-bist-section';
+                    usaSection.id  = 'mm-usa-section';
+                    container.appendChild(bistSection);
+                    container.appendChild(usaSection);
+                } else {
+                    document.getElementById('mm-bist-section').replaceWith(bistSection);
+                    bistSection.id = 'mm-bist-section';
+                    document.getElementById('mm-usa-section').replaceWith(usaSection);
+                    usaSection.id  = 'mm-usa-section';
+                }
             } catch(e) {}
         }
 

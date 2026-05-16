@@ -1,0 +1,15 @@
+{
+  "name": "verdent",
+  "version": "1.0.0",
+  "description": "VERDENT — Full-Stack Financial Trading Platform",
+  "private": true,
+  "scripts": {
+    "frontend": "cd frontend && npm run dev",
+    "backend":  "cd backend  && npm run dev",
+    "dev":      "concurrently \"npm run frontend\" \"npm run backend\"",
+    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
