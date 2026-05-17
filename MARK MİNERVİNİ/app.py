@@ -44,7 +44,7 @@ app.config['JSON_SORT_KEYS'] = False
 
 # Tarama ilerleme takibi (thread-safe)
 import threading
-_scan_progress = {'pct': 0, 'msg': '', 'active': False}
+_scan_progress = {'pct': 0, 'msg': '', 'active': False, 'result': None, 'error': None}
 _scan_lock = threading.Lock()
 
 def _set_progress(pct, msg=''):
@@ -101,6 +101,17 @@ def about_page():
 def api_scan_progress():
     with _scan_lock:
         return jsonify(dict(_scan_progress))
+
+@app.route('/api/scan/result', methods=['GET'])
+def api_scan_result():
+    with _scan_lock:
+        result = _scan_progress.get('result')
+        error  = _scan_progress.get('error')
+    if error:
+        return jsonify({'success': False, 'error': error}), 500
+    if result is None:
+        return jsonify({'success': False, 'error': 'Henüz sonuç yok'}), 404
+    return _safe_jsonify(result)
 
 @app.route('/api/scan/quick', methods=['POST'])
 def api_quick_scan():
@@ -243,10 +254,7 @@ def api_full_scan():
                 'timestamp': datetime.now().isoformat()
             })
 
-        # ── BUGÜN: canlı tarama (klasik sistem) ──
-        scanner = UniversalStockScanner()
-
-        # Seans öncesiyse son kapanış tarihini as_of_date olarak kullan
+        # ── BUGÜN: canlı tarama ── arka plan thread'inde çalıştır
         from datetime import datetime as _dt, date as _date, timedelta as _td
         _now = _dt.now()
         _wd = _now.weekday()
@@ -263,53 +271,66 @@ def api_full_scan():
         if _days_back > 0:
             _live_as_of = (_date.today() - _td(days=_days_back)).strftime('%Y-%m-%d')
 
-        if market == 'US':
-            us_results = []
-            import io, contextlib
-            with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
-                sp500 = yf.Ticker("^GSPC").history(period="2y")
-            for ticker in scanner.us_tickers:
-                result = scanner.scan_us_stock(ticker, sp500, as_of_date=_live_as_of)
-                if result:
-                    us_results.append(result)
-            # Cross-validation (Breakout + Pivot Near hisseler için)
-            if _VALIDATOR_AVAILABLE and us_results:
-                print("🔍 Cross-validation başlıyor (US)...", flush=True)
-                us_results = validate_scan_results(us_results, is_bist=False)
-            return _safe_jsonify({
-                'success': True, 'count': len(us_results), 'results': us_results,
-                'market': 'US', 'scan_date': 'today', 'timestamp': datetime.now().isoformat()
-            })
+        def _live_scan_worker():
+            try:
+                import io, contextlib
+                scanner_live = UniversalStockScanner()
 
-        elif market == 'BIST':
-            bist_results = []
-            import io, contextlib
-            with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
-                xu100 = yf.Ticker("XU100.IS").history(period="2y")
-            bist_list = scanner.get_tickers_by_scan_type(scan_type, manual_list)
-            for ticker in bist_list:
-                result = scanner.scan_bist_stock(ticker, xu100, as_of_date=_live_as_of)
-                if result:
-                    bist_results.append(result)
-            # Cross-validation (Breakout + Pivot Near hisseler için)
-            if _VALIDATOR_AVAILABLE and bist_results:
-                print("🔍 Cross-validation başlıyor (BIST)...", flush=True)
-                bist_results = validate_scan_results(bist_results, is_bist=True)
-            return _safe_jsonify({
-                'success': True, 'count': len(bist_results), 'results': bist_results,
-                'market': 'BIST', 'scan_date': 'today', 'timestamp': datetime.now().isoformat()
-            })
+                # Referans endeksleri çek (orijinal yöntem)
+                _set_progress(5, 'Referans veriler indiriliyor...')
+                with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+                    xu100 = yf.Ticker('XU100.IS').history(period='2y')
+                    sp500 = yf.Ticker('^GSPC').history(period='2y')
 
-        else:  # BOTH
-            results = scanner.run_universal_scan()
-            if _VALIDATOR_AVAILABLE and results:
-                print("🔍 Cross-validation başlıyor (BOTH)...", flush=True)
-                is_bist = any(r.get('Market') == 'BIST' for r in results[:5])
-                results = validate_scan_results(results, is_bist=False)
-            return _safe_jsonify({
-                'success': True, 'count': len(results), 'results': results,
-                'market': 'BOTH', 'scan_date': 'today', 'timestamp': datetime.now().isoformat()
-            })
+                # Tickers listesi
+                if market == 'US':
+                    tickers = list(scanner_live.us_tickers)
+                elif market == 'BIST':
+                    tickers = scanner_live.get_tickers_by_scan_type(scan_type, manual_list)
+                else:
+                    tickers = list(scanner_live.us_tickers) + scanner_live.get_tickers_by_scan_type(scan_type, manual_list)
+
+                total = len(tickers)
+                _set_progress(10, f'Taranıyor ({total} hisse)...')
+
+                results = []
+                for i, ticker in enumerate(tickers):
+                    if i % 15 == 0:
+                        pct = 10 + int((i + 1) / total * 85)
+                        _set_progress(pct, f'Analiz ediliyor... {i+1}/{total} ({pct}%)')
+                    try:
+                        is_bist = ticker.endswith('.IS')
+                        result = (
+                            scanner_live.scan_bist_stock(ticker, xu100, as_of_date=_live_as_of)
+                            if is_bist
+                            else scanner_live.scan_us_stock(ticker, sp500, as_of_date=_live_as_of)
+                        )
+                        if result:
+                            results.append(result)
+                    except Exception:
+                        pass
+
+                if _VALIDATOR_AVAILABLE and results:
+                    is_bist_scan = (market == 'BIST')
+                    results = validate_scan_results(results, is_bist=is_bist_scan)
+
+                _set_progress(100, f'Tamamlandı — {len(results)} hisse bulundu')
+                with _scan_lock:
+                    _scan_progress['result'] = {
+                        'success': True, 'count': len(results), 'results': results,
+                        'market': market, 'scan_date': 'today',
+                        'timestamp': datetime.now().isoformat()
+                    }
+                    _scan_progress['error'] = None
+            except Exception as e:
+                _set_progress(100, f'Hata: {e}')
+                with _scan_lock:
+                    _scan_progress['error'] = str(e)
+                    _scan_progress['result'] = None
+
+        t = threading.Thread(target=_live_scan_worker, daemon=True)
+        t.start()
+        return jsonify({'success': True, 'async': True, 'msg': 'Tarama başlatıldı'})
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

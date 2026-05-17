@@ -462,7 +462,35 @@
                 });
                 
                 const data = await response.json();
-                
+
+                // async tarama: progress %100 olana kadar bekle, sonra result çek
+                if (data.async) {
+                    await new Promise((resolve, reject) => {
+                        const resultPoll = setInterval(async () => {
+                            try {
+                                const pr = await fetch('/api/scan/progress');
+                                const pd = await pr.json();
+                                if (pd.pct > 0) {
+                                    progressFill.style.width = pd.pct + '%';
+                                    status.textContent = pd.msg || `Tarıyor... %${pd.pct}`;
+                                }
+                                if (!pd.active && pd.pct >= 100) {
+                                    clearInterval(resultPoll);
+                                    resolve();
+                                }
+                                if (pd.error) {
+                                    clearInterval(resultPoll);
+                                    reject(new Error(pd.error));
+                                }
+                            } catch(e) { clearInterval(resultPoll); reject(e); }
+                        }, 800);
+                    });
+                    // Sonucu al
+                    const resultResp = await fetch('/api/scan/result');
+                    const resultData = await resultResp.json();
+                    Object.assign(data, resultData);
+                }
+
                 clearInterval(pollInterval);
                 progressFill.style.width = '100%';
                 
