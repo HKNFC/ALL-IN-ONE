@@ -297,28 +297,40 @@ class UniversalStockScanner:
           cache'ler için iloc[-252] aynı tarihe denk gelir → scanner=backtest tutarlılığı.
         """
         try:
-            if len(stock_df) < 252 or len(market_df) < 252:
+            # Timezone normalize et
+            s_idx = stock_df.index.tz_localize(None) if stock_df.index.tz is not None else stock_df.index
+            m_idx = market_df.index.tz_localize(None) if market_df.index.tz is not None else market_df.index
+            stock_df = stock_df.copy(); stock_df.index = s_idx.normalize()
+            market_df = market_df.copy(); market_df.index = m_idx.normalize()
+            # Ortak tarihlere hizala → iloc[-252] her zaman aynı tarihe denk gelir
+            common = stock_df.index.intersection(market_df.index)
+            s = self._get_close_col(stock_df).loc[common]
+            m = self._get_close_col(market_df).loc[common]
+            # Son 280 bar: 252 için yeterli, fazla geçmiş verinin etkisini sıfırlar
+            s = s.iloc[-280:]
+            m = m.iloc[-280:]
+
+            # Yeterli veri yoksa kısa periyot fallback (min 63 gün = ~3 ay)
+            if len(s) >= 252 and len(m) >= 252:
+                lookback = 252
+            elif len(s) >= 126 and len(m) >= 126:
+                lookback = 126
+            elif len(s) >= 63 and len(m) >= 63:
+                lookback = 63
+            else:
                 return None
-            
-            # Son 1 yıllık performans
-            stock_close_now = stock_df['Close'].iloc[-1]
-            stock_close_past = stock_df['Close'].iloc[-252]
-            market_close_now = market_df['Close'].iloc[-1]
-            market_close_past = market_df['Close'].iloc[-252]
-            
-            # pandas Series dönerse float'a çevir
-            if isinstance(stock_close_now, pd.Series):
-                stock_close_now = float(stock_close_now.iloc[0]) if len(stock_close_now) > 0 else float(stock_close_now)
-            if isinstance(stock_close_past, pd.Series):
-                stock_close_past = float(stock_close_past.iloc[0]) if len(stock_close_past) > 0 else float(stock_close_past)
-            if isinstance(market_close_now, pd.Series):
-                market_close_now = float(market_close_now.iloc[0]) if len(market_close_now) > 0 else float(market_close_now)
-            if isinstance(market_close_past, pd.Series):
-                market_close_past = float(market_close_past.iloc[0]) if len(market_close_past) > 0 else float(market_close_past)
-            
-            stock_return = (stock_close_now / stock_close_past - 1) * 100
+
+            stock_close_now  = float(s.iloc[-1])
+            stock_close_past = float(s.iloc[-lookback])
+            market_close_now  = float(m.iloc[-1])
+            market_close_past = float(m.iloc[-lookback])
+
+            if stock_close_past <= 0 or market_close_past <= 0:
+                return None
+
+            stock_return  = (stock_close_now  / stock_close_past  - 1) * 100
             market_return = (market_close_now / market_close_past - 1) * 100
-            
+
             # RS: hissenin S&P500'e göre bağıl fazla getirisi
             # Cap yok — gerçek ayrışma değeri korunur (sıralama için kritik)
             rs = ((1 + stock_return/100) / (1 + market_return/100) - 1) * 100
@@ -752,7 +764,6 @@ class UniversalStockScanner:
                 'SMA_150': round(sma_150, 2),
                 'SMA_200': round(sma_200, 2),
                 'RS_Divergence_%': round(rs_divergence, 2),
-                'RS': round(rs_divergence, 2),
                 'VCP_Contractions': int(vcp_pattern['contractions']),
                 'VCP_Pattern': vcp_pattern['pattern'],
                 'Pivot': round(pivot, 2) if pivot else None,

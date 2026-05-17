@@ -111,8 +111,7 @@ class MarketDataCache:
 
     def store(self, ticker, df):
         if df is None or df.empty:
-            if not ticker.endswith('.IS'):  # BIST geçici hata, kalıcı bad sayma
-                self._bad.add(ticker)
+            self._bad.add(ticker)
             return
         df = df.sort_index()
         if ticker in self._data and not self._data[ticker].empty:
@@ -235,8 +234,7 @@ class MarketDataCache:
                     self.store(ticker, df)
                 else:
                     still_missing.append(ticker)
-                    if not ticker.endswith('.IS'):  # BIST geçici hata, kalıcı bad sayma
-                        self._bad.add(ticker)
+                    self._bad.add(ticker)
             missing = still_missing
         except Exception:
             pass
@@ -289,11 +287,9 @@ class MarketDataCache:
                     if len(df) >= 5:
                         self.store(ticker, df)
                     else:
-                        if not ticker.endswith('.IS'):  # BIST geçici hata, kalıcı bad sayma
-                            self._bad.add(ticker)
-                except Exception:
-                    if not ticker.endswith('.IS'):  # BIST geçici hata, kalıcı bad sayma
                         self._bad.add(ticker)
+                except Exception:
+                    self._bad.add(ticker)
 
             if i + chunk_size < len(missing):
                 time.sleep(0.5)
@@ -393,29 +389,9 @@ class MinerviniBacktest:
         benchmark    = ['^GSPC', 'XU100.IS', 'SPY']
         all_tickers  = list(dict.fromkeys(tickers + benchmark))
 
-        # Benchmark'ları her zaman yfinance'den direkt çek — fetch_start'tan itibaren
-        import yfinance as yf
-        _bm_start = fetch_start.strftime('%Y-%m-%d')
-        _bm_end   = fetch_end.strftime('%Y-%m-%d')
-        for _bm in benchmark:
-            try:
-                _bm_df = yf.download(_bm, start=_bm_start, end=_bm_end, auto_adjust=True, progress=False)
-                if _bm_df is not None and not _bm_df.empty:
-                    if isinstance(_bm_df.columns, pd.MultiIndex):
-                        _bm_df = _bm_df.xs(_bm, axis=1, level=1) if _bm in _bm_df.columns.get_level_values(1) else _bm_df.iloc[:, :5]
-                        _bm_df.columns = [c[0] if isinstance(c, tuple) else c for c in _bm_df.columns]
-                    _bm_df.index = _bm_df.index.tz_localize(None) if _bm_df.index.tz else _bm_df.index
-                    _bm_df.index = _bm_df.index.normalize()
-                    self._cache._data[_bm] = _bm_df
-                    print(f"  ✅ {_bm}: {len(_bm_df)} bar ({_bm_df.index[0].date()} → {_bm_df.index[-1].date()})", flush=True)
-            except Exception as e:
-                print(f"  ⚠️ {_bm} indirilemedi: {e}", flush=True)
-
         # DB ve disk cache'den yüklenebilenleri belleğe al
         missing = []
         for t in all_tickers:
-            if t in benchmark:
-                continue  # Benchmark zaten yüklendi
             cached = self._cache.get_or_fetch_disk(t, fetch_start, fetch_end)
             if cached is None:
                 missing.append(t)
@@ -437,7 +413,7 @@ class MinerviniBacktest:
         if os.path.exists(_bad_path):
             try:
                 with open(_bad_path) as _f:
-                    _saved_bad = set(t for t in json.load(_f) if not t.endswith('.IS'))
+                    _saved_bad = set(json.load(_f))
                 self._cache._bad.update(_saved_bad)
                 print(f"   ⚠️  {len(_saved_bad)} kalıcı başarısız hisse yüklendi", flush=True)
             except Exception:
@@ -446,8 +422,7 @@ class MinerviniBacktest:
         if missing:
             print(f"\n📥 Veri indirme başlıyor: {fetch_start.date()} → {fetch_end.date()}", flush=True)
             # Bad ticker listesinden çıkar — zaten başarısız olduğu bilinen hisseleri tekrar deneme
-            # BIST hisseleri (.IS) bad listesinden muaf — geçici ağ hatası kalıcı sayılmaz
-            missing_filtered = [t for t in missing if t not in self._cache._bad or t.endswith('.IS')]
+            missing_filtered = [t for t in missing if t not in self._cache._bad]
             print(f"   {len(missing_filtered)} hisse (disk cache'de olmayan, başarısız listede olmayan)", flush=True)
             if missing_filtered:
                 # İlk deneme
@@ -471,13 +446,12 @@ class MinerviniBacktest:
                             self._cache._save_disk(t, fetch_start, fetch_end, df)
 
                 # Kalıcı olarak başarısız olanları kaydet
-                # BIST hisseleri (.IS) kalıcı bad listesine eklenmez — geçici ağ hatası olabilir
                 _perm_bad = [t for t in missing_filtered
-                             if self._cache.get(t) is None and t not in ('^', 'SPY') and not t.endswith('.IS')]
+                             if self._cache.get(t) is None and t not in ('^', 'SPY')]
                 if _perm_bad:
                     self._cache._bad.update(_perm_bad)
                     try:
-                        _all_bad = [t for t in self._cache._bad if not t.endswith('.IS') and t not in {'^', 'SPY', 'XU100.IS', '^GSPC'}]
+                        _all_bad = list(self._cache._bad - {'^', 'SPY', 'XU100.IS', '^GSPC'})
                         with open(_bad_path, 'w') as _f:
                             json.dump(_all_bad, _f)
                         print(f"   💾 {len(_perm_bad)} başarısız hisse kalıcı listeye eklendi", flush=True)
@@ -628,23 +602,8 @@ class MinerviniBacktest:
         else:
             df['RS_Score'] = 0
 
-        # ── Minimum RS filtresi: negatif RS'li hisseler Minervini yöntemiyle seçilmez ──
-        df = df[df['RS_Score'] >= 0]
-        if df.empty:
-            print("  ⚠️ RS >= 0 kriterini geçen hisse bulunamadı, en iyi 5 hisse RS sıralamasıyla seçiliyor.", flush=True)
-            # Fallback: tüm sonuçları RS'e göre sırala
-            df_all = pd.DataFrame(priority)
-            if 'RS' in df_all.columns:
-                df_all['RS_Score'] = pd.to_numeric(df_all['RS'], errors='coerce').fillna(0)
-            elif 'RS_Divergence_%' in df_all.columns:
-                df_all['RS_Score'] = pd.to_numeric(df_all['RS_Divergence_%'], errors='coerce').fillna(0)
-            else:
-                df_all['RS_Score'] = 0
-            df = df_all.sort_values('RS_Score', ascending=False)
-            df['Status_Priority'] = df['Status'].map(STATUS_PRIORITY).fillna(0)
-        else:
-            df['Status_Priority'] = df['Status'].map(STATUS_PRIORITY).fillna(0)
-            df = df.sort_values(['Status_Priority', 'RS_Score'], ascending=[False, False])
+        df['Status_Priority'] = df['Status'].map(STATUS_PRIORITY).fillna(0)
+        df = df.sort_values(['Status_Priority', 'RS_Score'], ascending=[False, False])
 
         # ── Duplikasyon filtresi ──
         selected = []

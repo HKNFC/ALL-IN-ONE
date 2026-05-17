@@ -314,10 +314,8 @@ def api_full_scan():
                     is_bist_scan = (market == 'BIST')
                     results = validate_scan_results(results, is_bist=is_bist_scan)
 
+                _set_progress(100, f'Tamamlandı — {len(results)} hisse bulundu')
                 with _scan_lock:
-                    _scan_progress['pct'] = 100
-                    _scan_progress['msg'] = f'Tamamlandı — {len(results)} hisse bulundu'
-                    _scan_progress['active'] = False
                     _scan_progress['result'] = {
                         'success': True, 'count': len(results), 'results': results,
                         'market': market, 'scan_date': 'today',
@@ -330,12 +328,6 @@ def api_full_scan():
                     _scan_progress['error'] = str(e)
                     _scan_progress['result'] = None
 
-        with _scan_lock:
-            _scan_progress['pct'] = 0
-            _scan_progress['msg'] = 'Tarama başlatılıyor...'
-            _scan_progress['active'] = True
-            _scan_progress['result'] = None
-            _scan_progress['error'] = None
         t = threading.Thread(target=_live_scan_worker, daemon=True)
         t.start()
         return jsonify({'success': True, 'async': True, 'msg': 'Tarama başlatıldı'})
@@ -1061,6 +1053,20 @@ def api_run_backtest():
         frequency       = data.get('frequency', 'monthly')
         portfolio_size  = int(data.get('portfolio_size', 7))
         engine          = data.get('engine', 'classic')
+
+        # ── Duplicate kontrolü ──────────────────────────────────────────────
+        params_key  = f"{market}_{method}_{frequency}_{start_date}_{end_date}_{initial_capital}_{portfolio_size}"
+        existing_id = storage.find_duplicate_backtest(params_key)
+        if existing_id:
+            existing = storage.get_backtest(existing_id)
+            return jsonify({
+                'success': True, 'status': 'done',
+                'report':     existing['report'],
+                'saved_id':   existing_id,
+                'saved_name': existing['name'],
+                'duplicate':  True,
+                'message':    'Bu parametrelerle daha önce kaydedilmiş backtest bulundu.'
+            })
 
         # ── Yeni backtest: arka planda başlat ───────────────────────────────
         task_id = str(uuid.uuid4())[:12]

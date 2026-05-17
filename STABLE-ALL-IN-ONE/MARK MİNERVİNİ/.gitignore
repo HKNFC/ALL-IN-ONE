@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Veri cache (büyük dosyalar, otomatik yenilenir)
+data_cache/
+.cache/
+*.pkl
+
+# PyInstaller
+dist/
+build/
+*.spec.bak
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Hassas bilgiler
+telegram_config.json
+.env
+.env.local
+.env.*
+
+# Log / geçici dosyalar
+*.log
+server.log
+server.pid
+*.tmp
+*.bak
+
+# Diğer projeler (bu repo sadece MARK MİNERVİNİ klasörüne ait)
+../101 YATIRIM/
+../ANTROPİC HİSSE BULUCU/
+../BIST:USA /
+../EKONOMİK HABER AKISI/
+../PATLAMA/
+../VERDENT.docx
+../MARK MİNERVİNİ  programının son haline dönebilmek için terminale aşağıdaki komutu yaz.docx
+../Backtest kalitesini bozmadan süresini kısaltmak için.docx
+../GİTHUB TOKEN.docx
+
+# venv / node_modules
+venv/
+.venv/
+node_modules/
+
+# Gömülü git repoları
+PATLAMA/
+
+# SQLite DB (Railway Volume'da tutulur, repoya eklenmez)
+sepa.db
+
+# macOS app bundle (local, repoya eklenmez)
+SEPA Starter.app/

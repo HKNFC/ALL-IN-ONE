@@ -1,0 +1,6 @@
+Ticker,Maliyet,Adet,Alış_Tarihi,Stop_Seviyesi,Backstop_Aktif,Market
+CIEN,353.49,28,2026-02-25,328.75,False,US
+FIX,1459.7,7,2026-02-25,1357.52,False,US
+GLW,160.19,62,2026-02-25,148.98,False,US
+LRCX,249.24,40,2026-02-25,231.79,False,US
+TER,342.26,29,2026-02-25,318.3,False,US

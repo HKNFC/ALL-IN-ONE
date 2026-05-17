@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Minervini Trading Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ── Market Status Card ─────────────────────────────── */
+        .ms-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            border-left: 6px solid #e5e7eb;
+            transition: transform .2s;
+        }
+        .ms-card:hover { transform: translateY(-2px); }
+        .ms-card.ms-green  { border-left-color: #22c55e; }
+        .ms-card.ms-yellow { border-left-color: #f59e0b; }
+        .ms-card.ms-red    { border-left-color: #ef4444; }
+        .ms-card.ms-loading { color: #94a3b8; display:flex; align-items:center; gap:.75rem; min-height:120px; }
+
+        .ms-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+        .ms-market  { font-size:1rem; font-weight:700; color:#1e293b; }
+        .ms-badge   { padding:.3rem .9rem; border-radius:20px; font-size:.78rem; font-weight:700; letter-spacing:.03em; }
+        .ms-badge.green  { background:#dcfce7; color:#15803d; }
+        .ms-badge.yellow { background:#fef9c3; color:#92400e; }
+        .ms-badge.red    { background:#fee2e2; color:#b91c1c; }
+
+        .ms-action { font-size:.95rem; font-weight:600; color:#374151; margin-bottom:1.1rem; }
+        .ms-score  { display:flex; gap:.35rem; margin-bottom:1rem; }
+        .ms-dot    { width:18px; height:18px; border-radius:50%; background:#e5e7eb; }
+        .ms-dot.on.green  { background:#22c55e; }
+        .ms-dot.on.yellow { background:#f59e0b; }
+        .ms-dot.on.red    { background:#ef4444; }
+
+        .ms-criteria { list-style:none; padding:0; margin:0; font-size:.82rem; }
+        .ms-criteria li { display:flex; align-items:center; gap:.5rem; padding:.25rem 0; color:#64748b; border-bottom:1px solid #f1f5f9; }
+        .ms-criteria li:last-child { border-bottom:none; }
+        .ms-criteria .ck { font-size:.9rem; }
+        .ms-criteria .dt { margin-left:auto; font-family:monospace; color:#94a3b8; font-size:.76rem; }
+
+        .ms-price-row { display:flex; gap:1.5rem; font-size:.8rem; color:#94a3b8; margin-top:.75rem; }
+        .ms-price-row span strong { color:#374151; }
+
+        @keyframes ms-spin { to { transform:rotate(360deg); } }
+        .ms-spinner { width:20px;height:20px;border:3px solid #e5e7eb;border-top-color:#3b82f6;border-radius:50%;animation:ms-spin .8s linear infinite;flex-shrink:0; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>📈 Minervini Platform</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/" class="active">Dashboard</a></li>
+                <li><a href="/scanner">Scanner</a></li>
+                <li><a href="/backtest">Backtest</a></li>
+                <li><a href="/portfolio">Portfolio</a></li>
+                <li><a href="/signals">Signals</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Mark Minervini Trading Platform</h1>
+            <p class="hero-subtitle">Professional Stock Screening & Signal Generation System</p>
+            <p class="hero-description">
+                SEPA Methodology • Trend Template 2.0 • VCP Pattern Detection • Real-time Alerts
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="quickScan('US')">
+                    🇺🇸 Scan US Markets
+                </button>
+                <button class="btn btn-primary" onclick="quickScan('BIST')">
+                    🇹🇷 Scan BIST
+                </button>
+                <a href="/scanner" class="btn btn-secondary">
+                    Advanced Scanner →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market Status Section -->
+    <section style="padding: 2rem 0 0;">
+        <div class="container">
+            <h2 class="section-title" style="margin-bottom:1.25rem;">🌡️ Piyasanın Durumu</h2>
+            <div id="market-status-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.25rem;margin-bottom:1.25rem;">
+                <div class="ms-card ms-loading" id="ms-bist">
+                    <div class="ms-spinner"></div> BIST verisi yükleniyor...
+                </div>
+                <div class="ms-card ms-loading" id="ms-us">
+                    <div class="ms-spinner"></div> ABD verisi yükleniyor...
+                </div>
+            </div>
+            <p style="text-align:center;color:#94a3b8;font-size:.8rem;margin-bottom:2rem;">
+                Son güncelleme: <span id="ms-updated">—</span> &nbsp;·&nbsp;
+                <a href="#" onclick="loadMarketStatus();return false;" style="color:#3b82f6;text-decoration:none;">🔄 Yenile</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Platform Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Multi-Market Scanner</h3>
+                    <p>Scan BIST and US markets simultaneously with Trend Template 2.0 criteria</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>VCP Detection</h3>
+                    <p>Automatic Volatility Contraction Pattern recognition with base analysis</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Signal Generation</h3>
+                    <p>JSON-formatted BUY/SELL signals with webhook integration</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Risk Management</h3>
+                    <p>Automatic stop-loss, profit protection, and position sizing</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Real-time Alerts</h3>
+                    <p>Telegram notifications for breakouts and critical levels</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>TL/USD Cross-Check</h3>
+                    <p>Dual-confirmation for BIST stocks in both TL and USD charts</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Results Section -->
+    <section class="results" id="results-section" style="display: none;">
+        <div class="container">
+            <h2 class="section-title">Scan Results</h2>
+            <div id="results-container"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Mark Minervini Trading Platform © 2026</p>
+            <p>Based on SEPA Methodology • Not Investment Advice</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        loadMarketStatus();
+
+        // ── Stats ──────────────────────────────────────────────────
+        function loadStats() {}
+
+        // ── Market Status ──────────────────────────────────────────
+        async function loadMarketStatus() {
+            document.getElementById('ms-bist').className = 'ms-card ms-loading';
+            document.getElementById('ms-bist').innerHTML = '<div class="ms-spinner"></div> BIST verisi yükleniyor...';
+            document.getElementById('ms-us').className   = 'ms-card ms-loading';
+            document.getElementById('ms-us').innerHTML   = '<div class="ms-spinner"></div> ABD verisi yükleniyor...';
+
+            try {
+                const res  = await fetch('/api/market-status');
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+
+                renderMarketCard('ms-bist', data.bist);
+                renderMarketCard('ms-us',   data.us);
+                document.getElementById('ms-updated').textContent = new Date().toLocaleTimeString('tr-TR');
+            } catch(e) {
+                ['ms-bist','ms-us'].forEach(id => {
+                    document.getElementById(id).innerHTML = `<span style="color:#ef4444;">❌ Yüklenemedi: ${e.message}</span>`;
+                });
+            }
+        }
+
+        function renderMarketCard(elId, d) {
+            const el = document.getElementById(elId);
+            if (!d || d.error) {
+                el.className = 'ms-card';
+                el.innerHTML = `<span style="color:#ef4444;">❌ ${d?.error || 'Veri alınamadı'}</span>`;
+                return;
+            }
+
+            const c = d.color;
+            el.className = `ms-card ms-${c}`;
+
+            const dots = Array.from({length: d.max_score}, (_, i) =>
+                `<div class="ms-dot ${i < d.score ? 'on ' + c : ''}"></div>`
+            ).join('');
+
+            const criteriaRows = d.criteria.map(cr =>
+                `<li>
+                    <span class="ck">${cr.ok ? '✅' : '❌'}</span>
+                    <span>${cr.label}</span>
+                    <span class="dt">${cr.detail}</span>
+                </li>`
+            ).join('');
+
+            const isBist = d.symbol.includes('XU100');
+            const currency = isBist ? '₺' : '$';
+            const priceStr = d.price.toLocaleString('tr-TR', {maximumFractionDigits: 0});
+
+            // Volatilite rengi
+            const vol = d.vol20 || 0;
+            const volColor = vol < 15 ? '#22c55e' : vol < 25 ? '#f59e0b' : '#ef4444';
+            const volLabel = vol < 15 ? 'Düşük' : vol < 25 ? 'Orta' : 'Yüksek';
+
+            // VIX bölümü (sadece ABD kartı)
+            let vixSection = '';
+            if (d.vix) {
+                const v = d.vix;
+                const vixPct = Math.min((v.value / 60) * 100, 100).toFixed(1);
+                const vixBarColor = v.value < 15 ? '#22c55e' : v.value < 20 ? '#86efac' : v.value < 28 ? '#f59e0b' : v.value < 40 ? '#f97316' : '#ef4444';
+                const trendIcon = v.trend === 'YÜKSELIYOR' ? '↑' : '↓';
+                const trendColor = v.trend === 'YÜKSELIYOR' ? '#ef4444' : '#22c55e';
+                vixSection = `
+                    <div style="margin-top:.9rem;padding-top:.9rem;border-top:1px dashed #e5e7eb;">
+                        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;">
+                            <span style="font-size:.78rem;font-weight:700;color:#64748b;letter-spacing:.04em;">😨 VIX — CBOE Korku Endeksi</span>
+                            <span style="font-size:.95rem;font-weight:800;color:#1e293b;">${v.value.toFixed(2)}</span>
+                            <span style="font-size:.8rem;font-weight:700;color:${trendColor};">${trendIcon} ${v.trend}</span>
+                            <span style="margin-left:auto;font-size:.75rem;padding:.15rem .55rem;border-radius:10px;background:${vixBarColor}22;color:${vixBarColor};font-weight:700;">${v.level}</span>
+                        </div>
+                        <div style="position:relative;height:7px;background:#f1f5f9;border-radius:4px;overflow:hidden;margin-bottom:.25rem;">
+                            <div style="position:absolute;left:0;top:0;height:100%;width:${vixPct}%;background:${vixBarColor};border-radius:4px;opacity:.85;"></div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;font-size:.68rem;color:#94a3b8;">
+                            <span>0 Sakin</span><span>15</span><span>20</span><span>28</span><span>40</span><span>60 Panik</span>
+                        </div>
+                        <div style="font-size:.75rem;color:#64748b;margin-top:.3rem;">${v.comment} &nbsp;·&nbsp; 5G Ort: <strong>${v.vix_5d}</strong> &nbsp;·&nbsp; 20G Ort: <strong>${v.vix_20d}</strong></div>
+                    </div>`;
+            }
+
+            // BIST için gerçekleşmiş volatilite bölümü
+            let volSection = '';
+            if (isBist) {
+                volSection = `
+                    <div style="margin-top:.9rem;padding-top:.9rem;border-top:1px dashed #e5e7eb;">
+                        <div style="display:flex;align-items:center;gap:.6rem;">
+                            <span style="font-size:.78rem;font-weight:700;color:#64748b;letter-spacing:.04em;">📊 XU100 Gerçekleşmiş Volatilite (20G)</span>
+                            <span style="font-size:.95rem;font-weight:800;color:${volColor};">%${vol}</span>
+                            <span style="margin-left:auto;font-size:.75rem;padding:.15rem .55rem;border-radius:10px;background:${volColor}22;color:${volColor};font-weight:700;">${volLabel}</span>
+                        </div>
+                        <div style="font-size:.75rem;color:#64748b;margin-top:.3rem;">Yıllıklaştırılmış 20 günlük fiyat dalgalanması — Düşük (&lt;%15) yatırım için elverişli</div>
+                    </div>`;
+            }
+
+            // Birleşik karar banner
+            let combinedSection = '';
+            if (d.combined_decision) {
+                const cd = d.combined_decision;
+                combinedSection = `
+                    <div style="margin-top:1rem;padding:1rem 1.1rem;background:${cd.bg};border-radius:10px;border-left:4px solid ${cd.color};">
+                        <div style="font-size:1.05rem;font-weight:800;color:${cd.color};">${cd.icon} ${cd.text}</div>
+                        <div style="font-size:.82rem;color:${cd.color};margin-top:.3rem;opacity:.85;">${cd.sub}</div>
+                    </div>`;
+            }
+
+            el.innerHTML = `
+                <div class="ms-header">
+                    <span class="ms-market">📊 ${d.label}</span>
+                    <span class="ms-badge ${c}">${d.status} (${d.score}/${d.max_score})</span>
+                </div>
+                <div class="ms-action">${d.action}</div>
+                <div class="ms-score">${dots}</div>
+                <ul class="ms-criteria">${criteriaRows}</ul>
+                <div class="ms-price-row">
+                    <span>Fiyat: <strong>${currency}${priceStr}</strong></span>
+                    <span>50G SMA: <strong>${currency}${d.sma50.toLocaleString('tr-TR',{maximumFractionDigits:0})}</strong></span>
+                    <span>200G SMA: <strong>${currency}${d.sma200.toLocaleString('tr-TR',{maximumFractionDigits:0})}</strong></span>
+                </div>
+                ${vixSection}${volSection}
+                ${combinedSection}`;
+        }
+
+        function renderVixCard() {} // artık kullanılmıyor
+
+        // ── Quick Scan ─────────────────────────────────────────────
+        function quickScan(market) {
+            const resultsSection  = document.getElementById('results-section');
+            const resultsContainer = document.getElementById('results-container');
+            resultsSection.style.display = 'block';
+            resultsContainer.innerHTML = '<div class="loading">Scanning ' + market + ' markets... Please wait.</div>';
+
+            fetch('/api/scan/quick', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ market })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) displayResults(data.results, market);
+                else resultsContainer.innerHTML = '<div class="error">Error: ' + data.error + '</div>';
+            })
+            .catch(error => {
+                resultsContainer.innerHTML = '<div class="error">Error: ' + error + '</div>';
+            });
+        }
+
+        function displayResults(results, market) {
+            const container = document.getElementById('results-container');
+            if (results.length === 0) {
+                container.innerHTML = '<div class="no-results">No stocks found matching criteria.</div>';
+                return;
+            }
+            let html = '<div class="results-grid">';
+            results.forEach(stock => {
+                const currency = market === 'BIST' ? '₺' : '$';
+                const price = stock.current_price_tl || stock.current_price || stock.Price;
+                html += `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h3>${stock.Ticker || stock.ticker}</h3>
+                            <span class="badge badge-${stock.Status || stock.status}">${stock.Status || stock.status}</span>
+                        </div>
+                        <div class="result-body">
+                            <div class="result-row"><span>Price:</span><strong>${currency}${price.toFixed(2)}</strong></div>
+                            <div class="result-row"><span>Pivot:</span><span>${currency}${(stock.Pivot || stock.pivot_price).toFixed(2)}</span></div>
+                            <div class="result-row"><span>Distance:</span><span>${(stock.Distance_to_Pivot_pct || stock.distance_to_pivot_pct || 0).toFixed(2)}%</span></div>
+                            <div class="result-row"><span>Stop-Loss:</span><span>${currency}${(stock.Stop_Level || stock.stop_loss).toFixed(2)}</span></div>
+                        </div>
+                    </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

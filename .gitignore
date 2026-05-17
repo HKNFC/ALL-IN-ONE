@@ -26,3 +26,9 @@ BIST:USA/.cache/
 
 # Portfolio Optimizer cache
 Portfolio-Optimizer/data_cache/
+STABLE-ALL-IN-ONE/ALL-IN-ONE-PLATFORM/
+STABLE-ALL-IN-ONE/GEMINI-PIYASA-ZAMANLAMA-MODULU/
+STABLE-ALL-IN-ONE/Portfolio-Optimizer/
+STABLE-ALL-IN-ONE/SUPER-INVESTOR-CHATGPT/
+STABLE-ALL-IN-ONE/*/data_cache/
+STABLE-ALL-IN-ONE/*/__pycache__/
