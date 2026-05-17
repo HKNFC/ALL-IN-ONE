@@ -454,7 +454,7 @@
                 
                 // Make API call
                 // tarih girilmişse her zaman full scan kullan
-                const endpoint = (scanDate || scanType === 'full') ? '/api/scan/full' : '/api/scan/quick';
+                const endpoint = '/api/scan/full';  // Her zaman full scan — quick scan kaldırıldı
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
