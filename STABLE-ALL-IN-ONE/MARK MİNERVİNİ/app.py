@@ -757,23 +757,15 @@ def api_market_status():
     if not force and _market_status_cache['data'] and (_time.time() - _market_status_cache['ts']) < 900:
         return jsonify(_market_status_cache['data'])
 
-    # Twelvedata sembol eşlemeleri (yfinance sembolü → Twelvedata sembolü)
-    _TD_SYMBOLS = {
-        'XU100.IS': 'XU100:BIST',
-        '^GSPC':    'SPX',
-        '^VIX':     'VIX',
-    }
-
     def _fetch(symbol, period='14mo'):
-        """1) Twelvedata  2) yf.Ticker.history  3) yf.download"""
-        # -- Twelvedata --
+        """1) yf.download  2) yf.Ticker.history"""
+        # -- yfinance (primary) --
         try:
-            import twelvedata_client as td
-            td_sym = _TD_SYMBOLS.get(symbol, symbol)
-            outputsize = 400 if period in ('14mo', '1y', '2y') else 100
-            df_td = td.get_time_series(td_sym, interval='1day', outputsize=outputsize)
-            if df_td is not None and len(df_td) >= 200:
-                return df_td['close'].astype(float).squeeze()
+            import yfinance as yf
+            _yf_data = yf.download(symbol, period='2y', progress=False, auto_adjust=True)
+            df_td = _yf_data[['Open','High','Low','Close','Volume']] if not _yf_data.empty else pd.DataFrame()
+            if not df_td.empty and len(df_td) >= 200:
+                return df_td['Close'].astype(float).squeeze()
         except Exception:
             pass
         # -- yf.Ticker.history --
@@ -998,11 +990,10 @@ def _safe_jsonify(data):
 def api_data_source_status():
     """Veri kaynağı durumunu döndür"""
     try:
-        import twelvedata_client as td
-        usage = td.get_api_usage()
+        usage = {"credits_used": "N/A", "credits_limit": "N/A"}  # FMP'ye geçildi
         return jsonify({
-            'primary': 'Twelvedata',
-            'fallback': 'Yahoo Finance',
+            'primary': 'Yahoo Finance (FMP)',
+            'fallback': None,
             'usage': usage
         })
     except Exception:

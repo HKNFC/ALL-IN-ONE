@@ -537,10 +537,10 @@
 
             const bistList = list
                 .filter(bt => (bt.params?.market || '').toUpperCase() === 'BIST')
-                .sort((a, b) => new Date(b.params?.start_date || 0) - new Date(a.params?.start_date || 0));
+                .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
             const usList = list
                 .filter(bt => (bt.params?.market || '').toUpperCase() !== 'BIST')
-                .sort((a, b) => new Date(b.params?.start_date || 0) - new Date(a.params?.start_date || 0));
+                .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
             bistContainer.innerHTML = _buildTable(bistList);
             usContainer.innerHTML   = _buildTable(usList);

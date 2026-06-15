@@ -2,7 +2,7 @@
 # ============================================================
 # STABLE ALL-IN-ONE — Başlatma Scripti
 # Portlar: 5700 (portal), 8601 (Gemini), 5655 (Minervini),
-#          8605 (Optimizer), 8603 (Super Investor), 8606 (Ensemble)
+#          8605 (Optimizer), 8603 (Super Investor)
 # ============================================================
 
 STABLE_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -13,7 +13,7 @@ echo "  Klasör: $STABLE_DIR"
 echo "========================================"
 
 # Önceki stabil süreçleri durdur
-pkill -f "5655\|5700\|8601\|8603\|8605\|8606" 2>/dev/null
+pkill -f "5655\|5700\|8601\|8603\|8605" 2>/dev/null
 sleep 1
 
 # Piyasa Zamanlaması — port 8601
@@ -36,12 +36,25 @@ echo "▶ Super Investor (8603)..."
 cd "$STABLE_DIR/SUPER-INVESTOR-CHATGPT"
 nohup python3 -m streamlit run app.py --server.port 8603 --server.headless true > /tmp/stable_super.log 2>&1 &
 
-# Ensemble Portföy — port 8606
-echo "▶ Ensemble Portföy (8606)..."
-cd "$STABLE_DIR/Ensemble-Portfoy"
-nohup python3 -m streamlit run app.py --server.port 8606 --server.headless true > /tmp/stable_ensemble.log 2>&1 &
+
+
+
 
 sleep 4
+
+# QuantumScan (EMERGENT) — paylaşımlı, zaten çalışıyorsa atla
+echo "▶ QuantumScan — port durumu kontrol (5175/8090)..."
+if ! lsof -i :5175 -sTCP:LISTEN -t > /dev/null 2>&1; then
+  echo "  QuantumScan backend (8090) başlatılıyor..."
+  cd "$STABLE_DIR/../../../EMERGENT/backend" 2>/dev/null || cd "/Users/hakanficicilar/Documents/Aİ/EMERGENT/backend"
+  nohup python3 -m uvicorn server:app --host 0.0.0.0 --port 8090 > /tmp/qs_backend.log 2>&1 &
+  sleep 2
+  echo "  QuantumScan frontend (5175) başlatılıyor..."
+  cd "$STABLE_DIR/../../../EMERGENT/frontend" 2>/dev/null || cd "/Users/hakanficicilar/Documents/Aİ/EMERGENT/frontend"
+  nohup npx serve -s build -l 5175 > /tmp/qs_frontend.log 2>&1 &
+else
+  echo "  QuantumScan zaten çalışıyor (5175)"
+fi
 
 # Portal — port 5700
 echo "▶ Portal (5700)..."

@@ -1,0 +1,10 @@
+=====================================
+STABLE Checkpoint
+Tarih: 2026-06-03 14:19:52
+Kaynak: localhost:5600 (gelistirme)
+Hedef:  localhost:5700 (stable)
+Notlar: Tum BIST iyilestirmeleri dahil
+        bist_adaptations.py, bist_snapshot.py
+        momentum skoru, ATR duzeltmesi
+        universe filtresi, ticker_returns kaydı
+=====================================

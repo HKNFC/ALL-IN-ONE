@@ -1,0 +1,13 @@
+⚠️  STABLE ALL-IN-ONE — KİLİTLİ ORTAM
+========================================
+Bu klasördeki .py ve .html dosyaları SALT-OKUNUR (chmod 444) olarak kilitlenmiştir.
+DEV (localhost:5600) ortamında yaptığın değişiklikler buraya OTOMATIK YANSIMAZ.
+
+Sabit URL   : http://localhost:5700
+Başlatma    : bash "/Users/hakanficicilar/Documents/Aİ/STABLE-ALL-IN-ONE/start_stable.sh"
+
+Değişiklik yapmak istersen:
+  1. DEV ortamında (localhost:5600) geliştir ve test et
+  2. Onayladıktan sonra kilidi kaldır: chmod -R u+w STABLE-ALL-IN-ONE/
+  3. Değişiklikleri manuel kopyala
+  4. Tekrar kilitle: find STABLE-ALL-IN-ONE -name "*.py" | xargs chmod 444

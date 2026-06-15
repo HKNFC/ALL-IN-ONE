@@ -1,0 +1,6763 @@
+{
+  "entries": [
+    {
+      "id": "5e0a446cbcf1",
+      "type": "backtest",
+      "timestamp": 1780351968.2543192,
+      "datetime": "2026-06-02 01:12",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-06-02"
+      },
+      "total_return": 0.0,
+      "benchmark_return": 0.0,
+      "num_periods": 0,
+      "sharpe": 0.0,
+      "max_drawdown": 0.0,
+      "rebalance_history": []
+    },
+    {
+      "id": "8aeac8afeec7",
+      "type": "backtest",
+      "timestamp": 1780350456.774546,
+      "datetime": "2026-06-02 00:47",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-06-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 452.84,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 2.26,
+      "max_drawdown": -27.24,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "TRHOL",
+            "VANGD",
+            "DSTKF"
+          ],
+          "period_return": 26.65,
+          "scores": {
+            "TRHOL": 92.1,
+            "VANGD": 90.3,
+            "DSTKF": 89.9
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": 19.08,
+          "scores": {
+            "DSTKF": 93.0,
+            "HEDEF": 89.0,
+            "TRHOL": 88.8
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "DSTKF",
+            "KLNMA",
+            "CRDFA"
+          ],
+          "period_return": 20.9,
+          "scores": {
+            "DSTKF": 91.1,
+            "KLNMA": 90.8,
+            "CRDFA": 89.8
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "CRDFA"
+          ],
+          "period_return": 67.07,
+          "scores": {
+            "HEDEF": 93.6,
+            "DSTKF": 92.0,
+            "CRDFA": 89.5
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "HEDEF",
+            "GMTAS",
+            "CRDFA"
+          ],
+          "period_return": 60.21,
+          "scores": {
+            "HEDEF": 93.6,
+            "GMTAS": 93.3,
+            "CRDFA": 93.2
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": -0.73,
+          "scores": {
+            "CRDFA": 92.8,
+            "HEDEF": 91.2,
+            "TRHOL": 90.1
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "TDGYO",
+            "TRHOL"
+          ],
+          "period_return": 11.22,
+          "scores": {
+            "CRDFA": 95.7,
+            "TDGYO": 91.5,
+            "TRHOL": 91.0
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "TRHOL",
+            "TEHOL",
+            "CRDFA"
+          ],
+          "period_return": -27.24,
+          "scores": {
+            "TRHOL": 90.6,
+            "TEHOL": 90.5,
+            "CRDFA": 89.9
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "TRHOL",
+            "A1CAP",
+            "CRDFA"
+          ],
+          "period_return": 9.19,
+          "scores": {
+            "TRHOL": 88.0,
+            "A1CAP": 87.5,
+            "CRDFA": 87.3
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "CRDFA"
+          ],
+          "period_return": 24.31,
+          "scores": {
+            "HEDEF": 93.1,
+            "DSTKF": 91.2,
+            "CRDFA": 90.7
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "CRDFA",
+            "NETCD",
+            "DSTKF"
+          ],
+          "period_return": 6.64,
+          "scores": {
+            "CRDFA": 91.8,
+            "NETCD": 90.3,
+            "DSTKF": 90.0
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "VANGD"
+          ],
+          "period_return": -3.87,
+          "scores": {
+            "GMTAS": 94.9,
+            "KTLEV": 91.0,
+            "VANGD": 90.9
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "TRHOL"
+          ],
+          "period_return": 1.35,
+          "scores": {
+            "CRDFA": 92.7,
+            "KTLEV": 91.7,
+            "TRHOL": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "eb0604e21516",
+      "type": "scan",
+      "timestamp": 1780348742.892492,
+      "datetime": "2026-06-02 00:19",
+      "market": "BIST (Türkiye)",
+      "segment": "BIST TÜM",
+      "scan_mode": "Standart Tarama",
+      "profile": "Değer + Onay",
+      "quality": "Sıkı",
+      "sort_by": "Institutional Score",
+      "top_n": 20,
+      "result_count": 231,
+      "top_stocks": [
+        "HLGYO",
+        "ESCOM",
+        "AHSGY",
+        "PAGYO",
+        "CRDFA",
+        "ISFIN",
+        "AYES",
+        "ATATP",
+        "CATES",
+        "LIDFA"
+      ],
+      "scan_date": "2026-06-01"
+    },
+    {
+      "id": "bd2b3ee88b70",
+      "type": "scan",
+      "timestamp": 1780262208.760729,
+      "datetime": "2026-06-01 00:16",
+      "market": "BIST (Türkiye)",
+      "segment": "BIST TÜM",
+      "scan_mode": "Standart Tarama",
+      "profile": "Kalite Bileşikleri",
+      "quality": "Sıkı",
+      "sort_by": "Institutional Score",
+      "top_n": 20,
+      "result_count": 482,
+      "top_stocks": [
+        "CRDFA",
+        "AHSGY",
+        "ATATP",
+        "AYES",
+        "CATES",
+        "ALBRK",
+        "CWENE",
+        "AGESA",
+        "ANSGR",
+        "ANHYT"
+      ],
+      "scan_date": "2026-05-29"
+    },
+    {
+      "id": "252e8c9b4ac2",
+      "type": "backtest",
+      "timestamp": 1780261559.849049,
+      "datetime": "2026-06-01 00:05",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-06-01"
+      },
+      "total_return": 976.27,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 3.64,
+      "max_drawdown": -0.73,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "TRHOL",
+            "VANGD",
+            "DSTKF"
+          ],
+          "period_return": 26.65,
+          "scores": {
+            "TRHOL": 92.2,
+            "VANGD": 90.4,
+            "DSTKF": 90.0
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "KTLEV",
+            "HEDEF"
+          ],
+          "period_return": 17.0,
+          "scores": {
+            "DSTKF": 93.0,
+            "KTLEV": 90.4,
+            "HEDEF": 89.0
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "DSTKF",
+            "KLNMA",
+            "CRDFA"
+          ],
+          "period_return": 20.9,
+          "scores": {
+            "DSTKF": 91.0,
+            "KLNMA": 90.8,
+            "CRDFA": 89.7
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "CRDFA"
+          ],
+          "period_return": 67.07,
+          "scores": {
+            "HEDEF": 93.6,
+            "DSTKF": 92.0,
+            "CRDFA": 89.5
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "HEDEF",
+            "GMTAS",
+            "CRDFA"
+          ],
+          "period_return": 60.21,
+          "scores": {
+            "HEDEF": 93.6,
+            "GMTAS": 93.3,
+            "CRDFA": 93.1
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": -0.73,
+          "scores": {
+            "CRDFA": 92.8,
+            "HEDEF": 91.2,
+            "TRHOL": 90.1
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "TDGYO"
+          ],
+          "period_return": 15.95,
+          "scores": {
+            "CRDFA": 95.7,
+            "KTLEV": 91.6,
+            "TDGYO": 91.5
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "TEHOL"
+          ],
+          "period_return": 15.85,
+          "scores": {
+            "KTLEV": 92.8,
+            "TRHOL": 90.5,
+            "TEHOL": 90.4
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 8.94,
+          "scores": {
+            "KTLEV": 95.5,
+            "TRHOL": 88.0,
+            "CRDFA": 87.3
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "CRDFA"
+          ],
+          "period_return": 24.31,
+          "scores": {
+            "HEDEF": 93.1,
+            "DSTKF": 91.2,
+            "CRDFA": 90.6
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "NETCD"
+          ],
+          "period_return": 15.89,
+          "scores": {
+            "CRDFA": 91.8,
+            "KTLEV": 91.8,
+            "NETCD": 90.3
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "VANGD"
+          ],
+          "period_return": 4.96,
+          "scores": {
+            "GMTAS": 94.9,
+            "KTLEV": 93.8,
+            "VANGD": 90.9
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 2.19,
+          "scores": {
+            "KTLEV": 93.9,
+            "CRDFA": 92.7,
+            "TRHOL": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "c50db4361aae",
+      "type": "backtest",
+      "timestamp": 1780261516.725627,
+      "datetime": "2026-06-01 00:05",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-06-01"
+      },
+      "total_return": 102.44,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.4,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 44.67,
+          "scores": {
+            "KTLEV": 94.9,
+            "TRHOL": 90.6,
+            "CRDFA": 89.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 93.7,
+            "LIDFA": 89.2,
+            "TRHOL": 88.2
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "ESCOM"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 93.2,
+            "HEDEF": 92.5,
+            "ESCOM": 91.3
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "VANGD"
+          ],
+          "period_return": 32.95,
+          "scores": {
+            "KTLEV": 94.4,
+            "TRHOL": 90.0,
+            "VANGD": 89.5
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ESCOM"
+          ],
+          "period_return": 2.04,
+          "scores": {
+            "KTLEV": 92.4,
+            "TRHOL": 89.4,
+            "ESCOM": 89.1
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 92.8,
+            "CRDFA": 92.2,
+            "TRHOL": 91.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "99ccbb63bbc1",
+      "type": "backtest",
+      "timestamp": 1780261489.1855218,
+      "datetime": "2026-06-01 00:04",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-06-01"
+      },
+      "total_return": 102.44,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.4,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 44.67,
+          "scores": {
+            "KTLEV": 94.9,
+            "TRHOL": 90.6,
+            "CRDFA": 89.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 93.7,
+            "LIDFA": 89.2,
+            "TRHOL": 88.2
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "ESCOM"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 93.2,
+            "HEDEF": 92.5,
+            "ESCOM": 91.3
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "VANGD"
+          ],
+          "period_return": 32.95,
+          "scores": {
+            "KTLEV": 94.4,
+            "TRHOL": 90.0,
+            "VANGD": 89.5
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ESCOM"
+          ],
+          "period_return": 2.04,
+          "scores": {
+            "KTLEV": 92.4,
+            "TRHOL": 89.4,
+            "ESCOM": 89.1
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 92.8,
+            "CRDFA": 92.2,
+            "TRHOL": 91.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "fea54ce09331",
+      "type": "backtest",
+      "timestamp": 1780261449.1575081,
+      "datetime": "2026-06-01 00:04",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-06-01"
+      },
+      "total_return": 102.44,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.4,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 44.67,
+          "scores": {
+            "KTLEV": 94.9,
+            "TRHOL": 90.6,
+            "CRDFA": 89.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 93.7,
+            "LIDFA": 89.2,
+            "TRHOL": 88.2
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "ESCOM"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 93.2,
+            "HEDEF": 92.5,
+            "ESCOM": 91.3
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "VANGD"
+          ],
+          "period_return": 32.95,
+          "scores": {
+            "KTLEV": 94.4,
+            "TRHOL": 90.0,
+            "VANGD": 89.5
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ESCOM"
+          ],
+          "period_return": 2.04,
+          "scores": {
+            "KTLEV": 92.4,
+            "TRHOL": 89.4,
+            "ESCOM": 89.1
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 92.8,
+            "CRDFA": 92.2,
+            "TRHOL": 91.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "2051f0d2409f",
+      "type": "backtest",
+      "timestamp": 1780261402.231018,
+      "datetime": "2026-06-01 00:03",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-06-01"
+      },
+      "total_return": 102.44,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.4,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 44.67,
+          "scores": {
+            "KTLEV": 94.9,
+            "TRHOL": 90.6,
+            "CRDFA": 89.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 93.7,
+            "LIDFA": 89.2,
+            "TRHOL": 88.2
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "ESCOM"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 93.2,
+            "HEDEF": 92.5,
+            "ESCOM": 91.3
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "VANGD"
+          ],
+          "period_return": 32.95,
+          "scores": {
+            "KTLEV": 94.4,
+            "TRHOL": 90.0,
+            "VANGD": 89.5
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ESCOM"
+          ],
+          "period_return": 2.04,
+          "scores": {
+            "KTLEV": 92.4,
+            "TRHOL": 89.4,
+            "ESCOM": 89.1
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 92.8,
+            "CRDFA": 92.2,
+            "TRHOL": 91.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "35311bdfa278",
+      "type": "backtest",
+      "timestamp": 1780261376.939902,
+      "datetime": "2026-06-01 00:02",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-06-01"
+      },
+      "total_return": 102.44,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.4,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 44.67,
+          "scores": {
+            "KTLEV": 94.9,
+            "TRHOL": 90.6,
+            "CRDFA": 89.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 93.7,
+            "LIDFA": 89.2,
+            "TRHOL": 88.2
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "ESCOM"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 93.2,
+            "HEDEF": 92.5,
+            "ESCOM": 91.3
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "VANGD"
+          ],
+          "period_return": 32.95,
+          "scores": {
+            "KTLEV": 94.4,
+            "TRHOL": 90.0,
+            "VANGD": 89.5
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ESCOM"
+          ],
+          "period_return": 2.04,
+          "scores": {
+            "KTLEV": 92.4,
+            "TRHOL": 89.4,
+            "ESCOM": 89.1
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 92.8,
+            "CRDFA": 92.2,
+            "TRHOL": 91.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "2e19e785203b",
+      "type": "backtest",
+      "timestamp": 1780261340.746655,
+      "datetime": "2026-06-01 00:02",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2024-08-31",
+        "end": "2026-06-01"
+      },
+      "total_return": 281.41,
+      "benchmark_return": 35.14,
+      "num_periods": 22,
+      "sharpe": 1.5,
+      "max_drawdown": -44.79,
+      "rebalance_history": [
+        {
+          "date": "2024-09-02",
+          "tickers": [
+            "VANGD",
+            "RTALB",
+            "ESCOM"
+          ],
+          "period_return": -26.29,
+          "scores": {
+            "VANGD": 94.4,
+            "RTALB": 91.3,
+            "ESCOM": 91.2
+          }
+        },
+        {
+          "date": "2024-10-01",
+          "tickers": [
+            "ISATR",
+            "GMTAS",
+            "ALBRK"
+          ],
+          "period_return": -7.34,
+          "scores": {
+            "ISATR": 90.0,
+            "GMTAS": 86.6,
+            "ALBRK": 86.5
+          }
+        },
+        {
+          "date": "2024-10-30",
+          "tickers": [
+            "KZGYO",
+            "ICUGS",
+            "TSKB"
+          ],
+          "period_return": 1.88,
+          "scores": {
+            "KZGYO": 91.0,
+            "ICUGS": 88.0,
+            "TSKB": 86.2
+          }
+        },
+        {
+          "date": "2024-11-28",
+          "tickers": [
+            "IHLGM",
+            "MACKO",
+            "CRDFA"
+          ],
+          "period_return": -5.28,
+          "scores": {
+            "IHLGM": 89.6,
+            "MACKO": 88.1,
+            "CRDFA": 87.5
+          }
+        },
+        {
+          "date": "2024-12-27",
+          "tickers": [
+            "YGYO",
+            "LIDER",
+            "ISGSY"
+          ],
+          "period_return": -2.82,
+          "scores": {
+            "YGYO": 94.4,
+            "LIDER": 89.7,
+            "ISGSY": 87.9
+          }
+        },
+        {
+          "date": "2025-01-27",
+          "tickers": [
+            "TDGYO",
+            "VANGD",
+            "RAYSG"
+          ],
+          "period_return": -11.82,
+          "scores": {
+            "TDGYO": 89.6,
+            "VANGD": 88.8,
+            "RAYSG": 88.5
+          }
+        },
+        {
+          "date": "2025-02-25",
+          "tickers": [
+            "VANGD",
+            "GRSEL",
+            "GRTHO"
+          ],
+          "period_return": -2.25,
+          "scores": {
+            "VANGD": 91.9,
+            "GRSEL": 89.9,
+            "GRTHO": 88.4
+          }
+        },
+        {
+          "date": "2025-03-26",
+          "tickers": [
+            "HEDEF",
+            "TRHOL",
+            "TURSG"
+          ],
+          "period_return": 14.05,
+          "scores": {
+            "HEDEF": 94.2,
+            "TRHOL": 90.6,
+            "TURSG": 88.8
+          }
+        },
+        {
+          "date": "2025-04-24",
+          "tickers": [
+            "GARFA",
+            "VANGD",
+            "HEDEF"
+          ],
+          "period_return": 6.93,
+          "scores": {
+            "GARFA": 92.2,
+            "VANGD": 91.3,
+            "HEDEF": 90.8
+          }
+        },
+        {
+          "date": "2025-05-23",
+          "tickers": [
+            "TRHOL",
+            "GMTAS",
+            "DSTKF"
+          ],
+          "period_return": 6.28,
+          "scores": {
+            "TRHOL": 90.6,
+            "GMTAS": 90.0,
+            "DSTKF": 89.0
+          }
+        },
+        {
+          "date": "2025-06-23",
+          "tickers": [
+            "TRHOL",
+            "VANGD",
+            "DSTKF"
+          ],
+          "period_return": 29.81,
+          "scores": {
+            "TRHOL": 91.3,
+            "VANGD": 90.5,
+            "DSTKF": 89.2
+          }
+        },
+        {
+          "date": "2025-07-22",
+          "tickers": [
+            "KLNMA",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 20.33,
+          "scores": {
+            "KLNMA": 91.4,
+            "CRDFA": 88.5,
+            "KTLEV": 87.7
+          }
+        },
+        {
+          "date": "2025-08-20",
+          "tickers": [
+            "CRDFA",
+            "TRHOL",
+            "ISGSY"
+          ],
+          "period_return": 6.11,
+          "scores": {
+            "CRDFA": 89.5,
+            "TRHOL": 87.0,
+            "ISGSY": 86.9
+          }
+        },
+        {
+          "date": "2025-09-18",
+          "tickers": [
+            "HEDEF",
+            "TRHOL",
+            "TEHOL"
+          ],
+          "period_return": 55.9,
+          "scores": {
+            "HEDEF": 90.4,
+            "TRHOL": 89.1,
+            "TEHOL": 88.8
+          }
+        },
+        {
+          "date": "2025-10-17",
+          "tickers": [
+            "HEDEF",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": -4.01,
+          "scores": {
+            "HEDEF": 93.4,
+            "TRHOL": 91.5,
+            "CRDFA": 91.0
+          }
+        },
+        {
+          "date": "2025-11-17",
+          "tickers": [
+            "TRHOL",
+            "KTLEV",
+            "VAKFN"
+          ],
+          "period_return": -1.94,
+          "scores": {
+            "TRHOL": 90.6,
+            "KTLEV": 89.7,
+            "VAKFN": 89.4
+          }
+        },
+        {
+          "date": "2025-12-16",
+          "tickers": [
+            "TDGYO",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 3.76,
+          "scores": {
+            "TDGYO": 90.9,
+            "TRHOL": 90.5,
+            "CRDFA": 88.5
+          }
+        },
+        {
+          "date": "2026-01-14",
+          "tickers": [
+            "VANGD",
+            "KTLEV",
+            "AHSGY"
+          ],
+          "period_return": 18.32,
+          "scores": {
+            "VANGD": 93.3,
+            "KTLEV": 92.4,
+            "AHSGY": 92.3
+          }
+        },
+        {
+          "date": "2026-02-12",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "HEDEF"
+          ],
+          "period_return": 27.59,
+          "scores": {
+            "KTLEV": 91.4,
+            "VANGD": 91.2,
+            "HEDEF": 88.4
+          }
+        },
+        {
+          "date": "2026-03-13",
+          "tickers": [
+            "ISGSY",
+            "GMTAS",
+            "DSTKF"
+          ],
+          "period_return": 7.55,
+          "scores": {
+            "ISGSY": 94.5,
+            "GMTAS": 93.3,
+            "DSTKF": 92.1
+          }
+        },
+        {
+          "date": "2026-04-13",
+          "tickers": [
+            "VANGD",
+            "KTLEV",
+            "GMTAS"
+          ],
+          "period_return": 28.33,
+          "scores": {
+            "VANGD": 92.6,
+            "KTLEV": 91.0,
+            "GMTAS": 90.1
+          }
+        },
+        {
+          "date": "2026-05-12",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "NETCD"
+          ],
+          "period_return": 1.37,
+          "scores": {
+            "KTLEV": 94.3,
+            "TRHOL": 87.8,
+            "NETCD": 86.1
+          }
+        }
+      ]
+    },
+    {
+      "id": "2d9140470f6e",
+      "type": "backtest",
+      "timestamp": 1780261191.078885,
+      "datetime": "2026-05-31 23:59",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 976.27,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 3.64,
+      "max_drawdown": -0.73,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "TRHOL",
+            "VANGD",
+            "DSTKF"
+          ],
+          "period_return": 26.65,
+          "scores": {
+            "TRHOL": 92.2,
+            "VANGD": 90.4,
+            "DSTKF": 90.0
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "KTLEV",
+            "HEDEF"
+          ],
+          "period_return": 17.0,
+          "scores": {
+            "DSTKF": 93.0,
+            "KTLEV": 90.4,
+            "HEDEF": 89.0
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "DSTKF",
+            "KLNMA",
+            "CRDFA"
+          ],
+          "period_return": 20.9,
+          "scores": {
+            "DSTKF": 91.0,
+            "KLNMA": 90.8,
+            "CRDFA": 89.7
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "CRDFA"
+          ],
+          "period_return": 67.07,
+          "scores": {
+            "HEDEF": 93.6,
+            "DSTKF": 92.0,
+            "CRDFA": 89.5
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "HEDEF",
+            "GMTAS",
+            "CRDFA"
+          ],
+          "period_return": 60.21,
+          "scores": {
+            "HEDEF": 93.6,
+            "GMTAS": 93.3,
+            "CRDFA": 93.1
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": -0.73,
+          "scores": {
+            "CRDFA": 92.8,
+            "HEDEF": 91.2,
+            "TRHOL": 90.1
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "TDGYO"
+          ],
+          "period_return": 15.95,
+          "scores": {
+            "CRDFA": 95.7,
+            "KTLEV": 91.6,
+            "TDGYO": 91.5
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "TEHOL"
+          ],
+          "period_return": 15.85,
+          "scores": {
+            "KTLEV": 92.8,
+            "TRHOL": 90.5,
+            "TEHOL": 90.4
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 8.94,
+          "scores": {
+            "KTLEV": 95.5,
+            "TRHOL": 88.0,
+            "CRDFA": 87.3
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "CRDFA"
+          ],
+          "period_return": 24.31,
+          "scores": {
+            "HEDEF": 93.1,
+            "DSTKF": 91.2,
+            "CRDFA": 90.6
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "NETCD"
+          ],
+          "period_return": 15.89,
+          "scores": {
+            "CRDFA": 91.8,
+            "KTLEV": 91.8,
+            "NETCD": 90.3
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "VANGD"
+          ],
+          "period_return": 4.96,
+          "scores": {
+            "GMTAS": 94.9,
+            "KTLEV": 93.8,
+            "VANGD": 90.9
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 2.19,
+          "scores": {
+            "KTLEV": 93.9,
+            "CRDFA": 92.7,
+            "TRHOL": 90.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "e4c3dba188a2",
+      "type": "backtest",
+      "timestamp": 1780261144.274296,
+      "datetime": "2026-05-31 23:59",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Değer + Onay",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 102.44,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.4,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 44.67,
+          "scores": {
+            "KTLEV": 94.9,
+            "TRHOL": 90.6,
+            "CRDFA": 89.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 93.7,
+            "LIDFA": 89.2,
+            "TRHOL": 88.2
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "ESCOM"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 93.2,
+            "HEDEF": 92.5,
+            "ESCOM": 91.3
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "VANGD"
+          ],
+          "period_return": 32.95,
+          "scores": {
+            "KTLEV": 94.4,
+            "TRHOL": 90.0,
+            "VANGD": 89.5
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ESCOM"
+          ],
+          "period_return": 2.04,
+          "scores": {
+            "KTLEV": 92.4,
+            "TRHOL": 89.4,
+            "ESCOM": 89.1
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 92.8,
+            "CRDFA": 92.2,
+            "TRHOL": 91.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "9b9f4fb5c84e",
+      "type": "backtest",
+      "timestamp": 1780261062.996316,
+      "datetime": "2026-05-31 23:57",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Akıllı Para Kırılım",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 117.53,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.48,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ASELS"
+          ],
+          "period_return": 55.97,
+          "scores": {
+            "KTLEV": 93.0,
+            "TRHOL": 89.8,
+            "ASELS": 87.0
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "SKBNK"
+          ],
+          "period_return": 5.16,
+          "scores": {
+            "KTLEV": 90.0,
+            "LIDFA": 89.7,
+            "SKBNK": 88.5
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "ESCOM"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 92.8,
+            "HEDEF": 91.1,
+            "ESCOM": 90.8
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "LIDER",
+            "TRHOL"
+          ],
+          "period_return": 21.86,
+          "scores": {
+            "KTLEV": 91.9,
+            "LIDER": 89.3,
+            "TRHOL": 88.8
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "ASELS",
+            "TRHOL",
+            "KTLEV"
+          ],
+          "period_return": 1.79,
+          "scores": {
+            "ASELS": 87.9,
+            "TRHOL": 87.6,
+            "KTLEV": 86.9
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "TRHOL",
+            "KTLEV",
+            "TCKRC"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "TRHOL": 91.1,
+            "KTLEV": 88.2,
+            "TCKRC": 87.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "52fbdd81a974",
+      "type": "backtest",
+      "timestamp": 1780260716.494432,
+      "datetime": "2026-05-31 23:51",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Akıllı Para Kırılım",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 117.53,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.48,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ASELS"
+          ],
+          "period_return": 55.97,
+          "scores": {
+            "KTLEV": 93.0,
+            "TRHOL": 89.8,
+            "ASELS": 87.0
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "SKBNK"
+          ],
+          "period_return": 5.16,
+          "scores": {
+            "KTLEV": 90.0,
+            "LIDFA": 89.7,
+            "SKBNK": 88.5
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "ESCOM"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 92.8,
+            "HEDEF": 91.1,
+            "ESCOM": 90.8
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "LIDER",
+            "TRHOL"
+          ],
+          "period_return": 21.86,
+          "scores": {
+            "KTLEV": 91.9,
+            "LIDER": 89.3,
+            "TRHOL": 88.8
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "ASELS",
+            "TRHOL",
+            "KTLEV"
+          ],
+          "period_return": 1.79,
+          "scores": {
+            "ASELS": 87.9,
+            "TRHOL": 87.6,
+            "KTLEV": 86.9
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "TRHOL",
+            "KTLEV",
+            "TCKRC"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "TRHOL": 91.1,
+            "KTLEV": 88.2,
+            "TCKRC": 87.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "c12b1e258c58",
+      "type": "backtest",
+      "timestamp": 1780260686.759584,
+      "datetime": "2026-05-31 23:51",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Büyüme Liderleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 99.44,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.55,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "A1CAP"
+          ],
+          "period_return": 41.53,
+          "scores": {
+            "KTLEV": 94.6,
+            "TRHOL": 91.2,
+            "A1CAP": 87.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 92.9,
+            "LIDFA": 89.4,
+            "TRHOL": 87.9
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": 22.3,
+          "scores": {
+            "DSTKF": 93.8,
+            "HEDEF": 92.8,
+            "TRHOL": 91.3
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "LIDER"
+          ],
+          "period_return": 21.86,
+          "scores": {
+            "KTLEV": 94.0,
+            "TRHOL": 90.5,
+            "LIDER": 89.8
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "DSTKF"
+          ],
+          "period_return": -1.98,
+          "scores": {
+            "KTLEV": 91.1,
+            "TRHOL": 89.6,
+            "DSTKF": 87.6
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "TRHOL",
+            "KTLEV",
+            "CRDFA"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "TRHOL": 91.8,
+            "KTLEV": 91.8,
+            "CRDFA": 90.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "50603c7f0923",
+      "type": "backtest",
+      "timestamp": 1780260390.8367,
+      "datetime": "2026-05-31 23:46",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Büyüme Liderleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 544.29,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 2.16,
+      "max_drawdown": -8.34,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "TRHOL",
+            "A1CAP",
+            "SMRVA"
+          ],
+          "period_return": -4.58,
+          "scores": {
+            "TRHOL": 93.3,
+            "A1CAP": 90.4,
+            "SMRVA": 89.5
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "SKBNK",
+            "TRHOL"
+          ],
+          "period_return": 7.4,
+          "scores": {
+            "DSTKF": 93.6,
+            "SKBNK": 89.7,
+            "TRHOL": 88.7
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "DSTKF",
+            "KLNMA",
+            "GMTAS"
+          ],
+          "period_return": 11.85,
+          "scores": {
+            "DSTKF": 90.8,
+            "KLNMA": 89.2,
+            "GMTAS": 87.5
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "TRHOL"
+          ],
+          "period_return": 94.2,
+          "scores": {
+            "HEDEF": 94.2,
+            "DSTKF": 92.1,
+            "TRHOL": 87.9
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "HEDEF",
+            "GMTAS",
+            "CRDFA"
+          ],
+          "period_return": 60.21,
+          "scores": {
+            "HEDEF": 94.3,
+            "GMTAS": 93.3,
+            "CRDFA": 92.0
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": -0.73,
+          "scores": {
+            "CRDFA": 91.5,
+            "HEDEF": 91.0,
+            "TRHOL": 90.5
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "TRHOL",
+            "TDGYO"
+          ],
+          "period_return": 11.22,
+          "scores": {
+            "CRDFA": 95.5,
+            "TRHOL": 91.7,
+            "TDGYO": 91.2
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "TEHOL",
+            "KTLEV",
+            "TRHOL"
+          ],
+          "period_return": 15.85,
+          "scores": {
+            "TEHOL": 92.3,
+            "KTLEV": 91.7,
+            "TRHOL": 91.1
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "TCKRC",
+            "TRHOL"
+          ],
+          "period_return": -8.34,
+          "scores": {
+            "KTLEV": 95.5,
+            "TCKRC": 89.2,
+            "TRHOL": 87.6
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "TRHOL"
+          ],
+          "period_return": 31.59,
+          "scores": {
+            "HEDEF": 93.5,
+            "DSTKF": 91.0,
+            "TRHOL": 90.8
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "NETCD",
+            "KTLEV",
+            "YGGYO"
+          ],
+          "period_return": 15.92,
+          "scores": {
+            "NETCD": 90.8,
+            "KTLEV": 90.4,
+            "YGGYO": 90.4
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "DSTKF"
+          ],
+          "period_return": -1.15,
+          "scores": {
+            "GMTAS": 94.9,
+            "KTLEV": 93.1,
+            "DSTKF": 89.7
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 2.19,
+          "scores": {
+            "KTLEV": 93.2,
+            "CRDFA": 91.4,
+            "TRHOL": 90.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "bd2ecd8fbd13",
+      "type": "backtest",
+      "timestamp": 1780260343.141261,
+      "datetime": "2026-05-31 23:45",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Büyüme Liderleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 99.44,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.55,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "A1CAP"
+          ],
+          "period_return": 41.53,
+          "scores": {
+            "KTLEV": 94.6,
+            "TRHOL": 91.2,
+            "A1CAP": 87.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 92.9,
+            "LIDFA": 89.4,
+            "TRHOL": 87.9
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": 22.3,
+          "scores": {
+            "DSTKF": 93.8,
+            "HEDEF": 92.8,
+            "TRHOL": 91.3
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "LIDER"
+          ],
+          "period_return": 21.86,
+          "scores": {
+            "KTLEV": 94.0,
+            "TRHOL": 90.5,
+            "LIDER": 89.8
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "DSTKF"
+          ],
+          "period_return": -1.98,
+          "scores": {
+            "KTLEV": 91.1,
+            "TRHOL": 89.6,
+            "DSTKF": 87.6
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "TRHOL",
+            "KTLEV",
+            "CRDFA"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "TRHOL": 91.8,
+            "KTLEV": 91.8,
+            "CRDFA": 90.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "97a2094bbf38",
+      "type": "backtest",
+      "timestamp": 1780260132.296778,
+      "datetime": "2026-05-31 23:42",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Kalite Bileşikleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 95.8,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.36,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 44.67,
+          "scores": {
+            "KTLEV": 94.8,
+            "CRDFA": 90.0,
+            "TRHOL": 89.9
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 93.7,
+            "LIDFA": 89.0,
+            "TRHOL": 87.9
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "ESCOM",
+            "HEDEF"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 92.5,
+            "ESCOM": 92.2,
+            "HEDEF": 92.0
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "CRDFA"
+          ],
+          "period_return": 28.58,
+          "scores": {
+            "KTLEV": 94.4,
+            "VANGD": 90.5,
+            "CRDFA": 90.0
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "ESCOM",
+            "TRHOL"
+          ],
+          "period_return": 2.04,
+          "scores": {
+            "KTLEV": 92.5,
+            "ESCOM": 90.2,
+            "TRHOL": 88.8
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 93.0,
+            "CRDFA": 92.6,
+            "TRHOL": 90.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "73544497a1b7",
+      "type": "backtest",
+      "timestamp": 1780260060.601877,
+      "datetime": "2026-05-31 23:41",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Kalite Bileşikleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2024-09-02",
+        "end": "2026-05-31"
+      },
+      "total_return": 436.37,
+      "benchmark_return": 35.14,
+      "num_periods": 22,
+      "sharpe": 1.51,
+      "max_drawdown": -51.22,
+      "rebalance_history": [
+        {
+          "date": "2024-09-02",
+          "tickers": [
+            "VANGD",
+            "ESCOM",
+            "RTALB"
+          ],
+          "period_return": -26.29,
+          "scores": {
+            "VANGD": 94.8,
+            "ESCOM": 91.5,
+            "RTALB": 89.6
+          }
+        },
+        {
+          "date": "2024-10-01",
+          "tickers": [
+            "ISATR",
+            "GMTAS",
+            "AHSGY"
+          ],
+          "period_return": -12.17,
+          "scores": {
+            "ISATR": 90.0,
+            "GMTAS": 87.5,
+            "AHSGY": 87.1
+          }
+        },
+        {
+          "date": "2024-10-30",
+          "tickers": [
+            "KZGYO",
+            "TSKB",
+            "ICUGS"
+          ],
+          "period_return": 1.88,
+          "scores": {
+            "KZGYO": 90.6,
+            "TSKB": 87.9,
+            "ICUGS": 87.3
+          }
+        },
+        {
+          "date": "2024-11-28",
+          "tickers": [
+            "CRDFA",
+            "IHLGM",
+            "MACKO"
+          ],
+          "period_return": -5.28,
+          "scores": {
+            "CRDFA": 89.6,
+            "IHLGM": 88.1,
+            "MACKO": 87.2
+          }
+        },
+        {
+          "date": "2024-12-27",
+          "tickers": [
+            "YGYO",
+            "LIDER",
+            "ISGSY"
+          ],
+          "period_return": -2.82,
+          "scores": {
+            "YGYO": 94.3,
+            "LIDER": 88.5,
+            "ISGSY": 86.9
+          }
+        },
+        {
+          "date": "2025-01-27",
+          "tickers": [
+            "VANGD",
+            "TDGYO",
+            "ALBRK"
+          ],
+          "period_return": 1.8,
+          "scores": {
+            "VANGD": 90.5,
+            "TDGYO": 90.3,
+            "ALBRK": 88.5
+          }
+        },
+        {
+          "date": "2025-02-25",
+          "tickers": [
+            "VANGD",
+            "GRSEL",
+            "TDGYO"
+          ],
+          "period_return": -21.08,
+          "scores": {
+            "VANGD": 92.7,
+            "GRSEL": 88.5,
+            "TDGYO": 88.1
+          }
+        },
+        {
+          "date": "2025-03-26",
+          "tickers": [
+            "HEDEF",
+            "TRHOL",
+            "TURSG"
+          ],
+          "period_return": 14.05,
+          "scores": {
+            "HEDEF": 93.5,
+            "TRHOL": 89.8,
+            "TURSG": 89.2
+          }
+        },
+        {
+          "date": "2025-04-24",
+          "tickers": [
+            "GARFA",
+            "VANGD",
+            "HEDEF"
+          ],
+          "period_return": 6.93,
+          "scores": {
+            "GARFA": 93.1,
+            "VANGD": 92.6,
+            "HEDEF": 90.5
+          }
+        },
+        {
+          "date": "2025-05-23",
+          "tickers": [
+            "TRHOL",
+            "VANGD",
+            "GMTAS"
+          ],
+          "period_return": -2.08,
+          "scores": {
+            "TRHOL": 89.9,
+            "VANGD": 89.6,
+            "GMTAS": 89.0
+          }
+        },
+        {
+          "date": "2025-06-23",
+          "tickers": [
+            "VANGD",
+            "TRHOL",
+            "DSTKF"
+          ],
+          "period_return": 29.81,
+          "scores": {
+            "VANGD": 91.4,
+            "TRHOL": 90.5,
+            "DSTKF": 88.9
+          }
+        },
+        {
+          "date": "2025-07-22",
+          "tickers": [
+            "KLNMA",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 20.33,
+          "scores": {
+            "KLNMA": 92.0,
+            "CRDFA": 89.6,
+            "KTLEV": 88.7
+          }
+        },
+        {
+          "date": "2025-08-20",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": 72.17,
+          "scores": {
+            "CRDFA": 90.3,
+            "HEDEF": 87.2,
+            "TRHOL": 87.0
+          }
+        },
+        {
+          "date": "2025-09-18",
+          "tickers": [
+            "HEDEF",
+            "KTLEV",
+            "TRHOL"
+          ],
+          "period_return": 58.72,
+          "scores": {
+            "HEDEF": 90.0,
+            "KTLEV": 89.3,
+            "TRHOL": 88.7
+          }
+        },
+        {
+          "date": "2025-10-17",
+          "tickers": [
+            "HEDEF",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": -4.01,
+          "scores": {
+            "HEDEF": 92.8,
+            "CRDFA": 91.7,
+            "TRHOL": 90.7
+          }
+        },
+        {
+          "date": "2025-11-17",
+          "tickers": [
+            "KTLEV",
+            "VAKFN",
+            "TRHOL"
+          ],
+          "period_return": -1.94,
+          "scores": {
+            "KTLEV": 90.6,
+            "VAKFN": 90.1,
+            "TRHOL": 89.9
+          }
+        },
+        {
+          "date": "2025-12-16",
+          "tickers": [
+            "TDGYO",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 3.76,
+          "scores": {
+            "TDGYO": 90.5,
+            "TRHOL": 89.8,
+            "CRDFA": 89.1
+          }
+        },
+        {
+          "date": "2026-01-14",
+          "tickers": [
+            "VANGD",
+            "KTLEV",
+            "AHSGY"
+          ],
+          "period_return": 18.32,
+          "scores": {
+            "VANGD": 94.2,
+            "KTLEV": 93.0,
+            "AHSGY": 92.5
+          }
+        },
+        {
+          "date": "2026-02-12",
+          "tickers": [
+            "VANGD",
+            "KTLEV",
+            "HEDEF"
+          ],
+          "period_return": 27.59,
+          "scores": {
+            "VANGD": 92.0,
+            "KTLEV": 91.8,
+            "HEDEF": 88.8
+          }
+        },
+        {
+          "date": "2026-03-13",
+          "tickers": [
+            "ISGSY",
+            "GMTAS",
+            "CRDFA"
+          ],
+          "period_return": 7.1,
+          "scores": {
+            "ISGSY": 94.3,
+            "GMTAS": 93.1,
+            "CRDFA": 91.9
+          }
+        },
+        {
+          "date": "2026-04-13",
+          "tickers": [
+            "VANGD",
+            "KTLEV",
+            "CRDFA"
+          ],
+          "period_return": 23.63,
+          "scores": {
+            "VANGD": 93.2,
+            "KTLEV": 91.3,
+            "CRDFA": 90.7
+          }
+        },
+        {
+          "date": "2026-05-12",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ATATP"
+          ],
+          "period_return": 10.5,
+          "scores": {
+            "KTLEV": 94.3,
+            "TRHOL": 87.4,
+            "ATATP": 86.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "19577e1f9092",
+      "type": "backtest",
+      "timestamp": 1780259952.909259,
+      "datetime": "2026-05-31 23:39",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Kalite Bileşikleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 1473.24,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 4.2,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "VANGD",
+            "TRHOL",
+            "DSTKF"
+          ],
+          "period_return": 26.65,
+          "scores": {
+            "VANGD": 91.3,
+            "TRHOL": 91.2,
+            "DSTKF": 89.6
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "KTLEV",
+            "HEDEF"
+          ],
+          "period_return": 17.0,
+          "scores": {
+            "DSTKF": 92.6,
+            "KTLEV": 91.4,
+            "HEDEF": 89.1
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "KLNMA",
+            "DSTKF",
+            "CRDFA"
+          ],
+          "period_return": 20.9,
+          "scores": {
+            "KLNMA": 91.2,
+            "DSTKF": 90.8,
+            "CRDFA": 90.4
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "CRDFA"
+          ],
+          "period_return": 67.07,
+          "scores": {
+            "HEDEF": 93.0,
+            "DSTKF": 91.5,
+            "CRDFA": 90.1
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "CRDFA",
+            "GMTAS",
+            "HEDEF"
+          ],
+          "period_return": 60.21,
+          "scores": {
+            "CRDFA": 93.3,
+            "GMTAS": 93.2,
+            "HEDEF": 93.1
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "AHSGY"
+          ],
+          "period_return": 4.17,
+          "scores": {
+            "CRDFA": 93.0,
+            "HEDEF": 91.1,
+            "AHSGY": 89.6
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "TDGYO"
+          ],
+          "period_return": 15.95,
+          "scores": {
+            "CRDFA": 95.6,
+            "KTLEV": 92.4,
+            "TDGYO": 91.3
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 42.08,
+          "scores": {
+            "KTLEV": 93.1,
+            "CRDFA": 90.4,
+            "TRHOL": 89.8
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 8.94,
+          "scores": {
+            "KTLEV": 95.4,
+            "CRDFA": 88.2,
+            "TRHOL": 87.7
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "CRDFA",
+            "DSTKF"
+          ],
+          "period_return": 24.31,
+          "scores": {
+            "HEDEF": 92.5,
+            "CRDFA": 91.2,
+            "DSTKF": 90.8
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "DSTKF"
+          ],
+          "period_return": 31.64,
+          "scores": {
+            "CRDFA": 92.3,
+            "KTLEV": 91.9,
+            "DSTKF": 89.7
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "VANGD"
+          ],
+          "period_return": 4.96,
+          "scores": {
+            "GMTAS": 94.5,
+            "KTLEV": 93.8,
+            "VANGD": 91.6
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 2.19,
+          "scores": {
+            "KTLEV": 94.0,
+            "CRDFA": 92.9,
+            "TRHOL": 89.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "69fd757349d9",
+      "type": "backtest",
+      "timestamp": 1780259856.135236,
+      "datetime": "2026-05-31 23:37",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Kalite Bileşikleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 95.8,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.36,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 44.67,
+          "scores": {
+            "KTLEV": 94.8,
+            "CRDFA": 90.0,
+            "TRHOL": 89.9
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 93.7,
+            "LIDFA": 89.0,
+            "TRHOL": 87.9
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "ESCOM",
+            "HEDEF"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 92.5,
+            "ESCOM": 92.2,
+            "HEDEF": 92.0
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "CRDFA"
+          ],
+          "period_return": 28.58,
+          "scores": {
+            "KTLEV": 94.4,
+            "VANGD": 90.5,
+            "CRDFA": 90.0
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "ESCOM",
+            "TRHOL"
+          ],
+          "period_return": 2.04,
+          "scores": {
+            "KTLEV": 92.5,
+            "ESCOM": 90.2,
+            "TRHOL": 88.8
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 93.0,
+            "CRDFA": 92.6,
+            "TRHOL": 90.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "6714da2b18b6",
+      "type": "backtest",
+      "timestamp": 1780259765.2647529,
+      "datetime": "2026-05-31 23:36",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Timing Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 61.7,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 0.89,
+      "max_drawdown": -52.0,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "TRHOL",
+            "A1CAP",
+            "PASEU"
+          ],
+          "period_return": 4.47,
+          "scores": {
+            "TRHOL": 94.3,
+            "A1CAP": 93.5,
+            "PASEU": 92.3
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "SKBNK",
+            "RYGYO"
+          ],
+          "period_return": 8.71,
+          "scores": {
+            "DSTKF": 94.0,
+            "SKBNK": 93.5,
+            "RYGYO": 90.2
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "NTGAZ",
+            "ENERY",
+            "DSTKF"
+          ],
+          "period_return": 20.11,
+          "scores": {
+            "NTGAZ": 91.4,
+            "ENERY": 90.7,
+            "DSTKF": 90.0
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "SKBNK"
+          ],
+          "period_return": 58.11,
+          "scores": {
+            "HEDEF": 94.7,
+            "DSTKF": 91.6,
+            "SKBNK": 89.7
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "HEDEF",
+            "GMTAS",
+            "TEHOL"
+          ],
+          "period_return": 48.93,
+          "scores": {
+            "HEDEF": 94.9,
+            "GMTAS": 93.2,
+            "TEHOL": 92.7
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "HDFGS",
+            "TRHOL",
+            "HEDEF"
+          ],
+          "period_return": -37.33,
+          "scores": {
+            "HDFGS": 91.2,
+            "TRHOL": 90.5,
+            "HEDEF": 90.3
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "ENERY",
+            "TRHOL"
+          ],
+          "period_return": -2.44,
+          "scores": {
+            "CRDFA": 94.9,
+            "ENERY": 94.2,
+            "TRHOL": 92.1
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "TEHOL",
+            "TRHOL",
+            "TRALT"
+          ],
+          "period_return": -19.25,
+          "scores": {
+            "TEHOL": 94.3,
+            "TRHOL": 91.4,
+            "TRALT": 90.1
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "TCKRC",
+            "HALKB"
+          ],
+          "period_return": -1.1,
+          "scores": {
+            "KTLEV": 95.2,
+            "TCKRC": 91.5,
+            "HALKB": 88.5
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "SKBNK",
+            "TRHOL"
+          ],
+          "period_return": 3.22,
+          "scores": {
+            "HEDEF": 93.7,
+            "SKBNK": 91.8,
+            "TRHOL": 90.9
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "YGGYO",
+            "NETCD",
+            "TRHOL"
+          ],
+          "period_return": -4.76,
+          "scores": {
+            "YGGYO": 91.1,
+            "NETCD": 90.5,
+            "TRHOL": 88.3
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "SKBNK"
+          ],
+          "period_return": 8.19,
+          "scores": {
+            "GMTAS": 94.6,
+            "KTLEV": 91.6,
+            "SKBNK": 90.5
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "KTLEV",
+            "ASTOR",
+            "TRHOL"
+          ],
+          "period_return": -3.06,
+          "scores": {
+            "KTLEV": 92.0,
+            "ASTOR": 91.5,
+            "TRHOL": 90.6
+          }
+        }
+      ]
+    },
+    {
+      "id": "8ce1693be95f",
+      "type": "backtest",
+      "timestamp": 1780259718.134888,
+      "datetime": "2026-05-31 23:35",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Timing Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 114.2,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.93,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ARMGD"
+          ],
+          "period_return": 45.42,
+          "scores": {
+            "KTLEV": 93.8,
+            "TRHOL": 91.5,
+            "ARMGD": 90.9
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "SKBNK"
+          ],
+          "period_return": 5.16,
+          "scores": {
+            "KTLEV": 91.3,
+            "LIDFA": 89.8,
+            "SKBNK": 89.2
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "ASELS",
+            "DSTKF",
+            "HEDEF"
+          ],
+          "period_return": 12.93,
+          "scores": {
+            "ASELS": 94.2,
+            "DSTKF": 94.2,
+            "HEDEF": 92.6
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "LIDER",
+            "TRHOL"
+          ],
+          "period_return": 21.86,
+          "scores": {
+            "KTLEV": 93.0,
+            "LIDER": 90.6,
+            "TRHOL": 90.5
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "ASELS",
+            "TRHOL",
+            "KTLEV"
+          ],
+          "period_return": 1.79,
+          "scores": {
+            "ASELS": 91.1,
+            "TRHOL": 89.3,
+            "KTLEV": 88.6
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "TRHOL",
+            "TCKRC",
+            "KTLEV"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "TRHOL": 92.5,
+            "TCKRC": 90.6,
+            "KTLEV": 89.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "89c9c1e24ff9",
+      "type": "backtest",
+      "timestamp": 1780259495.928523,
+      "datetime": "2026-05-31 23:31",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Selection Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2024-08-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 1350.62,
+      "benchmark_return": 35.14,
+      "num_periods": 22,
+      "sharpe": 3.16,
+      "max_drawdown": -13.48,
+      "rebalance_history": [
+        {
+          "date": "2024-09-02",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": -10.41,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.3,
+            "GARFA": 95.6
+          }
+        },
+        {
+          "date": "2024-10-01",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": 1.37,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "GARFA": 95.5
+          }
+        },
+        {
+          "date": "2024-10-30",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": 15.44,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "GARFA": 95.6
+          }
+        },
+        {
+          "date": "2024-11-28",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": -4.39,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "GARFA": 95.6
+          }
+        },
+        {
+          "date": "2024-12-27",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": 10.05,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "GARFA": 95.5
+          }
+        },
+        {
+          "date": "2025-01-27",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": -1.46,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "GARFA": 95.5
+          }
+        },
+        {
+          "date": "2025-02-25",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": -12.2,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "GARFA": 95.5
+          }
+        },
+        {
+          "date": "2025-03-26",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": 43.44,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.3,
+            "GARFA": 95.4
+          }
+        },
+        {
+          "date": "2025-04-24",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": 22.02,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.3,
+            "GARFA": 95.5
+          }
+        },
+        {
+          "date": "2025-05-23",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": -2.18,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.3,
+            "GARFA": 95.5
+          }
+        },
+        {
+          "date": "2025-06-23",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 32.61,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-07-22",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 7.26,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-08-20",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 19.08,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-09-18",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 12.5,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-10-17",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 15.81,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.3,
+            "KTLEV": 95.8
+          }
+        },
+        {
+          "date": "2025-11-17",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 23.06,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-12-16",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 41.87,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2026-01-14",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 22.45,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2026-02-12",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 13.74,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2026-03-13",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 25.82,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.1,
+            "KTLEV": 95.6
+          }
+        },
+        {
+          "date": "2026-04-13",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 23.63,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.1,
+            "KTLEV": 95.6
+          }
+        },
+        {
+          "date": "2026-05-12",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 6.37,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "60097d696c97",
+      "type": "backtest",
+      "timestamp": 1780259416.47893,
+      "datetime": "2026-05-31 23:30",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Selection Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 767.58,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 5.52,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GARFA"
+          ],
+          "period_return": 1.26,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.3,
+            "GARFA": 95.5
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 35.31,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 9.47,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 19.47,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 16.4,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 17.06,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 11.6,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 35.5,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 15.95,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 32.21,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 31.15,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.1,
+            "KTLEV": 95.6
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 14.15,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.1,
+            "KTLEV": 95.6
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 2.39,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "ce663df7c83a",
+      "type": "backtest",
+      "timestamp": 1780259341.2228212,
+      "datetime": "2026-05-31 23:29",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Selection Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 202.68,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 4.09,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 36.27,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 7.22,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 45.68,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.1,
+            "KTLEV": 95.6
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 28.58,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.1,
+            "KTLEV": 95.6
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 10.59,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.1,
+            "KTLEV": 95.6
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "VANGD": 97.2,
+            "CRDFA": 96.2,
+            "KTLEV": 95.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "dd1a3882c653",
+      "type": "backtest",
+      "timestamp": 1780259303.118922,
+      "datetime": "2026-05-31 23:28",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2024-08-30",
+        "end": "2026-05-31"
+      },
+      "total_return": 123.78,
+      "benchmark_return": 35.14,
+      "num_periods": 22,
+      "sharpe": 1.19,
+      "max_drawdown": -29.15,
+      "rebalance_history": [
+        {
+          "date": "2024-08-30",
+          "tickers": [
+            "RTALB",
+            "QNBTR",
+            "YGYO"
+          ],
+          "period_return": -13.47,
+          "scores": {
+            "RTALB": 92.3,
+            "QNBTR": 92.0,
+            "YGYO": 90.8
+          }
+        },
+        {
+          "date": "2024-09-30",
+          "tickers": [
+            "ISATR",
+            "GUBRF",
+            "LIDER"
+          ],
+          "period_return": -2.76,
+          "scores": {
+            "ISATR": 87.6,
+            "GUBRF": 86.3,
+            "LIDER": 84.7
+          }
+        },
+        {
+          "date": "2024-10-29",
+          "tickers": [
+            "KZGYO",
+            "VAKFN",
+            "TDGYO"
+          ],
+          "period_return": -3.02,
+          "scores": {
+            "KZGYO": 90.9,
+            "VAKFN": 86.8,
+            "TDGYO": 85.5
+          }
+        },
+        {
+          "date": "2024-11-27",
+          "tickers": [
+            "CRDFA",
+            "RYGYO",
+            "MACKO"
+          ],
+          "period_return": -4.18,
+          "scores": {
+            "CRDFA": 91.5,
+            "RYGYO": 90.6,
+            "MACKO": 87.8
+          }
+        },
+        {
+          "date": "2024-12-26",
+          "tickers": [
+            "YGYO",
+            "ISGSY",
+            "LIDER"
+          ],
+          "period_return": -1.48,
+          "scores": {
+            "YGYO": 94.1,
+            "ISGSY": 89.5,
+            "LIDER": 87.6
+          }
+        },
+        {
+          "date": "2025-01-24",
+          "tickers": [
+            "VANGD",
+            "A1CAP",
+            "RALYH"
+          ],
+          "period_return": 9.57,
+          "scores": {
+            "VANGD": 88.3,
+            "A1CAP": 88.2,
+            "RALYH": 88.0
+          }
+        },
+        {
+          "date": "2025-02-24",
+          "tickers": [
+            "VANGD",
+            "HEDEF",
+            "GRSEL"
+          ],
+          "period_return": -14.34,
+          "scores": {
+            "VANGD": 90.7,
+            "HEDEF": 88.7,
+            "GRSEL": 88.2
+          }
+        },
+        {
+          "date": "2025-03-25",
+          "tickers": [
+            "HEDEF",
+            "TRHOL",
+            "TURSG"
+          ],
+          "period_return": 16.24,
+          "scores": {
+            "HEDEF": 90.6,
+            "TRHOL": 90.1,
+            "TURSG": 89.2
+          }
+        },
+        {
+          "date": "2025-04-23",
+          "tickers": [
+            "HEDEF",
+            "TRHOL",
+            "GARFA"
+          ],
+          "period_return": -10.99,
+          "scores": {
+            "HEDEF": 91.3,
+            "TRHOL": 90.9,
+            "GARFA": 89.2
+          }
+        },
+        {
+          "date": "2025-05-22",
+          "tickers": [
+            "TRHOL",
+            "DSTKF",
+            "BULGS"
+          ],
+          "period_return": -4.46,
+          "scores": {
+            "TRHOL": 89.8,
+            "DSTKF": 89.4,
+            "BULGS": 88.8
+          }
+        },
+        {
+          "date": "2025-06-20",
+          "tickers": [
+            "VANGD",
+            "TRHOL",
+            "GARFA"
+          ],
+          "period_return": -0.85,
+          "scores": {
+            "VANGD": 91.4,
+            "TRHOL": 91.3,
+            "GARFA": 88.3
+          }
+        },
+        {
+          "date": "2025-07-21",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "KTLEV"
+          ],
+          "period_return": 11.16,
+          "scores": {
+            "CRDFA": 89.6,
+            "HEDEF": 88.3,
+            "KTLEV": 88.2
+          }
+        },
+        {
+          "date": "2025-08-19",
+          "tickers": [
+            "CRDFA",
+            "ISGSY",
+            "TRHOL"
+          ],
+          "period_return": 12.77,
+          "scores": {
+            "CRDFA": 89.6,
+            "ISGSY": 88.2,
+            "TRHOL": 86.3
+          }
+        },
+        {
+          "date": "2025-09-17",
+          "tickers": [
+            "KTLEV",
+            "AHSGY",
+            "HEDEF"
+          ],
+          "period_return": 36.67,
+          "scores": {
+            "KTLEV": 93.7,
+            "AHSGY": 90.5,
+            "HEDEF": 89.6
+          }
+        },
+        {
+          "date": "2025-10-16",
+          "tickers": [
+            "TRHOL",
+            "CRDFA",
+            "TEHOL"
+          ],
+          "period_return": 7.12,
+          "scores": {
+            "TRHOL": 91.4,
+            "CRDFA": 91.2,
+            "TEHOL": 90.3
+          }
+        },
+        {
+          "date": "2025-11-14",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "VAKFN"
+          ],
+          "period_return": -1.65,
+          "scores": {
+            "KTLEV": 91.5,
+            "TRHOL": 91.1,
+            "VAKFN": 90.0
+          }
+        },
+        {
+          "date": "2025-12-15",
+          "tickers": [
+            "TDGYO",
+            "BRKVY",
+            "TRHOL"
+          ],
+          "period_return": -8.32,
+          "scores": {
+            "TDGYO": 91.1,
+            "BRKVY": 90.4,
+            "TRHOL": 89.7
+          }
+        },
+        {
+          "date": "2026-01-13",
+          "tickers": [
+            "KTLEV",
+            "AHSGY",
+            "TRHOL"
+          ],
+          "period_return": 10.91,
+          "scores": {
+            "KTLEV": 96.8,
+            "AHSGY": 92.1,
+            "TRHOL": 88.4
+          }
+        },
+        {
+          "date": "2026-02-11",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "TRHOL"
+          ],
+          "period_return": 23.3,
+          "scores": {
+            "KTLEV": 92.6,
+            "VANGD": 88.7,
+            "TRHOL": 88.4
+          }
+        },
+        {
+          "date": "2026-03-12",
+          "tickers": [
+            "ISGSY",
+            "DSTKF",
+            "HEDEF"
+          ],
+          "period_return": 11.88,
+          "scores": {
+            "ISGSY": 93.1,
+            "DSTKF": 92.8,
+            "HEDEF": 91.4
+          }
+        },
+        {
+          "date": "2026-04-10",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "CRDFA"
+          ],
+          "period_return": 23.86,
+          "scores": {
+            "KTLEV": 90.2,
+            "VANGD": 89.6,
+            "CRDFA": 88.4
+          }
+        },
+        {
+          "date": "2026-05-11",
+          "tickers": [
+            "KTLEV",
+            "NETCD",
+            "TRHOL"
+          ],
+          "period_return": 0.72,
+          "scores": {
+            "KTLEV": 91.6,
+            "NETCD": 86.6,
+            "TRHOL": 86.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "9ccc1d17c375",
+      "type": "backtest",
+      "timestamp": 1780259218.721059,
+      "datetime": "2026-05-31 23:26",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2024-09-02",
+        "end": "2026-05-31"
+      },
+      "total_return": 80.91,
+      "benchmark_return": 35.14,
+      "num_periods": 22,
+      "sharpe": 0.78,
+      "max_drawdown": -47.22,
+      "rebalance_history": [
+        {
+          "date": "2024-09-02",
+          "tickers": [
+            "VANGD",
+            "RTALB",
+            "ESCOM"
+          ],
+          "period_return": -26.29,
+          "scores": {
+            "VANGD": 93.9,
+            "RTALB": 92.3,
+            "ESCOM": 90.4
+          }
+        },
+        {
+          "date": "2024-10-01",
+          "tickers": [
+            "ISATR",
+            "GMTAS",
+            "GARAN"
+          ],
+          "period_return": -7.49,
+          "scores": {
+            "ISATR": 89.7,
+            "GMTAS": 87.1,
+            "GARAN": 85.9
+          }
+        },
+        {
+          "date": "2024-10-30",
+          "tickers": [
+            "KZGYO",
+            "ICUGS",
+            "TSKB"
+          ],
+          "period_return": 1.88,
+          "scores": {
+            "KZGYO": 90.8,
+            "ICUGS": 88.3,
+            "TSKB": 85.4
+          }
+        },
+        {
+          "date": "2024-11-28",
+          "tickers": [
+            "IHLGM",
+            "MACKO",
+            "RYGYO"
+          ],
+          "period_return": 4.32,
+          "scores": {
+            "IHLGM": 90.0,
+            "MACKO": 88.2,
+            "RYGYO": 86.5
+          }
+        },
+        {
+          "date": "2024-12-27",
+          "tickers": [
+            "YGYO",
+            "LIDER",
+            "ISGSY"
+          ],
+          "period_return": -2.82,
+          "scores": {
+            "YGYO": 94.3,
+            "LIDER": 89.6,
+            "ISGSY": 87.3
+          }
+        },
+        {
+          "date": "2025-01-27",
+          "tickers": [
+            "A1CAP",
+            "TDGYO",
+            "RAYSG"
+          ],
+          "period_return": -12.04,
+          "scores": {
+            "A1CAP": 89.4,
+            "TDGYO": 89.2,
+            "RAYSG": 88.3
+          }
+        },
+        {
+          "date": "2025-02-25",
+          "tickers": [
+            "VANGD",
+            "GRSEL",
+            "GRTHO"
+          ],
+          "period_return": -2.25,
+          "scores": {
+            "VANGD": 90.8,
+            "GRSEL": 90.2,
+            "GRTHO": 89.4
+          }
+        },
+        {
+          "date": "2025-03-26",
+          "tickers": [
+            "HEDEF",
+            "TRHOL",
+            "LIDER"
+          ],
+          "period_return": 13.44,
+          "scores": {
+            "HEDEF": 94.3,
+            "TRHOL": 90.4,
+            "LIDER": 88.3
+          }
+        },
+        {
+          "date": "2025-04-24",
+          "tickers": [
+            "GARFA",
+            "TRHOL",
+            "VANGD"
+          ],
+          "period_return": 17.71,
+          "scores": {
+            "GARFA": 91.9,
+            "TRHOL": 90.6,
+            "VANGD": 90.5
+          }
+        },
+        {
+          "date": "2025-05-23",
+          "tickers": [
+            "TRHOL",
+            "GMTAS",
+            "RALYH"
+          ],
+          "period_return": -19.42,
+          "scores": {
+            "TRHOL": 90.5,
+            "GMTAS": 89.3,
+            "RALYH": 88.1
+          }
+        },
+        {
+          "date": "2025-06-23",
+          "tickers": [
+            "TRHOL",
+            "VANGD",
+            "DSTKF"
+          ],
+          "period_return": 29.81,
+          "scores": {
+            "TRHOL": 91.4,
+            "VANGD": 89.0,
+            "DSTKF": 88.1
+          }
+        },
+        {
+          "date": "2025-07-22",
+          "tickers": [
+            "KLNMA",
+            "HLGYO",
+            "CRDFA"
+          ],
+          "period_return": 18.82,
+          "scores": {
+            "KLNMA": 90.7,
+            "HLGYO": 87.2,
+            "CRDFA": 86.8
+          }
+        },
+        {
+          "date": "2025-08-20",
+          "tickers": [
+            "CRDFA",
+            "TRHOL",
+            "ISGSY"
+          ],
+          "period_return": 6.11,
+          "scores": {
+            "CRDFA": 87.9,
+            "TRHOL": 86.3,
+            "ISGSY": 85.8
+          }
+        },
+        {
+          "date": "2025-09-18",
+          "tickers": [
+            "HEDEF",
+            "TEHOL",
+            "TRHOL"
+          ],
+          "period_return": 55.9,
+          "scores": {
+            "HEDEF": 89.6,
+            "TEHOL": 88.8,
+            "TRHOL": 88.8
+          }
+        },
+        {
+          "date": "2025-10-17",
+          "tickers": [
+            "HEDEF",
+            "TRHOL",
+            "TEHOL"
+          ],
+          "period_return": -22.44,
+          "scores": {
+            "HEDEF": 93.4,
+            "TRHOL": 91.6,
+            "TEHOL": 90.6
+          }
+        },
+        {
+          "date": "2025-11-17",
+          "tickers": [
+            "TRHOL",
+            "VAKFN",
+            "LIDER"
+          ],
+          "period_return": -25.4,
+          "scores": {
+            "TRHOL": 90.5,
+            "VAKFN": 89.4,
+            "LIDER": 89.3
+          }
+        },
+        {
+          "date": "2025-12-16",
+          "tickers": [
+            "TRHOL",
+            "TDGYO",
+            "BRKVY"
+          ],
+          "period_return": -8.78,
+          "scores": {
+            "TRHOL": 90.4,
+            "TDGYO": 90.2,
+            "BRKVY": 86.5
+          }
+        },
+        {
+          "date": "2026-01-14",
+          "tickers": [
+            "VANGD",
+            "AHSGY",
+            "KTLEV"
+          ],
+          "period_return": 18.32,
+          "scores": {
+            "VANGD": 92.8,
+            "AHSGY": 91.9,
+            "KTLEV": 91.8
+          }
+        },
+        {
+          "date": "2026-02-12",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "HEDEF"
+          ],
+          "period_return": 27.59,
+          "scores": {
+            "KTLEV": 90.3,
+            "VANGD": 89.9,
+            "HEDEF": 87.6
+          }
+        },
+        {
+          "date": "2026-03-13",
+          "tickers": [
+            "ISGSY",
+            "GMTAS",
+            "DSTKF"
+          ],
+          "period_return": 7.55,
+          "scores": {
+            "ISGSY": 94.4,
+            "GMTAS": 93.2,
+            "DSTKF": 91.8
+          }
+        },
+        {
+          "date": "2026-04-13",
+          "tickers": [
+            "VANGD",
+            "GMTAS",
+            "KTLEV"
+          ],
+          "period_return": 28.33,
+          "scores": {
+            "VANGD": 91.6,
+            "GMTAS": 90.0,
+            "KTLEV": 89.7
+          }
+        },
+        {
+          "date": "2026-05-12",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ASTOR"
+          ],
+          "period_return": -1.06,
+          "scores": {
+            "KTLEV": 93.9,
+            "TRHOL": 87.1,
+            "ASTOR": 85.1
+          }
+        }
+      ]
+    },
+    {
+      "id": "7a82f9de0fe3",
+      "type": "backtest",
+      "timestamp": 1780259143.207836,
+      "datetime": "2026-05-31 23:25",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 796.12,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 3.22,
+      "max_drawdown": -8.34,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "TRHOL",
+            "DSTKF",
+            "VANGD"
+          ],
+          "period_return": 26.65,
+          "scores": {
+            "TRHOL": 92.3,
+            "DSTKF": 89.0,
+            "VANGD": 88.9
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "KTLEV",
+            "TRHOL"
+          ],
+          "period_return": 24.29,
+          "scores": {
+            "DSTKF": 93.1,
+            "KTLEV": 89.5,
+            "TRHOL": 88.2
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "DSTKF",
+            "KLNMA",
+            "VAKFN"
+          ],
+          "period_return": 9.19,
+          "scores": {
+            "DSTKF": 90.6,
+            "KLNMA": 89.7,
+            "VAKFN": 88.4
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "AHSGY"
+          ],
+          "period_return": 62.78,
+          "scores": {
+            "HEDEF": 93.6,
+            "DSTKF": 91.6,
+            "AHSGY": 87.8
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "HEDEF",
+            "GMTAS",
+            "CRDFA"
+          ],
+          "period_return": 60.21,
+          "scores": {
+            "HEDEF": 93.7,
+            "GMTAS": 93.2,
+            "CRDFA": 92.2
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": -0.73,
+          "scores": {
+            "CRDFA": 91.8,
+            "HEDEF": 90.9,
+            "TRHOL": 89.9
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "TDGYO",
+            "KTLEV"
+          ],
+          "period_return": 15.95,
+          "scores": {
+            "CRDFA": 95.4,
+            "TDGYO": 91.1,
+            "KTLEV": 90.9
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "KTLEV",
+            "TEHOL",
+            "TRHOL"
+          ],
+          "period_return": 15.85,
+          "scores": {
+            "KTLEV": 92.0,
+            "TEHOL": 91.0,
+            "TRHOL": 90.4
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "TCKRC"
+          ],
+          "period_return": -8.34,
+          "scores": {
+            "KTLEV": 95.4,
+            "TRHOL": 87.4,
+            "TCKRC": 87.2
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "TRHOL"
+          ],
+          "period_return": 31.59,
+          "scores": {
+            "HEDEF": 93.0,
+            "DSTKF": 90.7,
+            "TRHOL": 90.2
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "NETCD"
+          ],
+          "period_return": 15.89,
+          "scores": {
+            "CRDFA": 90.8,
+            "KTLEV": 90.6,
+            "NETCD": 90.0
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "VANGD"
+          ],
+          "period_return": 4.96,
+          "scores": {
+            "GMTAS": 94.6,
+            "KTLEV": 93.1,
+            "VANGD": 89.4
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 2.19,
+          "scores": {
+            "KTLEV": 93.4,
+            "CRDFA": 91.7,
+            "TRHOL": 89.9
+          }
+        }
+      ]
+    },
+    {
+      "id": "a3c8199e2ab4",
+      "type": "backtest",
+      "timestamp": 1780259059.4290218,
+      "datetime": "2026-05-31 23:24",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 85.57,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.27,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "CRDFA"
+          ],
+          "period_return": 44.67,
+          "scores": {
+            "KTLEV": 94.5,
+            "TRHOL": 90.5,
+            "CRDFA": 87.7
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 93.0,
+            "LIDFA": 89.3,
+            "TRHOL": 87.6
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "ESCOM"
+          ],
+          "period_return": 6.92,
+          "scores": {
+            "DSTKF": 93.2,
+            "HEDEF": 92.3,
+            "ESCOM": 91.2
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "LIDER"
+          ],
+          "period_return": 21.86,
+          "scores": {
+            "KTLEV": 94.0,
+            "TRHOL": 89.8,
+            "LIDER": 89.1
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "ESCOM"
+          ],
+          "period_return": 2.04,
+          "scores": {
+            "KTLEV": 91.3,
+            "TRHOL": 89.1,
+            "ESCOM": 88.4
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 92.0,
+            "CRDFA": 91.2,
+            "TRHOL": 91.1
+          }
+        }
+      ]
+    },
+    {
+      "id": "aec431dc206a",
+      "type": "backtest",
+      "timestamp": 1780259028.907021,
+      "datetime": "2026-05-31 23:23",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Combined Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 58.67,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 1.86,
+      "max_drawdown": -9.22,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "AHSGY",
+            "AGESA",
+            "TCKRC"
+          ],
+          "period_return": 38.06,
+          "scores": {
+            "AHSGY": 86.3,
+            "AGESA": 85.7,
+            "TCKRC": 84.8
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "ANHYT",
+            "LIDFA",
+            "ANSGR"
+          ],
+          "period_return": -9.22,
+          "scores": {
+            "ANHYT": 91.6,
+            "LIDFA": 89.7,
+            "ANSGR": 89.6
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "LYDYE",
+            "ESCOM"
+          ],
+          "period_return": 4.71,
+          "scores": {
+            "DSTKF": 88.1,
+            "LYDYE": 85.1,
+            "ESCOM": 84.6
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "LIDFA"
+          ],
+          "period_return": 17.98,
+          "scores": {
+            "KTLEV": 88.2,
+            "CRDFA": 85.8,
+            "LIDFA": 84.5
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "ESCOM",
+            "VANGD",
+            "CRDFA"
+          ],
+          "period_return": 2.48,
+          "scores": {
+            "ESCOM": 89.9,
+            "VANGD": 87.2,
+            "CRDFA": 86.5
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "ATATP",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "ATATP": 83.5,
+            "CRDFA": 83.1,
+            "KTLEV": 82.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "33e2bd9cc422",
+      "type": "backtest",
+      "timestamp": 1780258879.939789,
+      "datetime": "2026-05-31 23:21",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "Technical Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 132.88,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.45,
+      "max_drawdown": -4.68,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "TCKRC",
+            "ASELS",
+            "BASGZ"
+          ],
+          "period_return": 28.2,
+          "scores": {
+            "TCKRC": 87.0,
+            "ASELS": 86.5,
+            "BASGZ": 86.4
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "MPARK",
+            "SKBNK",
+            "ISCTR"
+          ],
+          "period_return": 3.24,
+          "scores": {
+            "MPARK": 98.6,
+            "SKBNK": 96.1,
+            "ISCTR": 95.7
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "FONET",
+            "ASELS",
+            "LYDYE"
+          ],
+          "period_return": 15.63,
+          "scores": {
+            "FONET": 85.1,
+            "ASELS": 84.1,
+            "LYDYE": 83.5
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "RALYH",
+            "ICUGS",
+            "ARMGD"
+          ],
+          "period_return": 59.62,
+          "scores": {
+            "RALYH": 85.3,
+            "ICUGS": 83.2,
+            "ARMGD": 82.0
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "ESCOM",
+            "OZSUB",
+            "ASELS"
+          ],
+          "period_return": -4.68,
+          "scores": {
+            "ESCOM": 87.4,
+            "OZSUB": 85.2,
+            "ASELS": 85.1
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "LOGO",
+            "RYSAS",
+            "MARKA"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "LOGO": 82.1,
+            "RYSAS": 80.0,
+            "MARKA": 77.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "08ec3fc520c7",
+      "type": "backtest",
+      "timestamp": 1780258835.000723,
+      "datetime": "2026-05-31 23:20",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "RS Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2024-09-02",
+        "end": "2026-05-31"
+      },
+      "total_return": 477.84,
+      "benchmark_return": 35.14,
+      "num_periods": 22,
+      "sharpe": 2.1,
+      "max_drawdown": -42.97,
+      "rebalance_history": [
+        {
+          "date": "2024-09-02",
+          "tickers": [
+            "VANGD",
+            "ESCOM",
+            "ISATR"
+          ],
+          "period_return": -15.86,
+          "scores": {
+            "VANGD": 96.6,
+            "ESCOM": 94.3,
+            "ISATR": 92.4
+          }
+        },
+        {
+          "date": "2024-10-01",
+          "tickers": [
+            "AHSGY",
+            "ISATR",
+            "VANGD"
+          ],
+          "period_return": -6.56,
+          "scores": {
+            "AHSGY": 92.4,
+            "ISATR": 91.6,
+            "VANGD": 90.8
+          }
+        },
+        {
+          "date": "2024-10-30",
+          "tickers": [
+            "KZGYO",
+            "TDGYO",
+            "VANGD"
+          ],
+          "period_return": 1.28,
+          "scores": {
+            "KZGYO": 91.4,
+            "TDGYO": 91.3,
+            "VANGD": 90.1
+          }
+        },
+        {
+          "date": "2024-11-28",
+          "tickers": [
+            "CRDFA",
+            "AGESA",
+            "KZGYO"
+          ],
+          "period_return": -3.6,
+          "scores": {
+            "CRDFA": 93.5,
+            "AGESA": 92.2,
+            "KZGYO": 90.0
+          }
+        },
+        {
+          "date": "2024-12-27",
+          "tickers": [
+            "YGYO",
+            "ISGSY",
+            "VANGD"
+          ],
+          "period_return": 4.01,
+          "scores": {
+            "YGYO": 94.5,
+            "ISGSY": 93.5,
+            "VANGD": 92.6
+          }
+        },
+        {
+          "date": "2025-01-27",
+          "tickers": [
+            "ISGSY",
+            "VANGD",
+            "RAYSG"
+          ],
+          "period_return": -20.28,
+          "scores": {
+            "ISGSY": 96.4,
+            "VANGD": 94.2,
+            "RAYSG": 91.2
+          }
+        },
+        {
+          "date": "2025-02-25",
+          "tickers": [
+            "VANGD",
+            "TDGYO",
+            "TURSG"
+          ],
+          "period_return": -10.4,
+          "scores": {
+            "VANGD": 95.9,
+            "TDGYO": 92.3,
+            "TURSG": 92.1
+          }
+        },
+        {
+          "date": "2025-03-26",
+          "tickers": [
+            "KLNMA",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": 12.9,
+          "scores": {
+            "KLNMA": 93.8,
+            "HEDEF": 93.3,
+            "TRHOL": 92.4
+          }
+        },
+        {
+          "date": "2025-04-24",
+          "tickers": [
+            "CRDFA",
+            "VANGD",
+            "GARFA"
+          ],
+          "period_return": 22.02,
+          "scores": {
+            "CRDFA": 94.3,
+            "VANGD": 94.0,
+            "GARFA": 93.9
+          }
+        },
+        {
+          "date": "2025-05-23",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GMTAS"
+          ],
+          "period_return": -5.08,
+          "scores": {
+            "VANGD": 96.2,
+            "CRDFA": 95.1,
+            "GMTAS": 94.8
+          }
+        },
+        {
+          "date": "2025-06-23",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "DSTKF"
+          ],
+          "period_return": 35.39,
+          "scores": {
+            "VANGD": 96.6,
+            "CRDFA": 94.0,
+            "DSTKF": 93.2
+          }
+        },
+        {
+          "date": "2025-07-22",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 7.26,
+          "scores": {
+            "VANGD": 96.2,
+            "CRDFA": 95.5,
+            "KTLEV": 95.1
+          }
+        },
+        {
+          "date": "2025-08-20",
+          "tickers": [
+            "CRDFA",
+            "ISGSY",
+            "KLNMA"
+          ],
+          "period_return": 4.05,
+          "scores": {
+            "CRDFA": 95.5,
+            "ISGSY": 95.4,
+            "KLNMA": 93.0
+          }
+        },
+        {
+          "date": "2025-09-18",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "KLNMA"
+          ],
+          "period_return": 19.38,
+          "scores": {
+            "CRDFA": 95.7,
+            "KTLEV": 93.6,
+            "KLNMA": 93.2
+          }
+        },
+        {
+          "date": "2025-10-17",
+          "tickers": [
+            "GMTAS",
+            "CRDFA",
+            "AHSGY"
+          ],
+          "period_return": 15.31,
+          "scores": {
+            "GMTAS": 97.3,
+            "CRDFA": 96.0,
+            "AHSGY": 93.7
+          }
+        },
+        {
+          "date": "2025-11-17",
+          "tickers": [
+            "GMTAS",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 21.51,
+          "scores": {
+            "GMTAS": 96.7,
+            "CRDFA": 95.9,
+            "KTLEV": 95.5
+          }
+        },
+        {
+          "date": "2025-12-16",
+          "tickers": [
+            "CRDFA",
+            "GMTAS",
+            "KTLEV"
+          ],
+          "period_return": 33.04,
+          "scores": {
+            "CRDFA": 96.6,
+            "GMTAS": 96.4,
+            "KTLEV": 94.2
+          }
+        },
+        {
+          "date": "2026-01-14",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "VANGD"
+          ],
+          "period_return": 22.45,
+          "scores": {
+            "CRDFA": 96.1,
+            "KTLEV": 95.7,
+            "VANGD": 95.2
+          }
+        },
+        {
+          "date": "2026-02-12",
+          "tickers": [
+            "CRDFA",
+            "VANGD",
+            "KTLEV"
+          ],
+          "period_return": 13.74,
+          "scores": {
+            "CRDFA": 96.6,
+            "VANGD": 96.3,
+            "KTLEV": 96.1
+          }
+        },
+        {
+          "date": "2026-03-13",
+          "tickers": [
+            "VANGD",
+            "KTLEV",
+            "CRDFA"
+          ],
+          "period_return": 25.82,
+          "scores": {
+            "VANGD": 96.2,
+            "KTLEV": 96.0,
+            "CRDFA": 95.7
+          }
+        },
+        {
+          "date": "2026-04-13",
+          "tickers": [
+            "VANGD",
+            "KTLEV",
+            "CRDFA"
+          ],
+          "period_return": 23.63,
+          "scores": {
+            "VANGD": 96.3,
+            "KTLEV": 96.2,
+            "CRDFA": 95.4
+          }
+        },
+        {
+          "date": "2026-05-12",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "CRDFA"
+          ],
+          "period_return": 6.37,
+          "scores": {
+            "KTLEV": 96.4,
+            "VANGD": 95.5,
+            "CRDFA": 94.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "5287384928e1",
+      "type": "backtest",
+      "timestamp": 1780258769.731266,
+      "datetime": "2026-05-31 23:19",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "RS Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 404.19,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 4.22,
+      "max_drawdown": 0.0,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "VANGD",
+            "CRDFA",
+            "GMTAS"
+          ],
+          "period_return": 3.63,
+          "scores": {
+            "VANGD": 96.3,
+            "CRDFA": 94.6,
+            "GMTAS": 93.4
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "VANGD",
+            "KTLEV",
+            "DSTKF"
+          ],
+          "period_return": 18.84,
+          "scores": {
+            "VANGD": 97.3,
+            "KTLEV": 94.6,
+            "DSTKF": 93.0
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "CRDFA",
+            "VANGD",
+            "KTLEV"
+          ],
+          "period_return": 9.47,
+          "scores": {
+            "CRDFA": 96.2,
+            "VANGD": 96.0,
+            "KTLEV": 95.6
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "ISGSY",
+            "CRDFA",
+            "AHSGY"
+          ],
+          "period_return": 0.55,
+          "scores": {
+            "ISGSY": 97.1,
+            "CRDFA": 96.2,
+            "AHSGY": 93.8
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "CRDFA",
+            "VANGD",
+            "ISGSY"
+          ],
+          "period_return": 11.25,
+          "scores": {
+            "CRDFA": 96.8,
+            "VANGD": 94.2,
+            "ISGSY": 93.8
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "GMTAS",
+            "AHSGY"
+          ],
+          "period_return": 18.45,
+          "scores": {
+            "CRDFA": 96.7,
+            "GMTAS": 95.2,
+            "AHSGY": 94.1
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "GMTAS",
+            "KTLEV"
+          ],
+          "period_return": 12.45,
+          "scores": {
+            "CRDFA": 96.7,
+            "GMTAS": 96.6,
+            "KTLEV": 94.9
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "GMTAS",
+            "CRDFA",
+            "KTLEV"
+          ],
+          "period_return": 29.18,
+          "scores": {
+            "GMTAS": 96.5,
+            "CRDFA": 96.5,
+            "KTLEV": 95.9
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "AHSGY"
+          ],
+          "period_return": 4.26,
+          "scores": {
+            "KTLEV": 96.4,
+            "CRDFA": 96.2,
+            "AHSGY": 94.0
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "VANGD"
+          ],
+          "period_return": 32.21,
+          "scores": {
+            "CRDFA": 95.8,
+            "KTLEV": 95.3,
+            "VANGD": 95.0
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "CRDFA"
+          ],
+          "period_return": 31.15,
+          "scores": {
+            "KTLEV": 96.4,
+            "VANGD": 95.9,
+            "CRDFA": 95.7
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "VANGD",
+            "GMTAS",
+            "KTLEV"
+          ],
+          "period_return": 4.96,
+          "scores": {
+            "VANGD": 96.7,
+            "GMTAS": 96.5,
+            "KTLEV": 96.4
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "VANGD"
+          ],
+          "period_return": 2.39,
+          "scores": {
+            "CRDFA": 96.3,
+            "KTLEV": 96.2,
+            "VANGD": 94.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "d175950b74bb",
+      "type": "backtest",
+      "timestamp": 1780258697.490159,
+      "datetime": "2026-05-31 23:18",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Standart",
+        "scan_mode": "Standart Tarama",
+        "quality": "Sıkı",
+        "sort_by": "RS Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 184.82,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 3.23,
+      "max_drawdown": -5.23,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "CRDFA",
+            "KTLEV",
+            "AHSGY"
+          ],
+          "period_return": 45.09,
+          "scores": {
+            "CRDFA": 96.6,
+            "KTLEV": 96.5,
+            "AHSGY": 94.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "AHSGY"
+          ],
+          "period_return": -5.23,
+          "scores": {
+            "KTLEV": 96.4,
+            "CRDFA": 96.3,
+            "AHSGY": 94.4
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "CRDFA"
+          ],
+          "period_return": 45.68,
+          "scores": {
+            "KTLEV": 96.0,
+            "VANGD": 95.0,
+            "CRDFA": 94.1
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "CRDFA"
+          ],
+          "period_return": 28.58,
+          "scores": {
+            "KTLEV": 96.4,
+            "VANGD": 96.3,
+            "CRDFA": 95.1
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "VANGD",
+            "CRDFA"
+          ],
+          "period_return": 10.59,
+          "scores": {
+            "KTLEV": 96.4,
+            "VANGD": 96.0,
+            "CRDFA": 95.1
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "VANGD"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "KTLEV": 96.3,
+            "CRDFA": 95.7,
+            "VANGD": 94.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "540ab2b42b77",
+      "type": "backtest",
+      "timestamp": 1780258643.3234181,
+      "datetime": "2026-05-31 23:17",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Büyüme Liderleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Temel",
+        "sort_by": "Institutional Score",
+        "top_n": 5,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 275.29,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 2.2,
+      "max_drawdown": -16.44,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "TRHOL",
+            "KLRHO",
+            "A1CAP",
+            "SMRVA",
+            "GMTAS"
+          ],
+          "period_return": 4.52,
+          "scores": {
+            "TRHOL": 93.3,
+            "KLRHO": 91.0,
+            "A1CAP": 90.4,
+            "SMRVA": 89.5,
+            "GMTAS": 89.3
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "GEDIK",
+            "SKBNK",
+            "TRHOL",
+            "KTLEV"
+          ],
+          "period_return": 4.26,
+          "scores": {
+            "DSTKF": 93.6,
+            "GEDIK": 91.2,
+            "SKBNK": 89.7,
+            "TRHOL": 88.7,
+            "KTLEV": 88.4
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "DSTKF",
+            "KLNMA",
+            "GMTAS",
+            "TRHOL",
+            "VAKFN"
+          ],
+          "period_return": 6.82,
+          "scores": {
+            "DSTKF": 90.8,
+            "KLNMA": 89.2,
+            "GMTAS": 87.5,
+            "TRHOL": 87.5,
+            "VAKFN": 87.5
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "TRHOL",
+            "ISGSY",
+            "AHSGY"
+          ],
+          "period_return": 44.31,
+          "scores": {
+            "HEDEF": 94.2,
+            "DSTKF": 92.1,
+            "TRHOL": 87.9,
+            "ISGSY": 87.3,
+            "AHSGY": 87.1
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "HEDEF",
+            "GMTAS",
+            "CRDFA",
+            "TRHOL",
+            "TEHOL"
+          ],
+          "period_return": 53.6,
+          "scores": {
+            "HEDEF": 94.3,
+            "GMTAS": 93.3,
+            "CRDFA": 92.0,
+            "TRHOL": 91.0,
+            "TEHOL": 90.9
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "TRHOL",
+            "HDFGS",
+            "TEHOL"
+          ],
+          "period_return": -16.44,
+          "scores": {
+            "CRDFA": 91.5,
+            "HEDEF": 91.0,
+            "TRHOL": 90.5,
+            "HDFGS": 90.2,
+            "TEHOL": 88.7
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "TRHOL",
+            "TDGYO",
+            "DSTKF",
+            "KTLEV"
+          ],
+          "period_return": 4.24,
+          "scores": {
+            "CRDFA": 95.5,
+            "TRHOL": 91.7,
+            "TDGYO": 91.2,
+            "DSTKF": 90.3,
+            "KTLEV": 90.1
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "TEHOL",
+            "KTLEV",
+            "TRHOL",
+            "KLRHO",
+            "TRALT"
+          ],
+          "period_return": 21.76,
+          "scores": {
+            "TEHOL": 92.3,
+            "KTLEV": 91.7,
+            "TRHOL": 91.1,
+            "KLRHO": 89.0,
+            "TRALT": 88.1
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "TCKRC",
+            "TRHOL",
+            "TRMET",
+            "HALKB"
+          ],
+          "period_return": 3.46,
+          "scores": {
+            "KTLEV": 95.5,
+            "TCKRC": 89.2,
+            "TRHOL": 87.6,
+            "TRMET": 87.2,
+            "HALKB": 86.2
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "TRHOL",
+            "SKBNK",
+            "CRDFA"
+          ],
+          "period_return": 15.73,
+          "scores": {
+            "HEDEF": 93.5,
+            "DSTKF": 91.0,
+            "TRHOL": 90.8,
+            "SKBNK": 88.7,
+            "CRDFA": 88.5
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "NETCD",
+            "KTLEV",
+            "YGGYO",
+            "CRDFA",
+            "DSTKF"
+          ],
+          "period_return": 17.08,
+          "scores": {
+            "NETCD": 90.8,
+            "KTLEV": 90.4,
+            "YGGYO": 90.4,
+            "CRDFA": 90.2,
+            "DSTKF": 89.5
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "DSTKF",
+            "VANGD",
+            "TRHOL"
+          ],
+          "period_return": -1.68,
+          "scores": {
+            "GMTAS": 94.9,
+            "KTLEV": 93.1,
+            "DSTKF": 89.7,
+            "VANGD": 88.6,
+            "TRHOL": 88.1
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL",
+            "ASTOR",
+            "INVES"
+          ],
+          "period_return": -0.48,
+          "scores": {
+            "KTLEV": 93.2,
+            "CRDFA": 91.4,
+            "TRHOL": 90.5,
+            "ASTOR": 88.6,
+            "INVES": 86.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "dac1cdd9c69e",
+      "type": "backtest",
+      "timestamp": 1780258482.768002,
+      "datetime": "2026-05-31 23:14",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Büyüme Liderleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Temel",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 578.01,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 2.23,
+      "max_drawdown": -8.34,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "TRHOL",
+            "KLRHO",
+            "A1CAP"
+          ],
+          "period_return": 6.37,
+          "scores": {
+            "TRHOL": 93.3,
+            "KLRHO": 91.0,
+            "A1CAP": 90.4
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "GEDIK",
+            "SKBNK"
+          ],
+          "period_return": 1.4,
+          "scores": {
+            "DSTKF": 93.6,
+            "GEDIK": 91.2,
+            "SKBNK": 89.7
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "DSTKF",
+            "KLNMA",
+            "GMTAS"
+          ],
+          "period_return": 11.85,
+          "scores": {
+            "DSTKF": 90.8,
+            "KLNMA": 89.2,
+            "GMTAS": 87.5
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "TRHOL"
+          ],
+          "period_return": 94.2,
+          "scores": {
+            "HEDEF": 94.2,
+            "DSTKF": 92.1,
+            "TRHOL": 87.9
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "HEDEF",
+            "GMTAS",
+            "CRDFA"
+          ],
+          "period_return": 60.21,
+          "scores": {
+            "HEDEF": 94.3,
+            "GMTAS": 93.3,
+            "CRDFA": 92.0
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": -0.73,
+          "scores": {
+            "CRDFA": 91.5,
+            "HEDEF": 91.0,
+            "TRHOL": 90.5
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "TRHOL",
+            "TDGYO"
+          ],
+          "period_return": 11.22,
+          "scores": {
+            "CRDFA": 95.5,
+            "TRHOL": 91.7,
+            "TDGYO": 91.2
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "TEHOL",
+            "KTLEV",
+            "TRHOL"
+          ],
+          "period_return": 15.85,
+          "scores": {
+            "TEHOL": 92.3,
+            "KTLEV": 91.7,
+            "TRHOL": 91.1
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "TCKRC",
+            "TRHOL"
+          ],
+          "period_return": -8.34,
+          "scores": {
+            "KTLEV": 95.5,
+            "TCKRC": 89.2,
+            "TRHOL": 87.6
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "TRHOL"
+          ],
+          "period_return": 31.59,
+          "scores": {
+            "HEDEF": 93.5,
+            "DSTKF": 91.0,
+            "TRHOL": 90.8
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "NETCD",
+            "KTLEV",
+            "YGGYO"
+          ],
+          "period_return": 15.92,
+          "scores": {
+            "NETCD": 90.8,
+            "KTLEV": 90.4,
+            "YGGYO": 90.4
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "DSTKF"
+          ],
+          "period_return": -1.15,
+          "scores": {
+            "GMTAS": 94.9,
+            "KTLEV": 93.1,
+            "DSTKF": 89.7
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 2.19,
+          "scores": {
+            "KTLEV": 93.2,
+            "CRDFA": 91.4,
+            "TRHOL": 90.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "cf548f7b8ae1",
+      "type": "backtest",
+      "timestamp": 1780258285.1174662,
+      "datetime": "2026-05-31 23:11",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Büyüme Liderleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Temel",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2025-05-31",
+        "end": "2026-05-31"
+      },
+      "total_return": 578.01,
+      "benchmark_return": 51.66,
+      "num_periods": 13,
+      "sharpe": 2.23,
+      "max_drawdown": -8.34,
+      "rebalance_history": [
+        {
+          "date": "2025-06-02",
+          "tickers": [
+            "TRHOL",
+            "KLRHO",
+            "A1CAP"
+          ],
+          "period_return": 6.37,
+          "scores": {
+            "TRHOL": 93.3,
+            "KLRHO": 91.0,
+            "A1CAP": 90.4
+          }
+        },
+        {
+          "date": "2025-07-01",
+          "tickers": [
+            "DSTKF",
+            "GEDIK",
+            "SKBNK"
+          ],
+          "period_return": 1.4,
+          "scores": {
+            "DSTKF": 93.6,
+            "GEDIK": 91.2,
+            "SKBNK": 89.7
+          }
+        },
+        {
+          "date": "2025-07-30",
+          "tickers": [
+            "DSTKF",
+            "KLNMA",
+            "GMTAS"
+          ],
+          "period_return": 11.85,
+          "scores": {
+            "DSTKF": 90.8,
+            "KLNMA": 89.2,
+            "GMTAS": 87.5
+          }
+        },
+        {
+          "date": "2025-08-28",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "TRHOL"
+          ],
+          "period_return": 94.2,
+          "scores": {
+            "HEDEF": 94.2,
+            "DSTKF": 92.1,
+            "TRHOL": 87.9
+          }
+        },
+        {
+          "date": "2025-09-26",
+          "tickers": [
+            "HEDEF",
+            "GMTAS",
+            "CRDFA"
+          ],
+          "period_return": 60.21,
+          "scores": {
+            "HEDEF": 94.3,
+            "GMTAS": 93.3,
+            "CRDFA": 92.0
+          }
+        },
+        {
+          "date": "2025-10-27",
+          "tickers": [
+            "CRDFA",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": -0.73,
+          "scores": {
+            "CRDFA": 91.5,
+            "HEDEF": 91.0,
+            "TRHOL": 90.5
+          }
+        },
+        {
+          "date": "2025-11-25",
+          "tickers": [
+            "CRDFA",
+            "TRHOL",
+            "TDGYO"
+          ],
+          "period_return": 11.22,
+          "scores": {
+            "CRDFA": 95.5,
+            "TRHOL": 91.7,
+            "TDGYO": 91.2
+          }
+        },
+        {
+          "date": "2025-12-24",
+          "tickers": [
+            "TEHOL",
+            "KTLEV",
+            "TRHOL"
+          ],
+          "period_return": 15.85,
+          "scores": {
+            "TEHOL": 92.3,
+            "KTLEV": 91.7,
+            "TRHOL": 91.1
+          }
+        },
+        {
+          "date": "2026-01-22",
+          "tickers": [
+            "KTLEV",
+            "TCKRC",
+            "TRHOL"
+          ],
+          "period_return": -8.34,
+          "scores": {
+            "KTLEV": 95.5,
+            "TCKRC": 89.2,
+            "TRHOL": 87.6
+          }
+        },
+        {
+          "date": "2026-02-20",
+          "tickers": [
+            "HEDEF",
+            "DSTKF",
+            "TRHOL"
+          ],
+          "period_return": 31.59,
+          "scores": {
+            "HEDEF": 93.5,
+            "DSTKF": 91.0,
+            "TRHOL": 90.8
+          }
+        },
+        {
+          "date": "2026-03-23",
+          "tickers": [
+            "NETCD",
+            "KTLEV",
+            "YGGYO"
+          ],
+          "period_return": 15.92,
+          "scores": {
+            "NETCD": 90.8,
+            "KTLEV": 90.4,
+            "YGGYO": 90.4
+          }
+        },
+        {
+          "date": "2026-04-21",
+          "tickers": [
+            "GMTAS",
+            "KTLEV",
+            "DSTKF"
+          ],
+          "period_return": -1.15,
+          "scores": {
+            "GMTAS": 94.9,
+            "KTLEV": 93.1,
+            "DSTKF": 89.7
+          }
+        },
+        {
+          "date": "2026-05-20",
+          "tickers": [
+            "KTLEV",
+            "CRDFA",
+            "TRHOL"
+          ],
+          "period_return": 2.19,
+          "scores": {
+            "KTLEV": 93.2,
+            "CRDFA": 91.4,
+            "TRHOL": 90.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "3c0efcaca0c8",
+      "type": "backtest",
+      "timestamp": 1780258227.4488971,
+      "datetime": "2026-05-31 23:10",
+      "params": {
+        "market": "BIST (Türkiye)",
+        "universe": "BIST TÜM",
+        "profile": "Büyüme Liderleri",
+        "scan_mode": "Standart Tarama",
+        "quality": "Temel",
+        "sort_by": "Institutional Score",
+        "top_n": 3,
+        "rebalance": "1 Ay",
+        "weight": "Eşit Ağırlık",
+        "benchmark": "XU100",
+        "start": "2026-01-01",
+        "end": "2026-05-31"
+      },
+      "total_return": 99.44,
+      "benchmark_return": 18.82,
+      "num_periods": 6,
+      "sharpe": 2.55,
+      "max_drawdown": -3.53,
+      "rebalance_history": [
+        {
+          "date": "2026-01-01",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "A1CAP"
+          ],
+          "period_return": 41.53,
+          "scores": {
+            "KTLEV": 94.6,
+            "TRHOL": 91.2,
+            "A1CAP": 87.5
+          }
+        },
+        {
+          "date": "2026-01-30",
+          "tickers": [
+            "KTLEV",
+            "LIDFA",
+            "TRHOL"
+          ],
+          "period_return": -3.53,
+          "scores": {
+            "KTLEV": 92.9,
+            "LIDFA": 89.4,
+            "TRHOL": 87.9
+          }
+        },
+        {
+          "date": "2026-03-02",
+          "tickers": [
+            "DSTKF",
+            "HEDEF",
+            "TRHOL"
+          ],
+          "period_return": 22.3,
+          "scores": {
+            "DSTKF": 93.8,
+            "HEDEF": 92.8,
+            "TRHOL": 91.3
+          }
+        },
+        {
+          "date": "2026-03-31",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "LIDER"
+          ],
+          "period_return": 21.86,
+          "scores": {
+            "KTLEV": 94.0,
+            "TRHOL": 90.5,
+            "LIDER": 89.8
+          }
+        },
+        {
+          "date": "2026-04-29",
+          "tickers": [
+            "KTLEV",
+            "TRHOL",
+            "DSTKF"
+          ],
+          "period_return": -1.98,
+          "scores": {
+            "KTLEV": 91.1,
+            "TRHOL": 89.6,
+            "DSTKF": 87.6
+          }
+        },
+        {
+          "date": "2026-05-28",
+          "tickers": [
+            "TRHOL",
+            "KTLEV",
+            "CRDFA"
+          ],
+          "period_return": 0.0,
+          "scores": {
+            "TRHOL": 91.8,
+            "KTLEV": 91.8,
+            "CRDFA": 90.7
+          }
+        }
+      ]
+    }
+  ]
+}

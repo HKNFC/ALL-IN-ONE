@@ -277,8 +277,12 @@ class MarketDataCache:
                                 df.columns = lvl1
                     else:
                         if isinstance(raw.columns, pd.MultiIndex):
-                            lvls = raw.columns.get_level_values(1)
-                            if ticker in lvls:
+                            # yfinance yeni format: level0=ticker, level1=field
+                            lvls0 = raw.columns.get_level_values(0)
+                            lvls1 = raw.columns.get_level_values(1)
+                            if ticker in lvls0:
+                                df = raw.xs(ticker, axis=1, level=0).copy()
+                            elif ticker in lvls1:
                                 df = raw.xs(ticker, axis=1, level=1).copy()
                             else:
                                 df = pd.DataFrame()
@@ -413,21 +417,65 @@ class MinerviniBacktest:
 
         # DB ve disk cache'den yüklenebilenleri belleğe al
         missing = []
+        _earliest_needed = fetch_start + timedelta(days=45)
         for t in all_tickers:
             if t in benchmark:
                 continue  # Benchmark zaten yüklendi
             cached = self._cache.get_or_fetch_disk(t, fetch_start, fetch_end)
             if cached is None:
                 missing.append(t)
+            else:
+                # DB verisi yeterince geriye gidiyor mu kontrol et
+                # 916 ticker 2024-08-27'den başlıyor; fetch_start ~March 2024 ise yetersiz
+                try:
+                    _data_first = pd.Timestamp(cached.index[0]).tz_localize(None).normalize()
+                    _earliest_cmp = pd.Timestamp(_earliest_needed).tz_localize(None)
+                    if _data_first > _earliest_cmp:
+                        # Yeterli geçmiş yok — cache'den çıkar, yfinance'ten taze indir
+                        if t in self._cache._data:
+                            del self._cache._data[t]
+                        missing.append(t)
+                except Exception:
+                    pass
 
-        # DB'de tam verisi olan hisseleri missing listesinden çıkar
+        # DB'de tam verisi olan hisseleri cache'e yukle ve missing listesinden cikar
         if _STOCK_DB_AVAILABLE:
             try:
                 _db = _get_stock_db()
                 _db_count = _db.ticker_count()
                 if _db_count > 0:
-                    missing = [t for t in missing if not _db.has_data(t, min_rows=50)]
-                    print(f"   📦 SQLite DB'de {_db_count} hisse var, indirme listesi: {len(missing)}", flush=True)
+                    loaded_from_db = []
+                    still_missing = []
+                    for t in missing:
+                        if _db.has_data(t, min_rows=50, max_stale_days=365):
+                            # Veriyi DB'den belleğe yukle
+                            try:
+                                df_db = _db.get_prices(t, start=fetch_start.strftime('%Y-%m-%d'), end=fetch_end.strftime('%Y-%m-%d'))
+                                if df_db is not None and len(df_db) >= 50:
+                                    # DB verisi fetch_start'ı karşılıyor mu kontrol et
+                                    # 916 ticker 2024-08-27'den başlıyor; backtest için tam geçmiş gerekli
+                                    _earliest_needed = fetch_start + timedelta(days=45)
+                                    _db_first = df_db.index[0] if hasattr(df_db.index[0], 'date') else pd.Timestamp(df_db.index[0])
+                                    # DB verisi backtest bitiş tarihini karşılıyor mu kontrol et
+                                    _db_last = df_db.index[-1] if hasattr(df_db.index[-1], 'date') else pd.Timestamp(df_db.index[-1])
+                                    _end_needed = pd.Timestamp(self.end_date) - timedelta(days=5)
+                                    if _db_first > _earliest_needed:
+                                        # DB verisi yeterince geriye gitmiyor — yfinance'ten taze çek
+                                        still_missing.append(t)
+                                    elif _db_last < _end_needed:
+                                        # DB verisi backtest bitiş tarihini kapsamıyor — stale, yfinance'ten taze çek
+                                        still_missing.append(t)
+                                    else:
+                                        self._cache._data[t] = df_db
+                                        loaded_from_db.append(t)
+                                else:
+                                    still_missing.append(t)
+                            except Exception:
+                                still_missing.append(t)
+                        else:
+                            still_missing.append(t)
+                    missing = still_missing
+                    print(f"   📦 SQLite DB'den {len(loaded_from_db)} hisse yuklendi, kalan indirme: {len(missing)}", flush=True)
             except Exception:
                 pass
 
@@ -437,7 +485,7 @@ class MinerviniBacktest:
         if os.path.exists(_bad_path):
             try:
                 with open(_bad_path) as _f:
-                    _saved_bad = set(t for t in json.load(_f) if not t.endswith('.IS'))
+                    _saved_bad = set(t for t in json.load(_f) if t.endswith('.IS'))
                 self._cache._bad.update(_saved_bad)
                 print(f"   ⚠️  {len(_saved_bad)} kalıcı başarısız hisse yüklendi", flush=True)
             except Exception:
@@ -470,17 +518,23 @@ class MinerviniBacktest:
                         if df is not None and not df.empty:
                             self._cache._save_disk(t, fetch_start, fetch_end, df)
 
-                # Kalıcı olarak başarısız olanları kaydet
-                # BIST hisseleri (.IS) kalıcı bad listesine eklenmez — geçici ağ hatası olabilir
+                # Bad list sadece BIST hisselerine uygulanır — US tickerlari hic kalici bad listesine girilmez
                 _perm_bad = [t for t in missing_filtered
-                             if self._cache.get(t) is None and t not in ('^', 'SPY') and not t.endswith('.IS')]
+                             if self._cache.get(t) is None and t.endswith('.IS')]
                 if _perm_bad:
                     self._cache._bad.update(_perm_bad)
                     try:
-                        _all_bad = [t for t in self._cache._bad if not t.endswith('.IS') and t not in {'^', 'SPY', 'XU100.IS', '^GSPC'}]
+                        _existing_bad = []
+                        if os.path.exists(_bad_path):
+                            try:
+                                with open(_bad_path) as _rf:
+                                    _existing_bad = json.load(_rf)
+                            except Exception:
+                                pass
+                        _merged_bad = list(set(_existing_bad) | set(_perm_bad))
                         with open(_bad_path, 'w') as _f:
-                            json.dump(_all_bad, _f)
-                        print(f"   💾 {len(_perm_bad)} başarısız hisse kalıcı listeye eklendi", flush=True)
+                            json.dump(_merged_bad, _f)
+                        print(f"   💾 {len(_perm_bad)} BIST hissesi kalici listeye eklendi", flush=True)
                     except Exception:
                         pass
         else:
@@ -556,7 +610,7 @@ class MinerviniBacktest:
     # Portföy yönetimi
     # ──────────────────────────────────────────────────────────────────
 
-    def select_top_stocks(self, scan_results, top_n=5):
+    def select_top_stocks(self, scan_results, top_n=5, cutoff_date=None):
         """
         RS Yöntemi: saf RS skoruna göre sırala.
 
@@ -586,11 +640,12 @@ class MinerviniBacktest:
         # ── Duplikasyon filtresi: aynı fiyat datasına sahip hisseleri çıkar ──
         selected = []
         seen_prices = set()  # (son_kapanış, son_5_gün_toplam) imzası
+        _dedup_cutoff = cutoff_date if cutoff_date is not None else self.end_date
         for _, row in df.iterrows():
             ticker = row.get('Ticker', '')
             # Fiyat imzası oluştur
             try:
-                stock_df = self._cache.get_slice(ticker, self.end_date)
+                stock_df = self._cache.get_slice(ticker, _dedup_cutoff)
                 if stock_df is not None and len(stock_df) >= 5:
                     sig = (
                         round(float(stock_df['Close'].iloc[-1]), 2),
@@ -612,7 +667,7 @@ class MinerviniBacktest:
             print(f"    {i}. {s['Ticker']} | RS:{_to_float(s.get('RS_Score',0)):.1f} | {s.get('Status','?')}", flush=True)
         return top
 
-    def select_top_stocks_minervini(self, scan_results, top_n=5):
+    def select_top_stocks_minervini(self, scan_results, top_n=5, cutoff_date=None):
         """Minervini Yöntemi: kategori önceliği sonra RS"""
         STATUS_PRIORITY = {'BREAKOUT': 3, 'PIVOT_NEAR': 2, 'SETUP': 1}
         priority = [s for s in scan_results if s.get('Status') in STATUS_PRIORITY]
@@ -649,10 +704,11 @@ class MinerviniBacktest:
         # ── Duplikasyon filtresi ──
         selected = []
         seen_prices = set()
+        _dedup_cutoff = cutoff_date if cutoff_date is not None else self.end_date
         for _, row in df.iterrows():
             ticker = row.get('Ticker', '')
             try:
-                stock_df = self._cache.get_slice(ticker, self.end_date)
+                stock_df = self._cache.get_slice(ticker, _dedup_cutoff)
                 if stock_df is not None and len(stock_df) >= 5:
                     sig = (
                         round(float(stock_df['Close'].iloc[-1]), 2),
@@ -825,9 +881,9 @@ class MinerviniBacktest:
                 scan_results = self.scan_market_at_date(date, market)
 
             if method == 'minervini':
-                top_stocks = self.select_top_stocks_minervini(scan_results, top_n=portfolio_size)
+                top_stocks = self.select_top_stocks_minervini(scan_results, top_n=portfolio_size, cutoff_date=date)
             else:
-                top_stocks = self.select_top_stocks(scan_results, top_n=portfolio_size)
+                top_stocks = self.select_top_stocks(scan_results, top_n=portfolio_size, cutoff_date=date)
 
             self.rebalance_portfolio(top_stocks, date)
 
