@@ -62,7 +62,8 @@ class MarketDataCache:
     """
 
     DISK_CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_cache')
-    CACHE_TTL_DAYS = 90  # 90 gün — geçmiş veri değişmez, her gün yeniden indirmeye gerek yok
+    CACHE_TTL_DAYS_HIST    = 90   # Geçmiş tarih verisi — değişmez, 90 gün geçerli
+    CACHE_TTL_DAYS_RECENT  = 1    # Son 7 gün içindeki veri — her gün taze çek
 
     # Proses-level RAM cache — disk'e bile gitmeden aynı oturumda hızlı döner
     _RAM_CACHE: dict = {}
@@ -86,7 +87,15 @@ class MarketDataCache:
         if not os.path.exists(path):
             return None
         age_days = (time.time() - os.path.getmtime(path)) / 86400
-        if age_days > self.CACHE_TTL_DAYS:
+        # Bitiş tarihi son 7 gün içindeyse (canlı/güncel tarama) → 1 gün TTL
+        # Daha eski tarihler (geçmiş backtest) → 90 gün TTL
+        try:
+            end_dt = datetime.strptime(str(end)[:10], "%Y-%m-%d").date()
+            recent_cutoff = (datetime.utcnow().date() - timedelta(days=7))
+            ttl = self.CACHE_TTL_DAYS_RECENT if end_dt >= recent_cutoff else self.CACHE_TTL_DAYS_HIST
+        except Exception:
+            ttl = self.CACHE_TTL_DAYS_RECENT
+        if age_days > ttl:
             return None
         try:
             with open(path, 'rb') as f:

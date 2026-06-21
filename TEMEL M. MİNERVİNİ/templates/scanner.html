@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Scanner - Minervini Platform</title>
+    <title>TEMEL M. MİNERVİNİ - Scanner</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ── TEMEL M. MİNERVİNİ — Violet tema ── */
+        :root { --primary: #7c3aed; --primary-dark: #5b21b6; }
+        .navbar { border-bottom: 2px solid #7c3aed !important; }
+        .nav-brand h1 { color: #7c3aed !important; }
+        .btn-primary { background: linear-gradient(135deg,#7c3aed,#5b21b6) !important; }
+        .nav-menu a:hover, .nav-menu a.active { color: #7c3aed !important; }
+
         .scanner-controls {
             background: white;
             padding: 2rem;
@@ -123,7 +130,7 @@
     <nav class="navbar">
         <div class="container">
             <div class="nav-brand">
-                <h1>📈 Minervini Platform</h1>
+                <h1>🔬 Temel M. Minervini</h1>
             </div>
             <ul class="nav-menu">
                 <li><a href="/">Dashboard</a></li>
@@ -145,13 +152,17 @@
             <div class="scanner-controls">
                 <h3>Scan Configuration</h3>
                 
+                <!-- TEMEL M. MİNERVİNİ — USA only bilgi notu -->
+                <div style="background:#eff6ff;border-left:4px solid #3b82f6;padding:0.75rem 1rem;border-radius:6px;margin-bottom:1rem;font-size:0.85rem;color:#1e40af;">
+                    🔬 <strong>TEMEL M. MİNERVİNİ</strong> — Yalnızca USA piyasası desteklenmektedir.
+                    Temel veri FMP'den look-ahead bias'sız olarak çekilmektedir.
+                </div>
+
                 <div class="control-group">
                     <div class="control-item">
                         <label>Market</label>
                         <select id="market-select" onchange="updateScanTypeOptions()">
-                            <option value="BOTH">🌍 Both (BIST + US)</option>
-                            <option value="US">🇺🇸 US Markets</option>
-                            <option value="BIST">🇹🇷 BIST</option>
+                            <option value="US" selected>🇺🇸 US Markets</option>
                         </select>
                     </div>
                     
@@ -184,6 +195,17 @@
                     <div class="control-item">
                         <label>Min RS Diverjans %</label>
                         <input type="number" id="min-rs" value="70" min="-100" max="100" placeholder="70">
+                    </div>
+
+                    <div class="control-item">
+                        <label>⚖️ Temel Ağırlık %
+                            <span style="font-size:0.75rem;color:#6b7280;">(0=saf teknik · 60=max temel)</span>
+                        </label>
+                        <div style="display:flex;align-items:center;gap:0.75rem;">
+                            <input type="range" id="fund-weight-slider" min="0" max="60" value="40" step="5"
+                                   style="flex:1;" oninput="document.getElementById('fund-weight-val').textContent=this.value+'%'">
+                            <span id="fund-weight-val" style="font-weight:700;color:#7c3aed;min-width:36px;">40%</span>
+                        </div>
                     </div>
 
                     <div class="control-item">
@@ -264,7 +286,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>Mark Minervini Trading Platform © 2026</p>
+            <p>Temel M. Minervini © 2026</p>
             <p>Based on SEPA Methodology • Not Investment Advice</p>
         </div>
     </footer>
@@ -460,10 +482,11 @@
                 // Make API call
                 // tarih girilmişse her zaman full scan kullan
                 const endpoint = '/api/scan/full';  // Her zaman full scan — quick scan kaldırıldı
+                const fundWeightPct = document.getElementById('fund-weight-slider') ? parseInt(document.getElementById('fund-weight-slider').value) : 40;
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ market: market, scan_type: bistIndex, manual_list: manualInput, scan_date: scanDate })
+                    body: JSON.stringify({ market: market, scan_type: bistIndex, manual_list: manualInput, scan_date: scanDate, fund_weight: fundWeightPct / 100 })
                 });
                 
                 const data = await response.json();

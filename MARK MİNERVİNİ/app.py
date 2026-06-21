@@ -97,7 +97,23 @@ def about_page():
 # API ENDPOINTS
 # ============================================================================
 
-@app.route('/api/scan/progress', methods=['GET'])
+def _sort_scan_results(results: list) -> list:
+    """
+    Tarama sonuçlarını sıralar:
+    1. WATCHING hisseler en sona (BREAKOUT/PIVOT_NEAR/SETUP önce)
+    2. BREAKOUT/PIVOT_NEAR/SETUP kendi içinde RS azalan (en yüksek RS en önce)
+    3. WATCHING kendi içinde RS azalan
+    """
+    if not results:
+        return results
+    def _key(r):
+        is_watching = 1 if r.get('Status', 'WATCHING') == 'WATCHING' else 0
+        rs = -(r.get('RS_Divergence_%') or r.get('RS') or 0)   # azalan → negatif
+        return (is_watching, rs)
+    return sorted(results, key=_key)
+
+
+
 def api_scan_progress():
     with _scan_lock:
         return jsonify(dict(_scan_progress))
@@ -244,6 +260,8 @@ def api_full_scan():
             results = _scan_with_progress(bt, scan_dt, market, tickers_override)
 
             _set_progress(100, f'Tamamlandı — {len(results)} hisse bulundu')
+            # Minervini öncelik sıralaması
+            results = _sort_scan_results(results)
             return _safe_jsonify({
                 'success': True,
                 'count': len(results),
@@ -314,6 +332,9 @@ def api_full_scan():
                     is_bist_scan = (market == 'BIST')
                     results = validate_scan_results(results, is_bist=is_bist_scan)
 
+                # Minervini öncelik sıralaması
+                results = _sort_scan_results(results)
+
                 with _scan_lock:
                     _scan_progress['pct'] = 100
                     _scan_progress['msg'] = f'Tamamlandı — {len(results)} hisse bulundu'
@@ -336,6 +357,10 @@ def api_full_scan():
             _scan_progress['active'] = True
             _scan_progress['result'] = None
             _scan_progress['error'] = None
+
+        # Canlı tarama: RAM cache'i temizle — güncel fiyatlar çekilsin
+        if hasattr(backtest, '_cache') and hasattr(backtest._cache, '_ram'):
+            backtest._cache._ram.clear()
         t = threading.Thread(target=_live_scan_worker, daemon=True)
         t.start()
         return jsonify({'success': True, 'async': True, 'msg': 'Tarama başlatıldı'})

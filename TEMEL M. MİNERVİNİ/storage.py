@@ -1,0 +1,1 @@
+/Users/hakanficicilar/Documents/Aİ/MARK MİNERVİNİ/storage.py

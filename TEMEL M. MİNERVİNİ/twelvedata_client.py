@@ -1,0 +1,1 @@
+/Users/hakanficicilar/Documents/Aİ/MARK MİNERVİNİ/twelvedata_client.py

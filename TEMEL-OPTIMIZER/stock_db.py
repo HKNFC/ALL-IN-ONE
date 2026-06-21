@@ -1,0 +1,1 @@
+/Users/hakanficicilar/Documents/Aİ/Portfolio-Optimizer/stock_db.py

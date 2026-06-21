@@ -1,0 +1,1 @@
+/Users/hakanficicilar/Documents/Aİ/MARK MİNERVİNİ/market_calibration_scanner.py

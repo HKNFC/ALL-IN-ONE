@@ -1,0 +1,1 @@
+/Users/hakanficicilar/Documents/Aİ/TEMEL-OPTIMIZER/historical_fundamentals_fmp.py

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Minervini Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .about-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .about-section h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .about-section h3 {
+            color: var(--dark);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .about-section p, .about-section li {
+            line-height: 1.8;
+            color: #4b5563;
+        }
+        .about-section ul, .about-section ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        .about-section li {
+            margin-bottom: 0.5rem;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .feature-card {
+            background: linear-gradient(135deg, #f3f4f6, #ffffff);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        .feature-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .criteria-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .criteria-table th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        .criteria-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .criteria-table tr:hover {
+            background: #f9fafb;
+        }
+        .code-block {
+            background: #1f2937;
+            color: #10b981;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 1rem 0;
+        }
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .warning-box h4 {
+            color: #d97706;
+            margin: 0 0 0.5rem 0;
+        }
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .success-box h4 {
+            color: #059669;
+            margin: 0 0 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>📈 Minervini Platform</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/scanner">Scanner</a></li>
+                <li><a href="/backtest">Backtest</a></li>
+                <li><a href="/portfolio">Portfolio</a></li>
+                <li><a href="/signals">Signals</a></li>
+                <li><a href="/about" class="active">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- About Section -->
+    <section class="features" style="padding-top: 2rem;">
+        <div class="container">
+            <h1 class="section-title">ℹ️ About Minervini Platform</h1>
+            
+            <!-- Introduction -->
+            <div class="about-section">
+                <h2>🎯 Nedir?</h2>
+                <p>
+                    <strong>Minervini Trading Platform</strong>, efsanevi trader Mark Minervini'nin 
+                    <strong>SEPA (Specific Entry Point Analysis)</strong> metodolojisine dayanan, 
+                    hem BIST (Borsa İstanbul) hem de ABD borsalarını (NYSE, NASDAQ) gerçek zamanlı 
+                    tarayan otomatik bir hisse senedi analiz platformudur.
+                </p>
+                <p>
+                    Bu platform, dünya çapında kanıtlanmış momentum trading stratejilerini kullanarak 
+                    yüksek potansiyelli hisse senetlerini tespit eder ve size alım/satım sinyalleri sunar.
+                </p>
+            </div>
+
+            <!-- Mark Minervini -->
+            <div class="about-section">
+                <h2>👤 Mark Minervini Kimdir?</h2>
+                <p>
+                    Mark Minervini, <strong>US Investing Championship</strong>'te %155 yıllık getiri 
+                    ile birinci olan ve <strong>5 yıl boyunca %220 ortalama getiri</strong> elde eden 
+                    profesyonel bir trader'dır.
+                </p>
+                <p>
+                    <strong>"Think & Trade Like a Champion"</strong> ve <strong>"Trade Like a Stock Market Wizard"</strong> 
+                    kitaplarının yazarıdır. Momentum trading ve VCP (Volatility Contraction Pattern) 
+                    tekniklerinin öncüsüdür.
+                </p>
+            </div>
+
+            <!-- SEPA Methodology -->
+            <div class="about-section">
+                <h2>📊 SEPA Metodolojisi</h2>
+                <p>
+                    SEPA (Specific Entry Point Analysis), Mark Minervini'nin geliştirdiği, 
+                    yüksek olasılıklı alım noktalarını tespit etmek için kullanılan sistematik bir yaklaşımdır.
+                </p>
+                
+                <h3>🔑 Ana Kriterler</h3>
+                <table class="criteria-table">
+                    <thead>
+                        <tr>
+                            <th>Kriter</th>
+                            <th>Açıklama</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Trend Template (Aşama 2)</strong></td>
+                            <td>Fiyat 150G ve 200G hareketli ortalamaların üzerinde olmalı</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SMA Uptrend</strong></td>
+                            <td>200 günlük SMA en az 30 gündür yukarı yönlü</td>
+                        </tr>
+                        <tr>
+                            <td><strong>50G > 150G > 200G</strong></td>
+                            <td>Kısa vadeli momentum güçlü</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RS (Relative Strength)</strong></td>
+                            <td>Endekse göre pozitif ayrışma (BIST için XU100, US için S&P500)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>VCP Pattern</strong></td>
+                            <td>Volatilite daralması paterni (Volatility Contraction Pattern)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pivot Point</strong></td>
+                            <td>20 günlük en yüksek seviyeye yakınlık</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Volume Confirmation</strong></td>
+                            <td>Breakout sırasında hacim artışı</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- How to Use -->
+            <div class="about-section">
+                <h2>🚀 Nasıl Kullanılır?</h2>
+                
+                <h3>1️⃣ Scanner (Tarayıcı)</h3>
+                <ol>
+                    <li><strong>Market seçin:</strong> BIST, US veya Both (Her İkisi)</li>
+                    <li><strong>Scan Type:</strong>
+                        <ul>
+                            <li><strong>Quick Scan:</strong> Hızlı test için 8-12 hisse</li>
+                            <li><strong>Full Scan:</strong> Tüm hisse listesi (BIST: 474, US: 128)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Start Scanning</strong> tıklayın</li>
+                    <li><strong>Sonuçları yorumlayın:</strong> Tarama sonucunda hisseler şu kategorilere ayrılır:</li>
+                </ol>
+
+                <h3>📊 Status (Durum) Açıklamaları:</h3>
+                
+                <div class="success-box">
+                    <h4>🚀 BREAKOUT (Patlama)</h4>
+                    <p><strong>En güçlü sinyal - Hemen alım yapılabilir!</strong></p>
+                    <ul>
+                        <li>✅ Fiyat <strong>pivot noktasını yukarı kırdı</strong></li>
+                        <li>✅ <strong>%50+ hacim artışı</strong> var (Volume Spike)</li>
+                        <li>✅ Güçlü momentum ile direnç kırılımı</li>
+                        <li>📍 <strong>Mark Minervini'nin ideal alım noktası</strong></li>
+                    </ul>
+                    <p><strong>Örnek:</strong> Hisse 100 TL pivot'tan hacimle 102 TL'ye çıktı → BREAKOUT</p>
+                    
+                    <div style="background: #e0f2fe; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <h5 style="color: #0369a1; margin: 0 0 0.5rem 0;">📊 Hacim Teyidi Nasıl Kontrol Edilir?</h5>
+                        <p style="margin: 0; color: #075985; line-height: 1.6;">
+                            <strong>Otomatik Kontrol:</strong> Sistem her hisse için otomatik olarak hacim kontrolü yapar.<br>
+                            <strong>Formül:</strong> Güncel Hacim / Son 20 Günün Ortalama Hacmi<br>
+                            <strong>Teyit Şartı:</strong> Oran ≥ 1.5 (yani %50+ artış)<br><br>
+                            
+                            <strong>Örnekler:</strong><br>
+                            • Volume Spike: <span style="color: #10b981; font-weight: 600;">2.1x ✅ (Teyit var!)</span> → Güvenle alınabilir<br>
+                            • Volume Spike: <span style="color: #f59e0b; font-weight: 600;">1.2x ⚠️ (Düşük hacim)</span> → Dikkatli ol, bekle<br>
+                            • Volume Spike: <span style="color: #10b981; font-weight: 600;">1.8x ✅ (Teyit var!)</span> → İyi sinyal
+                        </p>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <h4>🎯 PIVOT_NEAR (Pivot'a Yakın)</h4>
+                    <p><strong>Breakout'a çok yakın - Dikkatli izle!</strong></p>
+                    <ul>
+                        <li>⚠️ Fiyat pivot'a <strong>%2 veya daha yakın</strong></li>
+                        <li>⚠️ Henüz breakout olmadı ama <strong>tetiklenmeye hazır</strong></li>
+                        <li>⚠️ Hacim kuruması (Volume Dry-up) devam ediyor</li>
+                        <li>📍 <strong>Watchlist'e ekle, breakout'u bekle</strong></li>
+                    </ul>
+                    <p><strong>Örnek:</strong> Pivot 100 TL, fiyat 98.5 TL → PIVOT_NEAR (1.5% mesafe)</p>
+                </div>
+
+                <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                    <h4 style="color: #1e40af; margin: 0 0 0.5rem 0;">📊 SETUP (Kurulum)</h4>
+                    <p style="margin: 0;"><strong>İyi setup var ama breakout uzak</strong></p>
+                    <ul style="margin: 0.5rem 0;">
+                        <li>💡 Tüm teknik kriterler sağlanıyor (SMA, RS, VCP)</li>
+                        <li>💡 Fiyat pivot'tan <strong>%2-10 uzakta</strong></li>
+                        <li>💡 Sağlam baz oluşumu (Base Building)</li>
+                        <li>📍 <strong>İzlemeye değer, sabırlı ol</strong></li>
+                    </ul>
+                    <p style="margin: 0.5rem 0 0 0;"><strong>Örnek:</strong> Pivot 100 TL, fiyat 94 TL → SETUP (6% mesafe)</p>
+                </div>
+
+                <div style="background: #f3f4f6; border-left: 4px solid #6b7280; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                    <h4 style="color: #374151; margin: 0 0 0.5rem 0;">👀 WATCHING (İzlemede)</h4>
+                    <p style="margin: 0;"><strong>Uzun vadeli takip - Acele etme</strong></p>
+                    <ul style="margin: 0.5rem 0;">
+                        <li>ℹ️ Teknik olarak sağlam ama <strong>pivot'tan %10+ uzak</strong></li>
+                        <li>ℹ️ Konsolidasyon devam ediyor</li>
+                        <li>ℹ️ VCP pattern henüz tam oluşmadı</li>
+                        <li>📍 <strong>Watchlist'te tut, acele etme</strong></li>
+                    </ul>
+                    <p style="margin: 0.5rem 0 0 0;"><strong>Örnek:</strong> Pivot 100 TL, fiyat 88 TL → WATCHING (12% mesafe)</p>
+                </div>
+
+                <h3>💡 Hangi Durumda Ne Yapmalı?</h3>
+                <table class="criteria-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Öncelik</th>
+                            <th>Aksiyon</th>
+                            <th>Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>🚀 BREAKOUT</strong></td>
+                            <td><span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px;">Çok Yüksek</span></td>
+                            <td>Hemen alım yapılabilir (hacim teyidi varsa)</td>
+                            <td>Düşük (%7 stop-loss)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🎯 PIVOT_NEAR</strong></td>
+                            <td><span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px;">Yüksek</span></td>
+                            <td>Breakout'u bekle, limit order koy</td>
+                            <td>Orta</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📊 SETUP</strong></td>
+                            <td><span style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px;">Orta</span></td>
+                            <td>Watchlist'e ekle, pivot'a yaklaşmasını izle</td>
+                            <td>Orta-Yüksek</td>
+                        </tr>
+                        <tr>
+                            <td><strong>👀 WATCHING</strong></td>
+                            <td><span style="background: #6b7280; color: white; padding: 2px 8px; border-radius: 4px;">Düşük</span></td>
+                            <td>Uzun vadeli takip, acele etme</td>
+                            <td>Yüksek</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="warning-box" style="margin-top: 1.5rem;">
+                    <h4>⚠️ ÖNEMLİ NOT:</h4>
+                    <p style="margin: 0;">
+                        <strong>Sadece BREAKOUT sinyallerini trade etmek en güvenlidir!</strong><br>
+                        PIVOT_NEAR, SETUP ve WATCHING durumları <strong>hazırlık aşamalarıdır</strong>. 
+                        Mark Minervini'nin kuralı: "Sadece breakout'ta al, tahmin etme!"
+                    </p>
+                </div>
+
+                <h3>2️⃣ Portfolio (Portföy)</h3>
+                <ol>
+                    <li>Scanner'dan bulduğunuz hisseleri portföye ekleyin</li>
+                    <li><strong>Entry Price, Quantity, Stop Loss</strong> girin</li>
+                    <li>Platform otomatik olarak:
+                        <ul>
+                            <li>Güncel fiyatları izler</li>
+                            <li>Kar/Zarar hesaplar</li>
+                            <li>Stop-loss seviyelerini takip eder</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>3️⃣ Signals (Sinyaller)</h3>
+                <p>Platform otomatik olarak şu sinyalleri üretir:</p>
+                <ul>
+                    <li><strong>BUY:</strong> Alım sinyali (Breakout, hacim teyidi)</li>
+                    <li><strong>SELL:</strong> Satış sinyali (Stop-loss, teknik zayıflık)</li>
+                    <li><strong>WATCH:</strong> İzleme (Setup kurulumu, henüz breakout yok)</li>
+                </ul>
+            </div>
+
+            <!-- Features -->
+            <div class="about-section">
+                <h2>✨ Özellikler</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🌍 Dual Market</h4>
+                        <p>BIST ve US piyasalarını aynı anda tara</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🤖 Otomatik Tarama</h4>
+                        <p>474 BIST + 128 US hissesi (602 toplam)</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📈 Gerçek Zamanlı</h4>
+                        <p>Yahoo Finance API ile canlı veriler</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🎯 VCP Detection</h4>
+                        <p>Volatility Contraction Pattern tespiti</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>💼 Portfolio Tracking</h4>
+                        <p>Pozisyonlarınızı takip edin</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔔 Smart Signals</h4>
+                        <p>Alım/satım sinyalleri</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📊 Advanced Metrics</h4>
+                        <p>RS, VCP, Pivot, Volume analizi</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📥 Export</h4>
+                        <p>Sonuçları CSV olarak indirin</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Management -->
+            <div class="about-section">
+                <h2>⚠️ Risk Yönetimi</h2>
+                
+                <div class="warning-box">
+                    <h4>🛡️ Mark Minervini'nin Risk Kuralları:</h4>
+                    <ul>
+                        <li><strong>%7 Hard Stop:</strong> Alım maliyetinden %7 düşüş = otomatik çık</li>
+                        <li><strong>%15 Profit Protection:</strong> %15 kâra ulaştıktan sonra stop'u başabaşa çek</li>
+                        <li><strong>Position Sizing:</strong> Her pozisyon portföyün max %2-3'ü</li>
+                        <li><strong>Diversification:</strong> Aynı sektörde 2-3'ten fazla pozisyon yok</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <h4>✅ Başarılı Trading için İpuçları:</h4>
+                    <ul>
+                        <li>Sadece <strong>BREAKOUT</strong> sinyallerini takip edin</li>
+                        <li>Hacim teyidi olmadan giriş yapmayın</li>
+                        <li>Stop-loss'u disiplinle uygulayın</li>
+                        <li>Pazar genel trendiyle uyumlu hareket edin</li>
+                        <li>Duygu yerine sistem kullanın</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Technical Details -->
+            <div class="about-section">
+                <h2>🛠️ Teknik Detaylar</h2>
+                
+                <h3>Stack:</h3>
+                <ul>
+                    <li><strong>Backend:</strong> Python 3.9+, Flask</li>
+                    <li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JavaScript</li>
+                    <li><strong>Data Source:</strong> Yahoo Finance API (yfinance)</li>
+                    <li><strong>Analysis:</strong> Pandas, NumPy</li>
+                </ul>
+
+                <h3>Nasıl Başlatılır:</h3>
+                <div class="code-block">
+# Requirements kurulumu<br>
+pip3 install -r requirements.txt<br>
+<br>
+# Server başlat<br>
+python3 app.py<br>
+<br>
+# Tarayıcıda aç<br>
+http://localhost:8888
+                </div>
+
+                <h3>Dosya Yapısı:</h3>
+                <ul>
+                    <li><strong>app.py:</strong> Flask web server & REST API</li>
+                    <li><strong>universal_scanner.py:</strong> BIST + US tarama motoru</li>
+                    <li><strong>sepa_scanner.py:</strong> SEPA metodolojisi implementasyonu</li>
+                    <li><strong>templates/:</strong> HTML şablonları</li>
+                    <li><strong>static/:</strong> CSS ve JavaScript dosyaları</li>
+                </ul>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="about-section">
+                <h2>⚖️ Yasal Uyarı</h2>
+                <div class="warning-box">
+                    <h4>⚠️ DİKKAT</h4>
+                    <p>
+                        Bu platform <strong>eğitim ve bilgilendirme amaçlıdır</strong>. 
+                        Yatırım tavsiyesi değildir. Borsa yatırımları risk içerir ve 
+                        geçmiş performans gelecek sonuçları garanti etmez.
+                    </p>
+                    <p>
+                        Her yatırım kararını vermeden önce kendi araştırmanızı yapın 
+                        ve gerekirse profesyonel finansal danışmanlık alın.
+                    </p>
+                    <p>
+                        <strong>Platform yalnızca teknik analiz araçları sunar, 
+                        yatırım kararları tamamen size aittir.</strong>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Resources -->
+            <div class="about-section">
+                <h2>📚 Kaynaklar & Daha Fazla Bilgi</h2>
+                <ul>
+                    <li><strong>Mark Minervini Kitapları:</strong>
+                        <ul>
+                            <li>"Think & Trade Like a Champion" (2017)</li>
+                            <li>"Trade Like a Stock Market Wizard" (2013)</li>
+                            <li>"Momentum Masters" (2015)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Web:</strong> <a href="https://www.minervini.com" target="_blank">minervini.com</a></li>
+                    <li><strong>Twitter:</strong> @markminervini</li>
+                    <li><strong>SEPA Metodolojisi:</strong> SEPA_KILAVUZU.md (proje dosyalarında)</li>
+                </ul>
+            </div>
+
+            <!-- Piyasanın Durumu -->
+            <div class="about-section">
+                <h2>🌡️ Piyasanın Durumu — Nasıl Yorumlanır?</h2>
+                <p>Dashboard'un üst kısmındaki <strong>"Piyasanın Durumu"</strong> paneli, BIST ve ABD piyasalarının yatırıma uygunluğunu anlık olarak değerlendirir. Her piyasa için 5 teknik kriter puanlanır ve sonuca göre renk kodlu bir karar önerisi üretilir.</p>
+
+                <h3>📊 5 Teknik Kriter</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <strong>1. Fiyat &gt; 50G SMA</strong>
+                        <p style="margin:.5rem 0 0;">Endeks fiyatı 50 günlük hareketli ortalamanın üzerinde. Kısa vadeli trendin sağlıklı olduğunu gösterir.</p>
+                    </div>
+                    <div class="feature-card">
+                        <strong>2. Fiyat &gt; 200G SMA</strong>
+                        <p style="margin:.5rem 0 0;">Endeks fiyatı 200 günlük hareketli ortalamanın üzerinde. Uzun vadeli boğa piyasasının teyididir.</p>
+                    </div>
+                    <div class="feature-card">
+                        <strong>3. 50G SMA &gt; 200G SMA</strong>
+                        <p style="margin:.5rem 0 0;">"Altın Kesişim" (Golden Cross) yapısı. Orta ve uzun vadeli trendin aynı yönde olduğunu gösterir.</p>
+                    </div>
+                    <div class="feature-card">
+                        <strong>4. 200G SMA Yükselen Trend</strong>
+                        <p style="margin:.5rem 0 0;">200G ortalaması son 30 günde yukarı eğimli. Piyasanın ivme kazandığını, momentumun güçlendiğini gösterir.</p>
+                    </div>
+                    <div class="feature-card">
+                        <strong>5. 52H Zirveden ≤%15 Uzakta</strong>
+                        <p style="margin:.5rem 0 0;">Endeks 52 haftalık en yüksek seviyesine yakın. Piyasanın "güçten" hareket ettiğini, zirveyi test ettiğini gösterir.</p>
+                    </div>
+                </div>
+
+                <h3>🚦 Skor → Karar Tablosu</h3>
+                <table style="width:100%;border-collapse:collapse;font-size:.92rem;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="padding:.7rem 1rem;text-align:left;border-bottom:2px solid #e5e7eb;">Skor</th>
+                            <th style="padding:.7rem 1rem;text-align:left;border-bottom:2px solid #e5e7eb;">Durum</th>
+                            <th style="padding:.7rem 1rem;text-align:left;border-bottom:2px solid #e5e7eb;">Karar</th>
+                            <th style="padding:.7rem 1rem;text-align:left;border-bottom:2px solid #e5e7eb;">Renk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid #f1f5f9;">
+                            <td style="padding:.6rem 1rem;font-weight:700;">5/5</td>
+                            <td style="padding:.6rem 1rem;">GÜÇLÜ BOĞA</td>
+                            <td style="padding:.6rem 1rem;">SİSTEM AKTİF — Tam pozisyon al</td>
+                            <td style="padding:.6rem 1rem;"><span style="background:#dcfce7;color:#15803d;padding:.2rem .7rem;border-radius:12px;font-weight:600;">Yeşil</span></td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;">
+                            <td style="padding:.6rem 1rem;font-weight:700;">4/5</td>
+                            <td style="padding:.6rem 1rem;">BOĞA</td>
+                            <td style="padding:.6rem 1rem;">SİSTEM AKTİF — Normal pozisyon al</td>
+                            <td style="padding:.6rem 1rem;"><span style="background:#dcfce7;color:#15803d;padding:.2rem .7rem;border-radius:12px;font-weight:600;">Yeşil</span></td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;">
+                            <td style="padding:.6rem 1rem;font-weight:700;">3/5</td>
+                            <td style="padding:.6rem 1rem;">KARMA</td>
+                            <td style="padding:.6rem 1rem;">DİKKATLİ — Yarım pozisyon düşün</td>
+                            <td style="padding:.6rem 1rem;"><span style="background:#fef9c3;color:#92400e;padding:.2rem .7rem;border-radius:12px;font-weight:600;">Sarı</span></td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;">
+                            <td style="padding:.6rem 1rem;font-weight:700;">2/5</td>
+                            <td style="padding:.6rem 1rem;">ZAYIF</td>
+                            <td style="padding:.6rem 1rem;">TEMKİNLİ — Mevcut pozisyonları koru</td>
+                            <td style="padding:.6rem 1rem;"><span style="background:#fef9c3;color:#92400e;padding:.2rem .7rem;border-radius:12px;font-weight:600;">Sarı</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:.6rem 1rem;font-weight:700;">0–1/5</td>
+                            <td style="padding:.6rem 1rem;">AY PİYASASI</td>
+                            <td style="padding:.6rem 1rem;">NAKİTTE KAL — Yeni alım yapma</td>
+                            <td style="padding:.6rem 1rem;"><span style="background:#fee2e2;color:#b91c1c;padding:.2rem .7rem;border-radius:12px;font-weight:600;">Kırmızı</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>😨 VIX — ABD Korku Endeksi</h3>
+                <p>VIX (CBOE Volatility Index), S&P500 opsiyonlarından türetilen ve piyasanın beklenen volatilitesini ölçen resmi bir endekstir. <strong>Sadece ABD kartında</strong> gösterilir çünkü doğrudan S&P500'e özgüdür.</p>
+                <table style="width:100%;border-collapse:collapse;font-size:.92rem;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="padding:.7rem 1rem;text-align:left;border-bottom:2px solid #e5e7eb;">VIX Seviyesi</th>
+                            <th style="padding:.7rem 1rem;text-align:left;border-bottom:2px solid #e5e7eb;">Anlam</th>
+                            <th style="padding:.7rem 1rem;text-align:left;border-bottom:2px solid #e5e7eb;">Öneri</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.6rem 1rem;font-weight:700;">&lt; 15</td><td style="padding:.6rem 1rem;">Düşük korku — piyasa sakin</td><td style="padding:.6rem 1rem;color:#15803d;">Yatırım ortamı elverişli</td></tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.6rem 1rem;font-weight:700;">15 – 20</td><td style="padding:.6rem 1rem;">Normal volatilite</td><td style="padding:.6rem 1rem;color:#15803d;">Sistem aktif, normal devam</td></tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.6rem 1rem;font-weight:700;">20 – 28</td><td style="padding:.6rem 1rem;">Artan belirsizlik</td><td style="padding:.6rem 1rem;color:#92400e;">Dikkat — pozisyon büyüklüğünü azalt</td></tr>
+                        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:.6rem 1rem;font-weight:700;">28 – 40</td><td style="padding:.6rem 1rem;">Yüksek korku</td><td style="padding:.6rem 1rem;color:#b91c1c;">Yeni alım yapma, bekle</td></tr>
+                        <tr><td style="padding:.6rem 1rem;font-weight:700;">&gt; 40</td><td style="padding:.6rem 1rem;">Panik satışı</td><td style="padding:.6rem 1rem;color:#b91c1c;">Kesinlikle bekle — fırsatlar gelebilir</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:1rem;font-size:.88rem;background:#f0f9ff;border-left:4px solid #3b82f6;padding:.75rem 1rem;border-radius:0 8px 8px 0;">
+                    💡 <strong>İpucu:</strong> VIX yüksek seyrederken mevcut rebalancing döngünüzü sürdürebilirsiniz, ancak yeni portföy açmak yerine var olan pozisyonlarınızı izleyin. VIX 20'nin altına düştüğünde sistem tam kapasite çalışmaya hazırdır.
+                </p>
+
+                <h3>📊 BIST Gerçekleşmiş Volatilite</h3>
+                <p>BIST için resmi bir VIX endeksi bulunmadığından, XU100 endeksinin son 20 günlük fiyat hareketlerinden hesaplanan <strong>gerçekleşmiş volatilite</strong> (yıllıklaştırılmış) kullanılır.</p>
+                <ul>
+                    <li><span style="color:#15803d;font-weight:700;">%15 altı — Düşük:</span> BIST sakin, yatırım ortamı elverişli.</li>
+                    <li><span style="color:#92400e;font-weight:700;">%15–25 arası — Orta:</span> Normal dalgalanma, temkinli devam.</li>
+                    <li><span style="color:#b91c1c;font-weight:700;">%25 üzeri — Yüksek:</span> Sert hareketler var, pozisyon büyüklüğünü küçült.</li>
+                </ul>
+
+                <h3>🔄 Ne Sıklıkla Kontrol Edilmeli?</h3>
+                <p>15 günlük rebalancing stratejisi kullanıyorsanız, <strong>her rebalancing gününden bir gün önce</strong> bu paneli kontrol etmeniz yeterlidir. Piyasa durumu kırmızıysa yeni portföy oluşturmak yerine nakit beklemeyi düşünün. Mevcut pozisyonları rebalancing döngüsü kapatacaktır.</p>
+            </div>
+
+            <!-- Version -->
+            <div class="about-section" style="text-align: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
+                <h2 style="color: white;">🚀 Version</h2>
+                <p style="font-size: 1.5rem; font-weight: 700; margin: 0; color: white;">Minervini Platform v1.0</p>
+                <p style="margin: 0.5rem 0 0 0; color: rgba(255,255,255,0.9);">Built with ❤️ for Traders • February 2026</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Mark Minervini Trading Platform © 2026</p>
+            <p>Based on SEPA Methodology • Not Investment Advice</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

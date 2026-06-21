@@ -1,0 +1,1 @@
+/Users/hakanficicilar/Documents/Aİ/Portfolio-Optimizer/data_cache.py
