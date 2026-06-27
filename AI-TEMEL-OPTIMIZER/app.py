@@ -1,13 +1,12 @@
 """
-TEMEL OPTİMİZER
-===============
-Portfolio Optimizer altyapısından türetilmiştir.
+AI TEMEL OPTİMİZER
+==================
+TEMEL OPTİMİZER üzerine inşa edilmiştir.
 
-FARK:
-  USA backtestinde ve taramasında Temel Veri Ağırlığı (fund_weight)
-  kullanıcı parametresidir (varsayılan %40).
-  Her rebalance tarihinde get_fundamentals_as_of(ticker, reb_date)
-  çağrılır → look-ahead bias yoktur.
+EK KATMANLAR:
+  1. Market Regime Filter  — piyasa rejimi skoru + pozisyon büyüklüğü ayarı
+  2. AI Narrative Score    — temel veri değişim hızı / kalite skoru
+  3. Portfolio Risk Control — volatilite bazlı pozisyon boyutlandırma + çıkış sinyalleri
 
 BIST: fund_weight = 0.0 — kesinlikle değiştirilmez.
 """
@@ -23,6 +22,11 @@ from datetime import datetime, timedelta
 import requests, os, sqlite3, json
 from io import BytesIO
 from typing import Optional, Dict, List, Tuple
+
+# ─── AI Katman importları ─────────────────────────────────────────────────────
+from market_regime import calc_market_regime
+from ai_score import calc_ai_score
+from portfolio_risk import calc_position_sizes, get_exit_signals, calc_sector_exposure
 
 try:
     from data_cache import get_price_data as _dc_get, batch_get_price_data as _dc_batch, init_price_cache as _dc_init
@@ -53,14 +57,14 @@ from historical_fundamentals_fmp import (
 
 # ─── Sayfa yapılandırması ─────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="TEMEL OPTİMİZER | Fundamental + Momentum",
-    page_icon="📐",
+    page_title="AI TEMEL OPTİMİZER | Regime + AI + Risk",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # ─── Sabitler ─────────────────────────────────────────────────────────────────
-DB_PATH        = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temel_optimizer.db")
+DB_PATH        = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ai_temel_optimizer.db")
 COMMISSION_RATE = 0.001
 SLIPPAGE_BUY   = 1.001
 SLIPPAGE_SELL  = 0.999
@@ -69,7 +73,7 @@ RANK_WEIGHTS   = {1: 0.40, 2: 0.25, 3: 0.18, 4: 0.10, 5: 0.07}
 FMP_API_KEY = os.environ.get("FMP_API_KEY", "")
 FMP_BASE    = "https://financialmodelingprep.com/stable"
 
-# ─── pandas-ta adapter (Portfolio Optimizer'dan kopyalandı) ──────────────────
+# ─── pandas-ta adapter ───────────────────────────────────────────────────────
 class _pta:
     @staticmethod
     def sma(series, length=20):   return series.rolling(window=length).mean()
@@ -100,12 +104,18 @@ def _get_db():
             trades_json TEXT,
             period_json TEXT
         )""")
-    # Migration: eski DB'lere period_json sütunu ekle
-    try:
-        conn.execute("ALTER TABLE temel_backtests ADD COLUMN period_json TEXT")
-        conn.commit()
-    except Exception:
-        pass
+    # Migration: eski DB'lere sütunlar ekle
+    for col_def in [
+        "ALTER TABLE temel_backtests ADD COLUMN period_json TEXT",
+        "ALTER TABLE temel_backtests ADD COLUMN regime_score REAL",
+        "ALTER TABLE temel_backtests ADD COLUMN market_exposure REAL",
+        "ALTER TABLE temel_backtests ADD COLUMN ai_score REAL",
+    ]:
+        try:
+            conn.execute(col_def)
+            conn.commit()
+        except Exception:
+            pass
     # Tarama geçmişi tablosu
     conn.execute("""
         CREATE TABLE IF NOT EXISTS temel_scans (
@@ -236,14 +246,12 @@ def _build_period_returns(trades: list, period_detail: list) -> pd.DataFrame:
     sat = df_t[df_t["İşlem"] == "SAT"].copy() if "İşlem" in df_t.columns else pd.DataFrame()
     if sat.empty:
         return pd.DataFrame()
-    # Dönem bilgisiyle eşleştir
     rows = []
     for p in period_detail:
         d_basi = p.get("Dönem Başı","")
         d_sonu = p.get("Dönem Sonu","")
         hisseler = [h.strip() for h in p.get("Seçilen Hisseler","").split(",") if h.strip()]
         for sym in hisseler:
-            # Bu dönemde yapılan SAT işlemi bul (dönem sonu tarihine yakın)
             sym_sat = sat[(sat["Sembol"] == sym) & (sat["Tarih"] >= d_basi) & (sat["Tarih"] <= d_sonu)]
             if not sym_sat.empty:
                 kz = sym_sat.iloc[-1]["K/Z (%)"]
@@ -264,7 +272,6 @@ def _build_period_returns(trades: list, period_detail: list) -> pd.DataFrame:
     return pd.DataFrame(rows) if rows else pd.DataFrame()
 
 # ─── S&P 500 + MidCap 400 — 913 hisselik statik evren ───────────────────────
-# Portfolio Optimizer ile aynı liste; Wikipedia erişimi gerekmez, her zaman 913 hisse
 _US_913_TICKERS = [
     "A","AA","AAL","AAON","AAPL","ABBV","ABNB","ABT","ACGL","ACI",
     "ACM","ACN","ADBE","ADC","ADI","ADM","ADP","ADSK","AEE","AEIS",
@@ -386,20 +393,17 @@ def _get_bist():
 def _get_universe(market: str) -> list:
     if "BIST" in market:
         return _get_bist()
-    # USA için her zaman 913 hisselik statik liste kullan (Wikipedia bağımlılığı yok)
     return list(_US_913_TICKERS)
 
-# ─── Sütun adlarını normalize et (yfinance sürüm farklarına karşı) ───────────
+# ─── Sütun adlarını normalize et ─────────────────────────────────────────────
 def _normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
     """MultiIndex veya büyük-küçük harf farklarını normalize eder."""
     if df.empty:
         return df
     if isinstance(df.columns, pd.MultiIndex):
-        # ('Close','AAPL') → 'close'
         df.columns = [str(c[0]).lower().strip() for c in df.columns]
     else:
         df.columns = [str(c).lower().strip() for c in df.columns]
-    # yfinance bazen 'adj close' döndürür — 'close' olarak yeniden adlandır
     if "adj close" in df.columns and "close" not in df.columns:
         df = df.rename(columns={"adj close": "close"})
     return df
@@ -429,7 +433,6 @@ def _batch_prices(tickers: list, start: str, end: str,
     if _USE_DATA_CACHE:
         try:
             raw_dc = _dc_batch(tickers, start, end, progress_callback=progress_cb)
-            # data_cache büyük harfli sütunlar döndürür → _normalize_cols uygula
             for k, v in raw_dc.items():
                 if v is not None and not v.empty:
                     result[k] = _normalize_cols(v.copy())
@@ -437,7 +440,6 @@ def _batch_prices(tickers: list, start: str, end: str,
                 return result
         except Exception:
             pass
-    # Fallback yfinance bulk
     chunk = 100
     for i in range(0, len(tickers), chunk):
         batch = tickers[i:i+chunk]
@@ -485,14 +487,10 @@ def _rebalance_dates(start: datetime, end: datetime, freq: str) -> list:
         dates.append(end)
     return dates
 
-# ─── Teknik skor (Portfolio Optimizer Alfa ile aynı) ─────────────────────────
+# ─── Teknik skor ──────────────────────────────────────────────────────────────
 def _calc_tech_score(ticker: str, df: pd.DataFrame,
                      bench_close: pd.Series,
                      bench_ann_vol: float = None) -> Optional[Dict]:
-    """
-    Portfolio Optimizer'daki _screen_alfa_backtest ile aynı formül.
-    Döndürür: {"rs_slope": float, "vol_penalty": float, bonuslar...}
-    """
     try:
         close  = df["close"].astype(float)
         volume = df.get("volume", pd.Series(dtype=float)).astype(float)
@@ -504,7 +502,6 @@ def _calc_tech_score(ticker: str, df: pd.DataFrame,
 
     last_price = float(close.iloc[-1])
 
-    # SMA filtreler
     sma50  = float(close.rolling(50).mean().iloc[-1])
     sma200 = float(close.rolling(200).mean().iloc[-1]) if len(close) >= 200 else None
 
@@ -513,7 +510,6 @@ def _calc_tech_score(ticker: str, df: pd.DataFrame,
     if sma200 and last_price < sma200 * 0.97:
         return None
 
-    # Excess return hesapla
     def _excess(n):
         if len(close) <= n or len(bench_close) <= n:
             return 0.0
@@ -523,24 +519,20 @@ def _calc_tech_score(ticker: str, df: pd.DataFrame,
 
     e1m, e3m, e6m, e12m = _excess(21), _excess(63), _excess(126), _excess(252)
 
-    # 6A mutlak getiri kontrolü
     if len(close) > 126:
         ret6m_abs = float(close.iloc[-1] / close.iloc[-126] - 1) * 100
         if ret6m_abs <= 0:
             return None
 
-    # Çift momentum filtresi
     if e3m < -5 and e6m < -10:
         return None
 
-    # Ortalama hacim
     if len(volume) >= 20:
         avg_vol20 = float(volume.iloc[-20:].mean())
         min_vol = 10000 if ticker.endswith(".IS") else 200000
         if avg_vol20 < min_vol:
             return None
 
-    # ADX bonusu
     adx_bonus = 0.0
     try:
         hi = close.values; lo = close.values; cl = close.values
@@ -562,14 +554,12 @@ def _calc_tech_score(ticker: str, df: pd.DataFrame,
     except Exception:
         pass
 
-    # İvme bonusu
     accel = 0.0
     if e1m > e3m > 0:
         accel += min(25.0, (e1m - e3m) * 0.7)
     if e3m > e6m > 0:
         accel += min(15.0, (e3m - e6m) * 0.4)
 
-    # 52H yakınlık
     lk = min(252, len(close)-1)
     h52 = float(close.iloc[-lk:].max())
     h52_bonus = 0.0
@@ -579,7 +569,6 @@ def _calc_tech_score(ticker: str, df: pd.DataFrame,
         elif d52 >= -10: h52_bonus = 15
         elif d52 >= -20: h52_bonus = 7
 
-    # SMA200 mesafe bonusu
     sma200_bonus = 0.0
     if sma200 and sma200 > 0:
         gap = (last_price / sma200 - 1) * 100
@@ -587,7 +576,6 @@ def _calc_tech_score(ticker: str, df: pd.DataFrame,
         elif gap >= 10: sma200_bonus = 12
         elif gap >= 0:  sma200_bonus = 5
 
-    # Hacim patlaması
     vol_bonus = 0.0
     if len(volume) >= 20:
         v5 = float(volume.iloc[-5:].mean())
@@ -598,7 +586,6 @@ def _calc_tech_score(ticker: str, df: pd.DataFrame,
             elif vr > 1.8: vol_bonus = 10
             elif vr > 1.3: vol_bonus = 4
 
-    # Volatilite cezası
     vol_penalty = 0.0
     dr = close.pct_change().dropna()
     if len(dr) >= 20:
@@ -629,8 +616,7 @@ def _get_hist_fund_score(ticker: str, as_of_date: str,
                          strategy: str = "Alfa") -> Tuple[Optional[float], dict]:
     """
     Look-ahead bias'sız tarihsel temel skor.
-    Temel veri yoksa (None, {}) döner — 50.0 default KULLANILMAZ.
-    Böylece backtest ve taramada fund skor yoksa final_score = tech_score (tutarlı).
+    Temel veri yoksa (None, {}) döner.
     """
     if ticker.endswith(".IS"):
         return None, {}
@@ -641,6 +627,19 @@ def _get_hist_fund_score(ticker: str, as_of_date: str,
         return calc_historical_fund_score(fund, strategy)
     except Exception:
         return None, {}
+
+
+# ─── AI Score hesaplama ───────────────────────────────────────────────────────
+def _calc_ai_score_for_ticker(ticker: str, as_of_date: str, prev_date: str) -> tuple:
+    """AI score için mevcut ve önceki dönem temel verisini çeker."""
+    if ticker.endswith(".IS"):
+        return 50.0, {}  # BIST için proxy yok — nötr
+    try:
+        curr = get_fundamentals_as_of(ticker, as_of_date)
+        prev = get_fundamentals_as_of(ticker, prev_date)
+        return calc_ai_score(curr, prev)
+    except Exception:
+        return 50.0, {}
 
 
 # ─── Metrik hesaplama ─────────────────────────────────────────────────────────
@@ -678,8 +677,8 @@ def _calc_metrics(equity: pd.Series, bench: pd.Series, initial: float) -> dict:
     }
 
 
-# ─── BACKTEST ─────────────────────────────────────────────────────────────────
-def run_temel_backtest(
+# ─── AI BACKTEST ──────────────────────────────────────────────────────────────
+def run_ai_temel_backtest(
     tickers: list,
     market: str,
     start_dt: datetime,
@@ -688,11 +687,15 @@ def run_temel_backtest(
     freq: str,
     fund_weight: float,
     initial_capital: float,
+    use_regime: bool = True,
+    use_ai: bool = True,
+    use_risk_control: bool = True,
+    exit_sensitivity: str = "Normal",
     progress_ph=None,
 ) -> dict:
     """
-    Temel Optimizer backtesti.
-    USA: final_score = tech_score*(1-fw) + hist_fund_score*fw
+    AI Temel Optimizer backtesti.
+    USA: adjusted_final_score = tech*w1 + fund*w2 + ai*w3 + regime*w4
     BIST: fund_weight zorla 0.0
     """
     is_bist = "BIST" in market
@@ -730,13 +733,13 @@ def run_temel_backtest(
             progress_ph.progress(0.60, text="[2/3] BIST — temel veri atlandı (fund_weight=0)")
 
     # ── Rebalance döngüsü ────────────────────────────────────────────────────
-    reb_dates  = _rebalance_dates(start_dt, end_dt, freq)
-    total_p    = len(reb_dates) - 1
-    cash       = float(initial_capital)
-    holdings   = {}
+    reb_dates   = _rebalance_dates(start_dt, end_dt, freq)
+    total_p     = len(reb_dates) - 1
+    cash        = float(initial_capital)
+    holdings    = {}
     equity_curve = {}
-    trade_log  = []
-    period_detail= []
+    trade_log   = []
+    period_detail = []
 
     bench_ann_vol = None
     if len(bench_close) >= 60:
@@ -801,9 +804,20 @@ def run_temel_backtest(
             br = b_slice.pct_change().dropna()
             b_ann = float(br.std()) * np.sqrt(252) if len(br) >= 20 else None
 
-        # ── Hisseleri skorla ────────────────────────────────────────────────
-        candidates = []
+        # ── Market Regime ────────────────────────────────────────────────────
+        if use_regime:
+            try:
+                regime_result = calc_market_regime(reb, market)
+                regime_score  = regime_result.get("regime_score", 75.0)
+                market_exposure = regime_result.get("market_exposure", 1.0)
+            except Exception:
+                regime_score  = 75.0
+                market_exposure = 1.0
+        else:
+            regime_score  = 75.0
+            market_exposure = 1.0
 
+        # ── Hisseleri skorla ─────────────────────────────────────────────────
         def _score_one(ticker):
             df = all_data.get(ticker)
             if df is None or df.empty:
@@ -811,12 +825,7 @@ def run_temel_backtest(
             sl = df[df.index <= reb]
             if len(sl) < 130:
                 return None
-            res = _calc_tech_score(ticker, sl, b_slice, bench_ann_vol=b_ann)
-            if res is None:
-                return None
-
-            # Normalize teknik skor 0-100
-            return res
+            return _calc_tech_score(ticker, sl, b_slice, bench_ann_vol=b_ann)
 
         with ThreadPoolExecutor(max_workers=8) as ex:
             raw_results = list(ex.map(_score_one, tickers))
@@ -828,57 +837,154 @@ def run_temel_backtest(
 
         # RS normalize
         all_rs = [r["rs_slope"] for r in valid]
-        # 95. persentil — outlier (data artifact) tüm sıralamayı bozmasın
         max_rs = float(np.percentile(all_rs, 95)) if len(all_rs) >= 10 else max(all_rs)
         max_rs = max(max_rs, 1e-9)
         for r in valid:
-            rs_norm    = (r["rs_slope"] / max_rs * 100)          # kırpma yok — 95p üstü avantajlı
+            rs_norm    = (r["rs_slope"] / max_rs * 100)
             tech_score = max(0.0, min(200.0,
                 (rs_norm + r["_bonus"]) * (1 - r.get("vol_penalty", 0))
             ))
             r["tech_score"] = round(tech_score, 2)
 
-        # Temel skor (USA, look-ahead bias'sız)
-        reb_date_str = reb.strftime("%Y-%m-%d")
+        # Temel skor + AI skor + Final skor hesapla
+        reb_date_str  = reb.strftime("%Y-%m-%d")
+        prev_date_str = (reb - pd.Timedelta(days=90)).strftime("%Y-%m-%d")
+
         for r in valid:
             sym = r["Sembol"]
+
+            # Temel skor (USA, look-ahead bias'sız)
+            fund_sc = None
             if fw > 0 and not sym.endswith(".IS"):
-                fund_sc, _ = _get_hist_fund_score(sym, reb_date_str)
-                if fund_sc is not None:
-                    r["fund_score"] = round(fund_sc, 2)
-                    r["final_score"] = round(
-                        r["tech_score"] * (1 - fw) + fund_sc * fw, 2
-                    )
+                fund_sc_val, _ = _get_hist_fund_score(sym, reb_date_str)
+                if fund_sc_val is not None:
+                    r["fund_score"] = round(fund_sc_val, 2)
+                    fund_sc = fund_sc_val
                 else:
-                    # Temel veri yok → tarama ile tutarlı: sadece teknik skor
                     r["fund_score"] = "-"
-                    r["final_score"] = r["tech_score"]
             else:
                 r["fund_score"] = "-"
-                r["final_score"] = r["tech_score"]
 
-        valid.sort(key=lambda x: x["final_score"], reverse=True)
+            # AI skor
+            if use_ai:
+                ai_sc, _ = _calc_ai_score_for_ticker(sym, reb_date_str, prev_date_str)
+            else:
+                ai_sc = 50.0
+
+            # Final skor formülü
+            tech_score = r["tech_score"]
+            if is_bist:
+                if use_ai:
+                    base_score = tech_score * 0.70 + ai_sc * 0.15 + regime_score * 0.15
+                else:
+                    base_score = tech_score * 0.85 + regime_score * 0.15
+            else:
+                if fund_sc is not None and use_ai:
+                    base_score = tech_score*0.45 + fund_sc*0.25 + ai_sc*0.15 + regime_score*0.15
+                elif fund_sc is not None and not use_ai:
+                    base_score = tech_score*0.55 + fund_sc*0.30 + regime_score*0.15
+                elif fund_sc is None and use_ai:
+                    base_score = tech_score*0.60 + ai_sc*0.25 + regime_score*0.15
+                else:
+                    base_score = tech_score*0.75 + regime_score*0.25
+
+            adjusted_final_score = base_score * market_exposure
+            r["adjusted_final_score"] = round(adjusted_final_score, 2)
+            r["regime_score"]         = round(regime_score, 1)
+            r["market_exposure"]      = market_exposure
+            r["ai_score"]             = round(ai_sc, 1)
+            # Geriye dönük uyumluluk için final_score da set et
+            r["final_score"]          = r["adjusted_final_score"]
+
+        # Sıralama: adjusted_final_score'a göre
+        valid.sort(key=lambda x: x["adjusted_final_score"], reverse=True)
         selected = valid[:top_n]
         new_syms = [s["Sembol"] for s in selected]
-        new_scores = {s["Sembol"]: s["final_score"] for s in selected}
 
-        # Sat
+        # ── Çıkış sinyalleri (risk control) ─────────────────────────────────
+        if use_risk_control:
+            for sym in list(holdings):
+                df_sym = all_data.get(sym, pd.DataFrame())
+                sl_sym = df_sym[df_sym.index <= reb] if not df_sym.empty else df_sym
+                # Excess return hesapla
+                excess_3m = 0.0
+                excess_6m = 0.0
+                if not sl_sym.empty and len(sl_sym) >= 63:
+                    try:
+                        c = sl_sym["close"]
+                        stock_3m = float(c.iloc[-1] / c.iloc[-63] - 1) * 100
+                        bench_3m_sl = b_slice.iloc[-63:] if len(b_slice) >= 63 else b_slice
+                        bench_3m = float(bench_3m_sl.iloc[-1] / bench_3m_sl.iloc[0] - 1) * 100 if len(bench_3m_sl) > 1 else 0.0
+                        excess_3m = stock_3m - bench_3m
+                    except Exception:
+                        pass
+                if not sl_sym.empty and len(sl_sym) >= 126:
+                    try:
+                        c = sl_sym["close"]
+                        stock_6m = float(c.iloc[-1] / c.iloc[-126] - 1) * 100
+                        bench_6m_sl = b_slice.iloc[-126:] if len(b_slice) >= 126 else b_slice
+                        bench_6m = float(bench_6m_sl.iloc[-1] / bench_6m_sl.iloc[0] - 1) * 100 if len(bench_6m_sl) > 1 else 0.0
+                        excess_6m = stock_6m - bench_6m
+                    except Exception:
+                        pass
+                try:
+                    exit_sig = get_exit_signals(sym, sl_sym, bench_ann_vol or 0.15, excess_3m, excess_6m)
+                    if exit_sig.get("signal") == "EXIT":
+                        _sell(sym, reb, f"Çıkış: {exit_sig.get('reason', 'Risk sinyali')}")
+                except Exception:
+                    pass
+
+        # Sat (portföyden çıkarılanlar)
         for sym in list(holdings):
             if sym not in new_syms:
                 _sell(sym, reb, "Portföyden çıkarıldı")
 
-        # Ağırlıklar
+        # ── Ağırlıklar ───────────────────────────────────────────────────────
         total_val = _pval(reb)
-        n = len(new_syms)
-        if n <= 5:
-            rw = [RANK_WEIGHTS.get(i+1, 1/n) for i in range(n)]
-        else:
-            step = 1 / (n*(n+1)/2)
-            rw = [(n-i)*step for i in range(n)]
-        ws = sum(rw)
-        allocs = {sym: (w/ws)*total_val for sym, w in zip(new_syms, rw)}
 
-        # Alım
+        if use_risk_control:
+            # Volatilite bazlı pozisyon boyutlandırma
+            stock_vols = {}
+            for s in selected:
+                sym = s["Sembol"]
+                df_s = all_data.get(sym, pd.DataFrame())
+                sl = df_s[df_s.index <= reb] if not df_s.empty else df_s
+                if not sl.empty and len(sl) >= 60:
+                    rets = sl["close"].pct_change().dropna()
+                    stock_vols[sym] = float(rets.std()) * np.sqrt(252)
+                else:
+                    stock_vols[sym] = bench_ann_vol or 0.15
+
+            sector_map = {s["Sembol"]: "Unknown" for s in selected}
+            try:
+                weights = calc_position_sizes(
+                    [{"ticker": s["Sembol"], "adjusted_final_score": s["adjusted_final_score"]} for s in selected],
+                    bench_ann_vol or 0.15,
+                    stock_vols,
+                    sector_map,
+                )
+                allocs = {sym: weights.get(sym, 1.0/len(new_syms)) * total_val for sym in new_syms}
+            except Exception:
+                # Fallback: rank weights
+                n = len(new_syms)
+                if n <= 5:
+                    rw = [RANK_WEIGHTS.get(i+1, 1/n) for i in range(n)]
+                else:
+                    step = 1 / (n*(n+1)/2)
+                    rw = [(n-i)*step for i in range(n)]
+                ws = sum(rw)
+                allocs = {sym: (w/ws)*total_val for sym, w in zip(new_syms, rw)}
+        else:
+            n = len(new_syms)
+            if n <= 5:
+                rw = [RANK_WEIGHTS.get(i+1, 1/n) for i in range(n)]
+            else:
+                step = 1 / (n*(n+1)/2)
+                rw = [(n-i)*step for i in range(n)]
+            ws = sum(rw)
+            allocs = {sym: (w/ws)*total_val for sym, w in zip(new_syms, rw)}
+
+        # ── Alım ─────────────────────────────────────────────────────────────
         for sym in new_syms:
             sl = all_data.get(sym, pd.DataFrame())
             sl = sl[sl.index <= reb] if not sl.empty else sl
@@ -889,7 +995,7 @@ def run_temel_backtest(
             if raw_p <= 0 or pd.isna(raw_p):
                 continue
             adj_p  = raw_p * SLIPPAGE_BUY
-            alloc  = min(allocs[sym], cash)
+            alloc  = min(allocs.get(sym, 0), cash)
             if alloc <= 1:
                 continue
             net    = alloc * (1 - COMMISSION_RATE)
@@ -908,18 +1014,24 @@ def run_temel_backtest(
                 "Fiyat": round(raw_p,2), "Alış Fiyatı": round(raw_p,2),
                 "Adet": round(shares,4), "K/Z (%)": 0,
                 "Bakiye": round(_pval(reb),2),
-                "Teknik Skor": score_info.get("tech_score","-"),
-                "Temel Skor" : score_info.get("fund_score","-"),
-                "Final Skor" : score_info.get("final_score","-"),
-                "Açıklama"   : "Portföye eklendi",
+                "Teknik Skor"        : score_info.get("tech_score","-"),
+                "Temel Skor"         : score_info.get("fund_score","-"),
+                "AI Skoru"           : score_info.get("ai_score","-"),
+                "Regime Skoru"       : round(regime_score, 1),
+                "Market Exposure"    : market_exposure,
+                "Adjusted Final Skor": score_info.get("adjusted_final_score","-"),
+                "Açıklama"           : "Portföye eklendi",
             })
 
         equity_curve[reb] = _pval(reb)
         period_detail.append({
-            "Dönem Başı": reb.strftime("%Y-%m-%d"),
-            "Dönem Sonu": n_reb.strftime("%Y-%m-%d"),
+            "Dönem Başı"      : reb.strftime("%Y-%m-%d"),
+            "Dönem Sonu"      : n_reb.strftime("%Y-%m-%d"),
             "Seçilen Hisseler": ", ".join(new_syms),
-            "Temel Ağırlık": f"%{int(fw*100)}",
+            "Temel Ağırlık"   : f"%{int(fw*100)}",
+            "Regime Skoru"    : round(regime_score, 1),
+            "Market Exposure" : f"%{int(market_exposure*100)}",
+            "Nakit Oranı"     : f"%{int((cash/_pval(reb))*100)}" if _pval(reb) > 0 else "-%",
         })
 
     # Final satış
@@ -934,20 +1046,22 @@ def run_temel_backtest(
     metrics    = _calc_metrics(eq_series, bench_algn, initial_capital)
 
     return {
-        "equity": eq_series,
-        "bench" : bench_algn,
-        "metrics": metrics,
-        "trades": trade_log,
+        "equity"       : eq_series,
+        "bench"        : bench_algn,
+        "metrics"      : metrics,
+        "trades"       : trade_log,
         "period_detail": period_detail,
     }
 
 
-# ─── TARAMA ───────────────────────────────────────────────────────────────────
-def run_temel_screening(
+# ─── AI TARAMA ────────────────────────────────────────────────────────────────
+def run_ai_temel_screening(
     tickers: list,
     market: str,
     fund_weight: float,
-    as_of_date: Optional[datetime] = None,   # None → bugün
+    use_regime: bool = True,
+    use_ai: bool = True,
+    as_of_date: Optional[datetime] = None,
     progress_ph=None,
 ) -> pd.DataFrame:
     is_bist = "BIST" in market
@@ -956,17 +1070,13 @@ def run_temel_screening(
 
     as_of   = as_of_date if as_of_date else datetime.now()
     end_s   = as_of.strftime("%Y-%m-%d")
-    # Hisse verisi: 600 gün — backtest ile aynı _excess(252) penceresi için
-    # (400 gün ile başlatıldığında _excess(252)'nin referans noktası ~40 iş günü kayıyor)
     start_s = (as_of - timedelta(days=600)).strftime("%Y-%m-%d")
-    # Benchmark verisi: 760 gün — backtest'in uzun tarihli b_ann hesabını taklit etmek için
     bench_start_s = (as_of - timedelta(days=760)).strftime("%Y-%m-%d")
 
     if progress_ph:
         progress_ph.progress(0.05, "Fiyat verisi indiriliyor...")
     all_data = _batch_prices(tickers, start_s, end_s)
 
-    # Benchmark: 760 günlük veri → b_ann için; 400 günlük slice → _excess için
     bench_long_df = _get_prices(bench_sym, bench_start_s, end_s)
     bench_long    = bench_long_df[bench_long_df.index <= as_of]["close"] if not bench_long_df.empty else pd.Series(dtype=float)
 
@@ -974,28 +1084,28 @@ def run_temel_screening(
     bench_df_sliced = bench_df[bench_df.index <= as_of] if not bench_df.empty else bench_df
     b_close  = bench_df_sliced["close"] if not bench_df_sliced.empty else pd.Series(dtype=float)
 
-    # b_ann: backtest ile tutarlı olması için 760 günlük pencereden hesapla
     b_ann = None
     if len(bench_long) >= 60:
         b_ann = float(bench_long.pct_change().dropna().std()) * np.sqrt(252)
     elif len(b_close) >= 60:
         b_ann = float(b_close.pct_change().dropna().std()) * np.sqrt(252)
 
+    # Market Regime (tarama tarihi için)
+    if use_regime:
+        try:
+            regime_result   = calc_market_regime(as_of, market)
+            regime_score    = regime_result.get("regime_score", 75.0)
+            market_exposure = regime_result.get("market_exposure", 1.0)
+        except Exception:
+            regime_score    = 75.0
+            market_exposure = 1.0
+    else:
+        regime_score    = 75.0
+        market_exposure = 1.0
+
     rows = []
     total = len(tickers)
-    valid_results = []
 
-    # 1. AŞAMA: ham teknik skorları topla — backtest ile aynı ThreadPoolExecutor
-    def _score_one_scan(ticker):
-        df = all_data.get(ticker)
-        if df is None or df.empty:
-            return None
-        df_sliced = df[df.index <= as_of]
-        if len(df_sliced) < 130:
-            return None
-        return _calc_tech_score(ticker, df_sliced, b_close, bench_ann_vol=b_ann)
-
-    # 1. AŞAMA: ham teknik skorları topla — backtest ile aynı ThreadPoolExecutor
     def _score_one_scan(ticker):
         try:
             df = all_data.get(ticker)
@@ -1021,46 +1131,48 @@ def run_temel_screening(
                             and len(all_data[t][all_data[t].index <= as_of]) >= 130)
         if progress_ph:
             progress_ph.progress(1.0, "Tamamlandı.")
-        # Diagnostic mesajı için özel bir exception değil, özel bir dict döndür
         return pd.DataFrame({"_diag": [
             f"Veri olan hisse: {n_with_data}/{total} | "
             f"130+ bar olan: {n_enough_bars}/{total} | "
             f"Teknik skor hesaplanan: 0"
         ]})
-    # 2. AŞAMA: RS normalize — outlier'a karşı 95. persentil kullan
+
+    # RS normalize
     all_rs = [r["rs_slope"] for r in valid_results]
-    # max() yerine 95. persentil: data artifact olan tek hisse tüm sıralamayı bozmasın
     max_rs = float(np.percentile(all_rs, 95)) if len(all_rs) >= 10 else max(all_rs)
     max_rs = max(max_rs, 1e-9)
     for r in valid_results:
-        rs_norm    = (r["rs_slope"] / max_rs * 100)              # kırpma yok — backtest ile aynı
+        rs_norm    = (r["rs_slope"] / max_rs * 100)
         tech_score = max(0.0, min(200.0,
             (rs_norm + r["_bonus"]) * (1 - r.get("vol_penalty", 0))
         ))
         r["tech_score"] = round(tech_score, 2)
 
-    # Teknik skora göre sırala — fundamentals sadece ilk 100 aday için çekilecek
     valid_results.sort(key=lambda x: x["tech_score"], reverse=True)
-    FUND_FETCH_LIMIT = 100   # API rate limit aşımını önlemek için
+    FUND_FETCH_LIMIT = 100
 
-    # 3. AŞAMA: temel skor — sadece teknik skor ilk FUND_FETCH_LIMIT adaya bak
     if progress_ph:
-        progress_ph.progress(0.75, f"Temel veriler işleniyor (ilk {FUND_FETCH_LIMIT} aday)...")
+        progress_ph.progress(0.75, f"Temel + AI veriler işleniyor (ilk {FUND_FETCH_LIMIT} aday)...")
+
+    as_of_str   = end_s
+    prev_90_str = (as_of - timedelta(days=90)).strftime("%Y-%m-%d")
 
     for idx, r in enumerate(valid_results):
         sym = r["Sembol"]
         fund_score  = "-"
+        fund_sc     = None
         final_score = r["tech_score"]
         fund_period = "-"
         eps_g = rev_g = roe = nm = pe = pb = "-"
+        ai_sc = 50.0
 
         if fw > 0 and not sym.endswith(".IS") and idx < FUND_FETCH_LIMIT:
             try:
-                fund = get_fundamentals_as_of(sym, end_s)
+                fund = get_fundamentals_as_of(sym, as_of_str)
                 if fund:
                     fs, _ = calc_historical_fund_score(fund, "Alfa")
                     fund_score  = round(fs, 1)
-                    final_score = round(r["tech_score"]*(1-fw) + fs*fw, 2)
+                    fund_sc     = fs
                     fund_period = fund.get("period_date", "-")
                     eps_g = f"{fund['eps_growth']:.1f}%" if fund.get("eps_growth") is not None else "-"
                     rev_g = f"{fund['rev_growth']:.1f}%" if fund.get("rev_growth") is not None else "-"
@@ -1071,27 +1183,56 @@ def run_temel_screening(
             except Exception:
                 pass
 
+        # AI skor
+        if use_ai and idx < FUND_FETCH_LIMIT:
+            try:
+                ai_sc, _ = _calc_ai_score_for_ticker(sym, as_of_str, prev_90_str)
+            except Exception:
+                ai_sc = 50.0
+
+        # Adjusted final skor
+        tech_score = r["tech_score"]
+        if is_bist:
+            if use_ai:
+                base_score = tech_score * 0.70 + ai_sc * 0.15 + regime_score * 0.15
+            else:
+                base_score = tech_score * 0.85 + regime_score * 0.15
+        else:
+            if fund_sc is not None and use_ai:
+                base_score = tech_score*0.45 + fund_sc*0.25 + ai_sc*0.15 + regime_score*0.15
+            elif fund_sc is not None and not use_ai:
+                base_score = tech_score*0.55 + fund_sc*0.30 + regime_score*0.15
+            elif fund_sc is None and use_ai:
+                base_score = tech_score*0.60 + ai_sc*0.25 + regime_score*0.15
+            else:
+                base_score = tech_score*0.75 + regime_score*0.25
+
+        adjusted_final_score = round(base_score * market_exposure, 2)
+
         rows.append({
-            "Sembol"       : sym,
-            "RS Eğimi"     : r["RS Eğimi"],
-            "1A Excess"    : round(r["_excess_1m"], 2),
-            "3A Excess"    : round(r["_excess_3m"], 2),
-            "6A Excess"    : round(r["_excess_6m"], 2),
-            "Teknik Skor"  : r["tech_score"],
-            "Temel Skor"   : fund_score,
-            "Final Skor"   : final_score,
-            "EPS Büy."     : eps_g,
-            "Gelir Büy."   : rev_g,
-            "ROE"          : roe,
-            "Net Marj"     : nm,
-            "F/K"          : pe,
-            "F/DD"         : pb,
-            "Temel Dönem"  : fund_period,
+            "Sembol"             : sym,
+            "RS Eğimi"           : r["RS Eğimi"],
+            "1A Excess"          : round(r["_excess_1m"], 2),
+            "3A Excess"          : round(r["_excess_3m"], 2),
+            "6A Excess"          : round(r["_excess_6m"], 2),
+            "Teknik Skor"        : r["tech_score"],
+            "Temel Skor"         : fund_score,
+            "AI Skoru"           : round(ai_sc, 1),
+            "Regime Skoru"       : round(regime_score, 1),
+            "Market Exposure"    : f"%{int(market_exposure*100)}",
+            "Adjusted Final Skor": adjusted_final_score,
+            "EPS Büy."           : eps_g,
+            "Gelir Büy."         : rev_g,
+            "ROE"                : roe,
+            "Net Marj"           : nm,
+            "F/K"                : pe,
+            "F/DD"               : pb,
+            "Temel Dönem"        : fund_period,
         })
 
     df_out = pd.DataFrame(rows)
     if not df_out.empty:
-        df_out = df_out.sort_values("Final Skor", ascending=False).reset_index(drop=True)
+        df_out = df_out.sort_values("Adjusted Final Skor", ascending=False).reset_index(drop=True)
     if progress_ph:
         progress_ph.progress(1.0, "Tarama tamamlandı.")
     return df_out
@@ -1117,17 +1258,18 @@ def _plot_equity(eq: pd.Series, bench: pd.Series, title: str):
 
 # ─── UI ───────────────────────────────────────────────────────────────────────
 def main():
-    # Başlık
-    st.markdown("""
-    <div style='background:linear-gradient(135deg,#0f2744,#1a3a6b);
-    padding:20px 28px;border-radius:12px;margin-bottom:18px'>
-    <h2 style='color:#34d399;margin:0'>📐 TEMEL OPTİMİZER</h2>
-    <p style='color:#94a3b8;margin:4px 0 0'>
-    Momentum × Temel Analiz — Tarihsel temel veri ile güçlendirilmiş portföy optimizasyonu
-    </p></div>""", unsafe_allow_html=True)
+    st.title("🤖 AI TEMEL OPTİMİZER")
+    st.caption("Temel Optimizer + Market Regime + AI Score + Portfolio Risk Control")
 
     # ── Sidebar ───────────────────────────────────────────────────────────────
     with st.sidebar:
+        st.markdown("### 🤖 AI Katmanları")
+        use_regime = st.sidebar.checkbox("Market Regime Filter", value=True)
+        use_ai     = st.sidebar.checkbox("AI Narrative Score", value=True)
+        use_risk   = st.sidebar.checkbox("Portfolio Risk Control", value=True)
+        exit_sens  = st.sidebar.selectbox("Çıkış Hassasiyeti", ["Sert", "Normal", "Yumuşak"], index=1)
+
+        st.markdown("---")
         st.markdown("### ⚙️ Parametreler")
 
         market = st.selectbox("Piyasa", [
@@ -1159,10 +1301,18 @@ def main():
     # ── TARAMA ────────────────────────────────────────────────────────────────
     with tab_screen:
         st.subheader("Tarama")
+
+        # Aktif AI katmanları bilgisi
+        ai_info_parts = []
+        if use_regime: ai_info_parts.append("Market Regime")
+        if use_ai:     ai_info_parts.append("AI Score")
+        if use_risk:   ai_info_parts.append("Risk Control")
+        ai_info = " + ".join(ai_info_parts) if ai_info_parts else "Yok"
+
         if not is_bist:
-            st.info(f"Teknik skor **%{100-fund_weight_pct}** + Tarihsel Temel skor **%{fund_weight_pct}** → Final Skor")
+            st.info(f"Teknik **%{100-fund_weight_pct}** + Temel **%{fund_weight_pct}** + AI Katmanları: **{ai_info}** → Adjusted Final Skor")
         else:
-            st.info("BIST taraması: yalnızca teknik/momentum skoru (fund_weight=0)")
+            st.info(f"BIST taraması: teknik/momentum + AI Katmanları: **{ai_info}** (fund_weight=0)")
 
         sc1, sc2 = st.columns([1, 2])
         with sc1:
@@ -1193,8 +1343,10 @@ def main():
                 lbl = "bugün"
                 scan_date_str = datetime.now().strftime("%Y-%m-%d")
             with st.spinner(f"Taranıyor ({lbl})..."):
-                df_res = run_temel_screening(
+                df_res = run_ai_temel_screening(
                     tickers, market, fw,
+                    use_regime=use_regime,
+                    use_ai=use_ai,
                     as_of_date=scan_as_of,
                     progress_ph=ph,
                 )
@@ -1202,21 +1354,18 @@ def main():
             if df_res.empty:
                 st.warning("Kriterleri karşılayan hisse bulunamadı.")
             elif "_diag" in df_res.columns:
-                # Diagnostic: neden 0 hisse bulundu
                 msg = df_res["_diag"].iloc[0]
                 st.error(f"Hisse bulunamadı. Tanı: {msg}")
                 st.info("Öneri: Önce Backtest sekmesinden aynı tarih aralığında bir backtest çalıştırın — bu verinin cache'lenmesini sağlar. Sonra taramayı tekrar deneyin.")
             else:
                 st.success(f"{len(df_res)} hisse bulundu — tarama tarihi: **{lbl}**")
-                for col in ["Teknik Skor","Final Skor"]:
+                for col in ["Teknik Skor","Adjusted Final Skor"]:
                     if col in df_res.columns:
                         df_res[col] = pd.to_numeric(df_res[col], errors="coerce")
 
-                # Backtest ile karşılaştırma için "Top N seçim" sütunu ekle
                 df_res.insert(0, "Sıra", range(1, len(df_res)+1))
                 df_res.insert(1, f"Top {top_n}?", df_res["Sıra"].apply(lambda x: "✅" if x <= top_n else ""))
 
-                # Tarama sonucunu DB'ye kaydet
                 _scan_save(scan_date_str, market, fw, top_n, df_res)
                 st.caption("Tarama geçmişe kaydedildi.")
 
@@ -1225,7 +1374,7 @@ def main():
                 buf = BytesIO()
                 df_res.to_excel(buf, index=False)
                 st.download_button("📥 Excel İndir", buf.getvalue(),
-                                   file_name=f"temel_tarama_{lbl}.xlsx",
+                                   file_name=f"ai_temel_tarama_{lbl}.xlsx",
                                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
         # ── Tarama Geçmişi ────────────────────────────────────────────────────
@@ -1266,15 +1415,24 @@ def main():
     # ── BACKTEST ──────────────────────────────────────────────────────────────
     with tab_bt:
         st.subheader("Backtest")
+
+        # AI katman bilgisi
+        ai_layers = []
+        if use_regime: ai_layers.append("Market Regime")
+        if use_ai:     ai_layers.append("AI Score")
+        if use_risk:   ai_layers.append(f"Risk Control ({exit_sens})")
+        ai_layer_str = " + ".join(ai_layers) if ai_layers else "Devre dışı"
+
         if not is_bist:
             st.markdown(f"""
             <div style='background:#1a2740;padding:12px;border-radius:8px;font-size:13px;color:#94a3b8'>
+            🤖 AI Katmanları: <b>{ai_layer_str}</b><br>
             ℹ️ Her rebalance tarihinde <code>get_fundamentals_as_of(ticker, reb_date)</code> çağrılır.<br>
             Yalnızca o tarihte SEC'e dosyalanmış raporlar kullanılır — <b>look-ahead bias yoktur</b>.<br>
             Temel ağırlığı: <b>%{fund_weight_pct}</b> | Teknik ağırlığı: <b>%{100-fund_weight_pct}</b>
             </div>""", unsafe_allow_html=True)
         else:
-            st.info("BIST backtestinde temel veri kullanılmaz (fund_weight=0.0 — sabit).")
+            st.info(f"BIST backtestinde temel veri kullanılmaz (fund_weight=0.0 — sabit). AI Katmanları: {ai_layer_str}")
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -1296,12 +1454,12 @@ def main():
                 st.error("Başlangıç tarihi bitiş tarihinden önce olmalı.")
             else:
                 tickers = _get_universe(market)
-                st.info(f"{len(tickers)} hisselik evren | {freq} rebalance | Top {top_n}")
+                st.info(f"{len(tickers)} hisselik evren | {freq} rebalance | Top {top_n} | AI: {ai_layer_str}")
                 ph = st.progress(0)
                 t0 = time.time()
 
                 with st.spinner("Backtest çalışıyor..."):
-                    res = run_temel_backtest(
+                    res = run_ai_temel_backtest(
                         tickers=tickers,
                         market=market,
                         start_dt=datetime.combine(start_date, datetime.min.time()),
@@ -1310,6 +1468,10 @@ def main():
                         freq=freq,
                         fund_weight=fw,
                         initial_capital=float(initial),
+                        use_regime=use_regime,
+                        use_ai=use_ai,
+                        use_risk_control=use_risk,
+                        exit_sensitivity=exit_sens,
                         progress_ph=ph,
                     )
                 ph.empty()
@@ -1320,7 +1482,7 @@ def main():
                 if not m:
                     st.warning("Sonuç hesaplanamadı.")
                 else:
-                    # Metrik kartlar
+                    # Temel metrik kartlar
                     c1,c2,c3,c4,c5,c6 = st.columns(6)
                     c1.metric("Toplam Getiri", f"{m.get('Toplam Getiri (%)',0):.1f}%")
                     c2.metric("CAGR", f"{m.get('CAGR (%)',0):.1f}%")
@@ -1329,9 +1491,26 @@ def main():
                     c5.metric("Calmar", f"{m.get('Calmar',0):.2f}")
                     c6.metric("Bench Üstü", f"{m.get('Benchmark Üstü Getiri (%)',0):.1f}%")
 
+                    # AI metrik kartları
+                    period_detail = res.get("period_detail", [])
+                    if period_detail:
+                        regime_scores = [p.get("Regime Skoru", 75.0) for p in period_detail if isinstance(p.get("Regime Skoru"), (int, float))]
+                        trades_list   = res.get("trades", [])
+                        ai_scores_t   = [t.get("AI Skoru") for t in trades_list if isinstance(t.get("AI Skoru"), (int, float))]
+                        me_vals       = [t.get("Market Exposure") for t in trades_list if isinstance(t.get("Market Exposure"), (int, float))]
+
+                        st.markdown("#### 🤖 AI Katman Metrikleri")
+                        ac1, ac2, ac3 = st.columns(3)
+                        ac1.metric("Ort. Regime Skoru",
+                                   f"{np.mean(regime_scores):.1f}" if regime_scores else "—")
+                        ac2.metric("Ort. Market Exposure",
+                                   f"%{int(np.mean(me_vals)*100)}" if me_vals else "—")
+                        ac3.metric("Ort. AI Skoru",
+                                   f"{np.mean(ai_scores_t):.1f}" if ai_scores_t else "—")
+
                     # Grafik
                     _plot_equity(res["equity"], res["bench"],
-                                 f"TEMEL OPTİMİZER — {market} | Temel Ağırlık: %{fund_weight_pct}")
+                                 f"AI TEMEL OPTİMİZER — {market} | Temel: %{fund_weight_pct} | AI: {ai_layer_str}")
 
                     # Dönem detayı
                     if res.get("period_detail"):
@@ -1346,12 +1525,12 @@ def main():
                             buf = BytesIO()
                             df_t.to_excel(buf, index=False)
                             st.download_button("📥 Excel", buf.getvalue(),
-                                file_name=f"temel_backtest_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+                                file_name=f"ai_temel_backtest_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
                                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
                     # Kaydet
                     _db_save({
-                        "market": market, "strategy": "Alfa",
+                        "market": market, "strategy": "AI-Alfa",
                         "start_date": str(start_date), "end_date": str(end_date),
                         "top_n": top_n, "rebalance": freq,
                         "fund_weight": fw,
@@ -1359,7 +1538,11 @@ def main():
                         "sharpe": m.get("Sharpe",0),
                         "max_dd": m.get("Max Drawdown (%)",0),
                         "total_return": m.get("Toplam Getiri (%)",0),
-                        "params": {"initial": initial, "top_n": top_n, "freq": freq},
+                        "params": {
+                            "initial": initial, "top_n": top_n, "freq": freq,
+                            "use_regime": use_regime, "use_ai": use_ai,
+                            "use_risk": use_risk, "exit_sens": exit_sens,
+                        },
                         "trades": res.get("trades",[]),
                         "period_detail": res.get("period_detail",[]),
                     })
@@ -1373,7 +1556,6 @@ def main():
         if not db_rows:
             st.info("Henüz kayıtlı backtest yok.")
         else:
-            # Üst özet tablosu
             df_h = pd.DataFrame(db_rows, columns=[
                 "ID","Tarih","Piyasa","Strateji","Başlangıç","Bitiş",
                 "Hisse","Rebalance","Temel Ağırlık","CAGR%","Sharpe","MaxDD%","Getiri%"
@@ -1400,26 +1582,29 @@ def main():
                                f"Sharpe: {sharpe_str}  MaxDD: {maxdd_str}")
 
                 with st.expander(label):
-                    # ── Metrik kartlar ──────────────────────────────────────
                     mc1, mc2, mc3, mc4 = st.columns(4)
                     mc1.metric("Toplam Getiri", getiri_str)
                     mc2.metric("CAGR",          cagr_str)
                     mc3.metric("Sharpe",         sharpe_str)
                     mc4.metric("Max Drawdown",   maxdd_str)
 
-                    # ── Veri yükle ──────────────────────────────────────────
                     detail = _db_get_detail(rid)
                     trades  = detail["trades"]
                     periods = detail["period_detail"]
 
-                    # ── Dönem bazlı hisse kazançları ────────────────────────
+                    # AI sütunları varsa göster
+                    if periods:
+                        df_periods = pd.DataFrame(periods)
+                        ai_cols = [c for c in ["Regime Skoru","Market Exposure","Nakit Oranı"] if c in df_periods.columns]
+                        if ai_cols:
+                            st.markdown("**Dönem Detayı (AI Katmanları)**")
+                            st.dataframe(_clean_df_for_display(df_periods), use_container_width=True)
+
                     df_pr = _build_period_returns(trades, periods)
                     if not df_pr.empty:
                         st.markdown("**Dönem Bazlı Hisse Kazançları**")
-
                         st.dataframe(_clean_df_for_display(df_pr), use_container_width=True, height=min(400, 40 + len(df_pr)*36))
 
-                        # Hisse bazlı özet (ortalama K/Z)
                         numeric_kz = df_pr[df_pr["K/Z (%)"].apply(lambda v: isinstance(v,(int,float)))]
                         if not numeric_kz.empty:
                             ozet = (numeric_kz.groupby("Hisse")["K/Z (%)"]
@@ -1431,17 +1616,21 @@ def main():
                             ozet["Toplam K/Z%"] = ozet["Toplam K/Z%"].apply(lambda v: f"{v:+.2f}%")
                             st.markdown("**Hisse Bazlı Özet**")
                             st.dataframe(ozet, use_container_width=True)
-                    elif periods:
-                        # period_detail var ama SAT kaydı yok (backtest henüz bitmemiş dönem)
+                    elif periods and not pd.DataFrame(periods).empty:
                         st.markdown("**Dönem Detayı**")
                         st.dataframe(pd.DataFrame(periods), use_container_width=True)
 
                     if trades:
                         st.markdown("**İşlem Geçmişi (AL / SAT)**")
                         df_t = _clean_df_for_display(pd.DataFrame(trades))
+                        # AI sütunlarını öne al
+                        ai_trade_cols = ["AI Skoru","Regime Skoru","Market Exposure","Adjusted Final Skor"]
+                        existing_ai = [c for c in ai_trade_cols if c in df_t.columns]
+                        if existing_ai:
+                            other_cols = [c for c in df_t.columns if c not in existing_ai]
+                            df_t = df_t[other_cols[:6] + existing_ai + other_cols[6:]]
                         st.dataframe(df_t, use_container_width=True, height=300)
 
-                        # Excel indir
                         buf = BytesIO()
                         with pd.ExcelWriter(buf, engine="openpyxl") as writer:
                             df_t.to_excel(writer, sheet_name="İşlemler", index=False)
@@ -1450,14 +1639,13 @@ def main():
                         st.download_button(
                             "📥 Excel İndir",
                             buf.getvalue(),
-                            file_name=f"temel_bt_{rid}_{sd}_{ed}.xlsx",
+                            file_name=f"ai_temel_bt_{rid}_{sd}_{ed}.xlsx",
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             key=f"dl_{rid}",
                         )
                     else:
                         st.caption("Bu kayıt için işlem verisi bulunamadı.")
 
-                    # ── Sil butonu ───────────────────────────────────────────
                     if st.button("🗑️ Bu kaydı sil", key=f"del_{rid}"):
                         _db_delete(rid)
                         st.success(f"#{rid} silindi.")

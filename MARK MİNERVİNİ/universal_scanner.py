@@ -815,10 +815,13 @@ class UniversalStockScanner:
         
         df_results = pd.DataFrame(all_results)
         
-        # Duruma göre sırala
+        # RS Score'a göre sırala (primary: azalan), Status (secondary), Distance (tertiary)
         status_order = {'BREAKOUT': 1, 'PIVOT_NEAR': 2, 'SETUP': 3, 'WATCHING': 4}
-        df_results['Status_Order'] = df_results['Status'].map(status_order)
-        df_results = df_results.sort_values(['Status_Order', 'Market', 'Distance_to_Pivot_%'])
+        df_results['Status_Order'] = df_results['Status'].map(status_order).fillna(4)
+        df_results = df_results.sort_values(
+            ['RS_Score', 'Status_Order', 'Distance_to_Pivot_%'],
+            ascending=[False, True, True]
+        )
         df_results = df_results.drop('Status_Order', axis=1)
         
         # Durumlara göre ayır

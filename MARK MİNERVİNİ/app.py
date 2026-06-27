@@ -806,21 +806,29 @@ def api_market_status():
             t  = yf.Ticker(symbol)
             df = t.history(period=period, auto_adjust=True)
             if df is not None and len(df) >= 200:
-                return df['Close'].squeeze()
+                s = df['Close'].squeeze().dropna()
+                if len(s) >= 200:
+                    return s
         except Exception:
             pass
         # -- yf.download --
         try:
             df = yf.download(symbol, period=period, auto_adjust=True, progress=False, timeout=30)
             if df is not None and not df.empty and len(df) >= 200:
-                return df['Close'].squeeze()
+                s = df['Close'].squeeze().dropna()
+                if len(s) >= 200:
+                    return s
         except Exception:
             pass
         return None
 
+    _FALLBACKS = {'^GSPC': 'SPY', '^XU100.IS': 'XU100.IS'}
+
     def analyze(symbol, label):
         try:
             close = _fetch(symbol)
+            if close is None and symbol in _FALLBACKS:
+                close = _fetch(_FALLBACKS[symbol])
             if close is None:
                 return {'symbol': symbol, 'label': label, 'error': 'Veri indirilemedi'}
             price        = float(close.iloc[-1])

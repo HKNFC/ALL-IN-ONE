@@ -194,9 +194,9 @@
 
         function renderMarketCard(elId, d) {
             const el = document.getElementById(elId);
-            if (!d || d.error) {
+            if (!d || d.error || d.price == null) {
                 el.className = 'ms-card';
-                el.innerHTML = `<span style="color:#ef4444;">❌ ${d?.error || 'Veri alınamadı'}</span>`;
+                el.innerHTML = `<span style="color:#ef4444;">❌ ${d?.error || 'Piyasa verisi alınamadı (veri kaynağı geçici olarak erişilemiyor)'}</span>`;
                 return;
             }
 
@@ -285,8 +285,8 @@
                 <ul class="ms-criteria">${criteriaRows}</ul>
                 <div class="ms-price-row">
                     <span>Fiyat: <strong>${currency}${priceStr}</strong></span>
-                    <span>50G SMA: <strong>${currency}${d.sma50.toLocaleString('tr-TR',{maximumFractionDigits:0})}</strong></span>
-                    <span>200G SMA: <strong>${currency}${d.sma200.toLocaleString('tr-TR',{maximumFractionDigits:0})}</strong></span>
+                    <span>50G SMA: <strong>${currency}${d.sma50 != null ? d.sma50.toLocaleString('tr-TR',{maximumFractionDigits:0}) : '—'}</strong></span>
+                    <span>200G SMA: <strong>${currency}${d.sma200 != null ? d.sma200.toLocaleString('tr-TR',{maximumFractionDigits:0}) : '—'}</strong></span>
                 </div>
                 ${vixSection}${volSection}
                 ${combinedSection}`;

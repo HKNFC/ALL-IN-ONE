@@ -30,6 +30,14 @@ from temel_scanner import TemelUSAScanner
 logger = logging.getLogger(__name__)
 
 
+def _safe_print(*args, **kwargs):
+    """BrokenPipeError'a karşı korumalı print."""
+    try:
+        print(*args, **kwargs)
+    except (BrokenPipeError, OSError):
+        pass
+
+
 class TemelBacktest(MinerviniBacktest):
     """
     USA backtestinde teknik skora ek olarak FMP temel skorunu kullanan engine.
@@ -83,7 +91,7 @@ class TemelBacktest(MinerviniBacktest):
                 if res:
                     results.append(res)
 
-        print(f"  ✅ {len(results)} USA hissesi kriterleri geçti", flush=True)
+        _safe_print(f"  ✅ {len(results)} USA hissesi kriterleri geçti", flush=True)
         return results
 
     # ------------------------------------------------------------------
@@ -100,13 +108,13 @@ class TemelBacktest(MinerviniBacktest):
             if s.get('Status') in ('BREAKOUT', 'PIVOT_NEAR', 'SETUP')
         ]
         if not eligible:
-            print("  ⚠️  Uygun hisse (BREAKOUT/PIVOT_NEAR/SETUP) bulunamadı.", flush=True)
+            _safe_print("  ⚠️  Uygun hisse (BREAKOUT/PIVOT_NEAR/SETUP) bulunamadı.", flush=True)
             return []
 
         eligible.sort(key=lambda s: _to_float(s.get('Final_Score', 0)), reverse=True)
         top = eligible[:top_n]
         for i, s in enumerate(top, 1):
-            print(
+            _safe_print(
                 f"    {i}. {s['Ticker']:10s} | "
                 f"Final:{_to_float(s.get('Final_Score',0)):6.1f} "
                 f"(Tech:{_to_float(s.get('Tech_Score',0)):5.1f} "
@@ -137,22 +145,22 @@ class TemelBacktest(MinerviniBacktest):
             }
         """
         freq_labels = {'weekly': 'Haftalık', 'biweekly': '15 Günlük', 'monthly': 'Aylık'}
-        print("\n" + "=" * 70, flush=True)
-        print("🚀 TEMEL M. MİNERVİNİ BACKTEST (USA)", flush=True)
-        print(f"📅 {self.start_date.date()} → {self.end_date.date()}", flush=True)
-        print(f"💰 Sermaye: ${self.initial_capital:,.0f}  |  Portföy: {portfolio_size} hisse", flush=True)
-        print(f"⚖️  Temel Ağırlık: %{self.fund_weight*100:.0f}  |  Teknik Ağırlık: %{(1-self.fund_weight)*100:.0f}", flush=True)
-        print("=" * 70, flush=True)
+        _safe_print("\n" + "=" * 70, flush=True)
+        _safe_print("🚀 TEMEL M. MİNERVİNİ BACKTEST (USA)", flush=True)
+        _safe_print(f"📅 {self.start_date.date()} → {self.end_date.date()}", flush=True)
+        _safe_print(f"💰 Sermaye: ${self.initial_capital:,.0f}  |  Portföy: {portfolio_size} hisse", flush=True)
+        _safe_print(f"⚖️  Temel Ağırlık: %{self.fund_weight*100:.0f}  |  Teknik Ağırlık: %{(1-self.fund_weight)*100:.0f}", flush=True)
+        _safe_print("=" * 70, flush=True)
 
         # Tüm veriyi tek seferlik indir
         all_tickers = list(self._us_tickers)
         self._global_prefetch(all_tickers, 'US')
 
         rebalance_dates = self.get_rebalance_dates(frequency)
-        print(f"📆 {len(rebalance_dates)} {freq_labels.get(frequency,'Aylık').lower()} rebalancing planlandı", flush=True)
+        _safe_print(f"📆 {len(rebalance_dates)} {freq_labels.get(frequency,'Aylık').lower()} rebalancing planlandı", flush=True)
 
         for i, date in enumerate(rebalance_dates, 1):
-            print(f"\n── Periyot {i}/{len(rebalance_dates)}: {date.strftime('%d %B %Y')} ──", flush=True)
+            _safe_print(f"\n── Periyot {i}/{len(rebalance_dates)}: {date.strftime('%d %B %Y')} ──", flush=True)
 
             scan_results = self._scan_usa_temel(date)
             top_stocks   = self._select_top_temel(scan_results, top_n=portfolio_size)
@@ -166,10 +174,10 @@ class TemelBacktest(MinerviniBacktest):
                 'value':      pv,
                 'return_pct': ret,
             })
-            print(f"  💼 Portföy: ${pv:,.2f}  |  Getiri: {ret:+.2f}%", flush=True)
+            _safe_print(f"  💼 Portföy: ${pv:,.2f}  |  Getiri: {ret:+.2f}%", flush=True)
 
         # Pozisyonları kapat
-        print("\n── Final: pozisyonlar kapatılıyor ──", flush=True)
+        _safe_print("\n── Final: pozisyonlar kapatılıyor ──", flush=True)
         self.rebalance_portfolio([], self.end_date)
 
         final_value  = float(self.current_capital)
@@ -180,7 +188,7 @@ class TemelBacktest(MinerviniBacktest):
             'return_pct': total_return,
         })
 
-        print(f"\n✅ Toplam Getiri: {total_return:+.2f}%", flush=True)
+        _safe_print(f"\n✅ Toplam Getiri: {total_return:+.2f}%", flush=True)
 
         # ── Summary hesapla (frontend render() için) ──────────────────
         eq_values  = [e['value'] for e in self.equity_curve if e.get('value')]
